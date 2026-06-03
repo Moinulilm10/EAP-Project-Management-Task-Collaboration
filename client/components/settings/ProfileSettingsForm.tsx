@@ -15,10 +15,9 @@ export function ProfileSettingsForm() {
             src="https://lh3.googleusercontent.com/aida-public/AB6AXuBOV6tQEuUe4szmiXKsKnmqPuqR7_rpTnOxJraQZz1OKH10YTQfmEwmbCNGBvgdURKDVqEonDEt_QooGFmoeGC2cG7Z6hLi3y67Qg0i-aWlwZdYVVqzhe3bja4QxE783hzTAqcc6sleyN2JTKxopPxewBBIlx-IHuOVSPpl6RWPOjK6fgIoPYg0m7x4PqUDqulTHnadynTh6xKkX0TxixG0pRD182xEd-Tw75TH8l36S2iQiWfgfXMG5k3zzONEXkHU3rmYoVjqPdY"
             alt="User Avatar"
             size="xl"
-            className="ring-1 ring-outline-variant/20"
           />
-          <button className="absolute bottom-0 right-0 bg-surface-container-lowest text-primary rounded-full p-1 shadow-sm border border-outline-variant/30 hover:bg-surface-container-low transition-colors">
-            <span className="material-symbols-outlined text-[16px]">edit</span>
+          <button className="absolute -bottom-1 -right-1 bg-surface-container-lowest text-primary rounded-full p-1 hover:bg-surface-container-low transition-colors">
+            <span className="material-symbols-outlined text-[18px]">edit</span>
           </button>
         </div>
         <div className="flex flex-col gap-xs">
