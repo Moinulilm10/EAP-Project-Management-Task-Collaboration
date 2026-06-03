@@ -6,60 +6,28 @@ import Image from "next/image";
 import { useTheme } from "next-themes";
 import { useTranslation } from "react-i18next";
 import { FcGoogle } from "react-icons/fc";
-import { MdPerson, MdMail, MdLock, MdCheck, MdClose } from "react-icons/md";
+import { MdPerson, MdMail, MdLock } from "react-icons/md";
+import { FormField } from "@/components/ui/FormField";
+import { PasswordStrengthIndicator } from "@/components/ui/PasswordStrengthIndicator";
 import "../../i18n";
 
 export default function SignupPage() {
   const { t } = useTranslation();
   const router = useRouter();
-  
+
   // Form Fields
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [agreeTerms, setAgreeTerms] = useState(false);
+  const [isPasswordValid, setIsPasswordValid] = useState(false);
   const [showConfirmError, setShowConfirmError] = useState(false);
 
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  // Password Strength State
-  const [passwordStrength, setPasswordStrength] = useState({
-    score: 0,
-    hasMinLength: false,
-    hasUpper: false,
-    hasLower: false,
-    hasNumber: false,
-    hasSpecial: false,
-  });
-
   useEffect(() => setMounted(true), []);
-
-  // Calculate Password Strength in real time
-  useEffect(() => {
-    const hasMinLength = password.length >= 8;
-    const hasUpper = /[A-Z]/.test(password);
-    const hasLower = /[a-z]/.test(password);
-    const hasNumber = /[0-9]/.test(password);
-    const hasSpecial = /[^A-Za-z0-9]/.test(password);
-
-    let score = 0;
-    if (hasMinLength) score += 1;
-    if (hasUpper) score += 1;
-    if (hasLower) score += 1;
-    if (hasNumber) score += 1;
-    if (hasSpecial) score += 1;
-
-    setPasswordStrength({
-      score,
-      hasMinLength,
-      hasUpper,
-      hasLower,
-      hasNumber,
-      hasSpecial,
-    });
-  }, [password]);
 
   // Check matching password validation on input change
   useEffect(() => {
@@ -80,37 +48,13 @@ export default function SignupPage() {
       setShowConfirmError(true);
       return;
     }
-    if (passwordStrength.score < 4) {
-      return;
-    }
+    if (!isPasswordValid) return;
     if (!agreeTerms) return;
-    
+
     // Simulate signup success and route to dashboard (home page)
     router.push("/");
   };
 
-  // Get Strength Color and Label details
-  const getStrengthMeta = () => {
-    if (!password) return { label: "", colorClass: "bg-outline-variant/30", scoreColorClass: "text-outline" };
-    switch (passwordStrength.score) {
-      case 1:
-      case 2:
-        return { label: t("Weak"), colorClass: "bg-error", scoreColorClass: "text-error" };
-      case 3:
-        return { label: t("Medium"), colorClass: "bg-secondary", scoreColorClass: "text-secondary" };
-      case 4:
-        return { label: t("Good"), colorClass: "bg-primary", scoreColorClass: "text-primary" };
-      case 5:
-        return { label: t("Strong"), colorClass: "bg-tertiary-fixed-dim", scoreColorClass: "text-tertiary-fixed-dim" };
-      default:
-        return { label: "", colorClass: "bg-outline-variant/30", scoreColorClass: "text-outline" };
-    }
-  };
-
-  const strengthMeta = getStrengthMeta();
-
-  // Validate form readiness
-  const isPasswordValid = passwordStrength.score >= 4;
   const passwordsMatch = password === confirmPassword;
   const canSubmit = name && email && isPasswordValid && passwordsMatch && agreeTerms;
 
@@ -190,185 +134,59 @@ export default function SignupPage() {
 
             <form onSubmit={handleSubmit} className="space-y-3.5" id="signupForm">
               {/* Full Name */}
-              <div className="space-y-1">
-                <label className="block font-label-md text-label-md text-on-surface-variant uppercase" htmlFor="name">
-                  {t("Full Name")}
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <MdPerson className="text-outline text-[20px] w-5 h-5" />
-                  </div>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-2 border border-outline-variant rounded-lg bg-surface focus:bg-surface-container-lowest input-glow font-body-md text-body-md text-on-surface transition-all duration-200"
-                    placeholder="John Doe"
-                    required
-                  />
-                </div>
-              </div>
+              <FormField
+                label={t("Full Name")}
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                icon={<MdPerson />}
+                placeholder="John Doe"
+                required
+              />
 
               {/* Email Address */}
-              <div className="space-y-1">
-                <label className="block font-label-md text-label-md text-on-surface-variant uppercase" htmlFor="email">
-                  {t("Email Address")}
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <MdMail className="text-outline text-[20px] w-5 h-5" />
-                  </div>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-2 border border-outline-variant rounded-lg bg-surface focus:bg-surface-container-lowest input-glow font-body-md text-body-md text-on-surface transition-all duration-200"
-                    placeholder="name@company.com"
-                    required
-                  />
-                </div>
-              </div>
+              <FormField
+                label={t("Email Address")}
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                icon={<MdMail />}
+                placeholder="name@company.com"
+                required
+              />
 
               {/* Password */}
-              <div className="space-y-1">
-                <label className="block font-label-md text-label-md text-on-surface-variant uppercase" htmlFor="password">
-                  {t("Password")}
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <MdLock className="text-outline text-[20px] w-5 h-5" />
-                  </div>
-                  <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-2 border border-outline-variant rounded-lg bg-surface focus:bg-surface-container-lowest input-glow font-body-md text-body-md text-on-surface transition-all duration-200"
-                    placeholder="••••••••"
-                    required
-                  />
-                </div>
-
-                {/* Password Strength Indicator UI */}
-                {password && (
-                  <div className="mt-2 space-y-2 p-2 bg-surface-container/30 border border-outline-variant/30 rounded-lg animate-fade-in">
-                    <div className="flex items-center justify-between">
-                      <span className="font-label-sm text-label-sm text-on-surface-variant">
-                        {t("Password Strength")}
-                      </span>
-                      <span className={`font-label-sm text-label-sm font-bold ${strengthMeta.scoreColorClass}`}>
-                        {strengthMeta.label}
-                      </span>
-                    </div>
-
-                    {/* Progress Bar Segments */}
-                    <div className="grid grid-cols-5 gap-1.5 h-1.5 w-full">
-                      {[1, 2, 3, 4, 5].map((level) => (
-                        <div
-                          key={level}
-                          className={`h-full rounded-full transition-all duration-300 ${
-                            passwordStrength.score >= level
-                              ? strengthMeta.colorClass
-                              : "bg-outline-variant/20"
-                          }`}
-                        />
-                      ))}
-                    </div>
-
-                    {/* Password criteria checklist */}
-                    <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 pt-1">
-                      <div className="flex items-center gap-1">
-                        {passwordStrength.hasMinLength ? (
-                          <MdCheck className="text-tertiary-fixed-dim w-3.5 h-3.5" />
-                        ) : (
-                          <MdClose className="text-outline w-3.5 h-3.5" />
-                        )}
-                        <span className={`text-[10px] font-medium leading-none ${passwordStrength.hasMinLength ? "text-on-surface" : "text-on-surface-variant/60"}`}>
-                          {t("Min. 8 characters")}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-1">
-                        {passwordStrength.hasUpper ? (
-                          <MdCheck className="text-tertiary-fixed-dim w-3.5 h-3.5" />
-                        ) : (
-                          <MdClose className="text-outline w-3.5 h-3.5" />
-                        )}
-                        <span className={`text-[10px] font-medium leading-none ${passwordStrength.hasUpper ? "text-on-surface" : "text-on-surface-variant/60"}`}>
-                          {t("Uppercase letter")}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-1">
-                        {passwordStrength.hasLower ? (
-                          <MdCheck className="text-tertiary-fixed-dim w-3.5 h-3.5" />
-                        ) : (
-                          <MdClose className="text-outline w-3.5 h-3.5" />
-                        )}
-                        <span className={`text-[10px] font-medium leading-none ${passwordStrength.hasLower ? "text-on-surface" : "text-on-surface-variant/60"}`}>
-                          {t("Lowercase letter")}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-1">
-                        {passwordStrength.hasNumber ? (
-                          <MdCheck className="text-tertiary-fixed-dim w-3.5 h-3.5" />
-                        ) : (
-                          <MdClose className="text-outline w-3.5 h-3.5" />
-                        )}
-                        <span className={`text-[10px] font-medium leading-none ${passwordStrength.hasNumber ? "text-on-surface" : "text-on-surface-variant/60"}`}>
-                          {t("Number (0-9)")}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-1 col-span-2">
-                        {passwordStrength.hasSpecial ? (
-                          <MdCheck className="text-tertiary-fixed-dim w-3.5 h-3.5" />
-                        ) : (
-                          <MdClose className="text-outline w-3.5 h-3.5" />
-                        )}
-                        <span className={`text-[10px] font-medium leading-none ${passwordStrength.hasSpecial ? "text-on-surface" : "text-on-surface-variant/60"}`}>
-                          {t("Special character (@, #, $, etc.)")}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )}
+              <div>
+                <FormField
+                  label={t("Password")}
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  icon={<MdLock />}
+                  placeholder="••••••••"
+                  required
+                />
+                <PasswordStrengthIndicator
+                  password={password}
+                  onStrengthChange={setIsPasswordValid}
+                />
               </div>
 
               {/* Confirm Password */}
-              <div className="space-y-1">
-                <label className="block font-label-md text-label-md text-on-surface-variant uppercase" htmlFor="confirmPassword">
-                  {t("Confirm Password")}
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <MdLock className="text-outline text-[20px] w-5 h-5" />
-                  </div>
-                  <input
-                    type="password"
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className={`block w-full pl-10 pr-3 py-2 border rounded-lg bg-surface focus:bg-surface-container-lowest input-glow font-body-md text-body-md text-on-surface transition-all duration-200 ${
-                      showConfirmError ? "border-error focus:ring-error/50" : "border-outline-variant"
-                    }`}
-                    placeholder="••••••••"
-                    required
-                  />
-                </div>
-                {showConfirmError && (
-                  <p className="text-[10px] font-semibold text-error mt-1 animate-fade-in">
-                    {t("Passwords do not match.")}
-                  </p>
-                )}
-              </div>
+              <FormField
+                label={t("Confirm Password")}
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                icon={<MdLock />}
+                placeholder="••••••••"
+                error={showConfirmError ? t("Passwords do not match.") : undefined}
+                required
+              />
 
               {/* Terms Checkbox */}
               <div className="flex items-start pt-1">

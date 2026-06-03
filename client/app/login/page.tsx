@@ -6,7 +6,8 @@ import Image from "next/image";
 import { useTheme } from "next-themes";
 import { useTranslation } from "react-i18next";
 import { FcGoogle } from "react-icons/fc";
-import { MdDashboard, MdMail, MdLock, MdBolt } from "react-icons/md";
+import { MdMail, MdLock, MdBolt } from "react-icons/md";
+import { FormField } from "@/components/ui/FormField";
 import "../../i18n";
 
 export default function LoginPage() {
@@ -124,49 +125,31 @@ export default function LoginPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5" id="loginForm">
-              <div className="space-y-1.5">
-                <label className="block font-label-md text-label-md text-on-surface-variant uppercase" htmlFor="email">
-                  {t("Email Address")}
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <MdMail className="text-outline text-[20px] w-5 h-5" />
-                  </div>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className={`block w-full pl-10 pr-3 py-3 border rounded-lg bg-surface focus:bg-surface-container-lowest input-glow font-body-md text-body-md text-on-surface transition-all duration-200 ${isDemoAnimating ? "ring-2 ring-primary border-transparent" : "border-outline-variant"
-                      }`}
-                    placeholder="name@company.com"
-                    required
-                  />
-                </div>
-              </div>
+              {/* Email Address */}
+              <FormField
+                label={t("Email Address")}
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                icon={<MdMail />}
+                placeholder="name@company.com"
+                isAnimating={isDemoAnimating}
+                required
+              />
 
-              <div className="space-y-1.5">
-                <label className="block font-label-md text-label-md text-on-surface-variant uppercase" htmlFor="password">
-                  {t("Password")}
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <MdLock className="text-outline text-[20px] w-5 h-5" />
-                  </div>
-                  <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className={`block w-full pl-10 pr-3 py-3 border rounded-lg bg-surface focus:bg-surface-container-lowest input-glow font-body-md text-body-md text-on-surface transition-all duration-200 ${isDemoAnimating ? "ring-2 ring-primary border-transparent" : "border-outline-variant"
-                      }`}
-                    placeholder="••••••••"
-                    required
-                  />
-                </div>
-              </div>
+              {/* Password */}
+              <FormField
+                label={t("Password")}
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                icon={<MdLock />}
+                placeholder="••••••••"
+                isAnimating={isDemoAnimating}
+                required
+              />
 
               <div className="flex items-center justify-between pt-2">
                 <div className="flex items-center">
