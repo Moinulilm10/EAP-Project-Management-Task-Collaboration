@@ -3,6 +3,9 @@
 import React from "react";
 import Link from "next/link";
 import { Button } from "../ui/Button";
+import { Input } from "../ui/Input";
+import { IconButton } from "../ui/IconButton";
+import { Avatar } from "../ui/Avatar";
 import { useTranslation } from "react-i18next";
 import "../../i18n";
 
@@ -32,41 +35,30 @@ export function TopNavBar({ onMenuClick }: TopNavBarProps) {
       </div>
 
       {/* Desktop Search */}
-      <div className="hidden md:flex items-center relative w-96">
-        <span className="material-symbols-outlined absolute left-sm text-on-surface-variant">
-          {t("search")}
-        </span>
-        <input
-          className="w-full pl-xl pr-sm py-sm bg-surface-container-low border-none rounded-full text-body-md focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all"
-          placeholder={t("Search projects...") as string}
-          type="text"
-        />
+      <div className="hidden md:flex items-center w-96 relative">
+        <Input icon="search" placeholder={t("Search workspace...") as string} />
       </div>
 
       <div className="flex items-center gap-md">
-        <button
-          className="text-on-surface-variant hover:text-primary transition-colors p-1.5 rounded-full hover:bg-surface-container-high/40"
-          aria-label={t("notifications") as string}
-        >
-          <span className="material-symbols-outlined">{t("notifications")}</span>
-        </button>
-        <button
-          className="text-on-surface-variant hover:text-primary transition-colors p-1.5 rounded-full hover:bg-surface-container-high/40"
-          aria-label={t("dark_mode") as string}
-        >
-          <span className="material-symbols-outlined">{t("dark_mode")}</span>
-        </button>
-
         <Button className="hidden md:flex">
           <span className="material-symbols-outlined text-[18px]">{t("add")}</span>
           {t("Create Task")}
         </Button>
 
-        <Link
-          href="/login"
-          className="w-8 h-8 rounded-full bg-secondary-container overflow-hidden border border-outline-variant/30 cursor-pointer flex items-center justify-center text-on-secondary-container font-bold hover:border-primary transition-colors"
-        >
-          {t("U")}
+        <div className="flex items-center gap-xs">
+          <IconButton icon="notifications" aria-label={t("notifications") as string} />
+          <IconButton icon="dark_mode" aria-label={t("dark mode") as string} />
+        </div>
+
+        <div className="h-8 w-px bg-outline-variant/40 mx-xs hidden lg:block"></div>
+
+        <Link href="/login">
+          <Avatar
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-sE0_3Oy-ZLOQDutQWVo2wie-aHmf3roUcGKS5jS4RNZAjiaCn01epfG0YAwHdte23nrTbrJtl7OPYGPp2AKeMQxK2-dHm_278yDrZzqr3kguZj2utsEchzWTSSKbR8THOdgcx5IabdNhYDBvHt8VUcnbI2QIFEzn4DLstxnSLSkANHVo2Ud10k5IJBNStMuz7cZ8U7812KCT1UarI6STW9cuXmEmr_4PCchf65JAjKVtz2nWjvXG7sbj4ZgcBZoQYpV-QAIs8TM"
+            alt={t("User Profile") as string}
+            size="sm"
+            className="cursor-pointer hover:ring-2 hover:ring-primary/50"
+          />
         </Link>
       </div>
     </header>

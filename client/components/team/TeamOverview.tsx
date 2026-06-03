@@ -1,0 +1,62 @@
+import React from "react";
+import { KpiCard } from "../shared/KpiCard";
+import { Card } from "../ui/Card";
+import { ProgressBar } from "../ui/ProgressBar";
+import { useTranslation } from "react-i18next";
+
+export function TeamOverview() {
+  const { t } = useTranslation();
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter mb-lg">
+      {/* Total Team */}
+      <KpiCard
+        title={t("Total Team")}
+        value="24"
+        icon="group"
+        subtitle={t("Active Members")}
+        customDecorative={
+          <div className="absolute bottom-0 right-0 opacity-10 pointer-events-none transform translate-x-1/4 translate-y-1/4">
+            <span className="material-symbols-outlined text-[120px]">group</span>
+          </div>
+        }
+      />
+
+      {/* Overall Capacity */}
+      <Card className="justify-between relative overflow-hidden h-full">
+        <div className="flex justify-between items-start mb-md z-10">
+          <h3 className="font-title-md text-title-md text-on-surface">{t("Overall Capacity")}</h3>
+          <span className="p-sm bg-secondary-container rounded-full text-on-secondary-container">
+            <span className="material-symbols-outlined">speed</span>
+          </span>
+        </div>
+        <div className="z-10">
+          <span className="font-display-lg text-display-lg text-on-surface">82%</span>
+          <ProgressBar value={82} className="mt-sm" />
+          <p className="font-body-md text-body-md text-secondary mt-xs">{t("Optimal utilization")}</p>
+        </div>
+      </Card>
+
+      {/* Pending Tasks */}
+      <Card className="justify-between relative overflow-hidden bg-primary text-on-primary border-none h-full">
+        <div className="flex justify-between items-start mb-md z-10">
+          <h3 className="font-title-md text-title-md text-on-primary/90">{t("Pending Tasks")}</h3>
+          <span className="p-sm bg-on-primary/20 rounded-full text-on-primary">
+            <span className="material-symbols-outlined">assignment_late</span>
+          </span>
+        </div>
+        <div className="z-10">
+          <span className="font-display-lg text-display-lg text-on-primary">156</span>
+          <p className="font-body-md text-body-md text-on-primary/80 mt-xs">{t("Across 8 active projects")}</p>
+        </div>
+        <div
+          className="absolute inset-0 opacity-20 pointer-events-none"
+          style={{
+            backgroundImage: "radial-gradient(circle at 2px 2px, white 1px, transparent 0)",
+            backgroundSize: "20px 20px",
+          }}
+        ></div>
+      </Card>
+    </div>
+  );
+}

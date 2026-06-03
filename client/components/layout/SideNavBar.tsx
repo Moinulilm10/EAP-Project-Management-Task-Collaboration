@@ -82,15 +82,15 @@ export function SideNavBar({ isOpen = false, onClose }: SideNavBarProps) {
           <span className="material-symbols-outlined">{t("assignment")}</span>
           {t("Tasks")}
         </Link>
-        <Link href="#" className={getLinkClass("/team")} onClick={onClose}>
+        <Link href="/team" className={getLinkClass("/team")} onClick={onClose}>
           <span className="material-symbols-outlined">{t("group")}</span>
           {t("Team")}
         </Link>
-        <Link href="#" className={getLinkClass("/analytics")} onClick={onClose}>
+        <Link href="/analytics" className={getLinkClass("/analytics")} onClick={onClose}>
           <span className="material-symbols-outlined">{t("analytics")}</span>
           {t("Analytics")}
         </Link>
-        <Link href="#" className={getLinkClass("/settings")} onClick={onClose}>
+        <Link href="/settings" className={getLinkClass("/settings")} onClick={onClose}>
           <span className="material-symbols-outlined">{t("settings")}</span>
           {t("Settings")}
         </Link>

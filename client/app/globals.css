@@ -66,6 +66,10 @@
 
   --font-inter: "Inter", sans-serif;
 
+  --text-title-sm: 15px;
+  --text-title-sm-line-height: 20px;
+  --text-title-sm-font-weight: 600;
+
   --text-title-md: 18px;
   --text-title-md--line-height: 24px;
   --text-title-md--font-weight: 600;
@@ -120,9 +124,17 @@ body {
 }
 
 @keyframes gradientBG {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .bg-animated-gradient {
@@ -132,8 +144,15 @@ body {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-fade-in {

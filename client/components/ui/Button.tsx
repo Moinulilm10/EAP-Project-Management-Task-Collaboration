@@ -12,7 +12,7 @@ export function Button({ variant = "primary", children, className = "", ...props
   
   const variants = {
     primary: "bg-primary text-on-primary px-md py-sm hover:bg-primary/90 shadow-sm",
-    secondary: "bg-transparent text-secondary border border-primary px-md py-sm hover:bg-surface-container-low",
+    secondary: "bg-transparent text-primary border border-primary px-md py-sm hover:bg-primary-container/10",
     ghost: "bg-transparent text-secondary px-xs py-1 hover:text-primary hover:bg-surface-container-high rounded",
   };
 
