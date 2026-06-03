@@ -2,65 +2,95 @@
 
 import React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Button } from "../ui/Button";
 import { useTranslation } from "react-i18next";
 import "../../i18n";
 
-export function SideNavBar() {
+interface SideNavBarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+export function SideNavBar({ isOpen = false, onClose }: SideNavBarProps) {
   const { t } = useTranslation();
+  const pathname = usePathname();
+
+  // Helper to check if a route is active
+  const isActive = (path: string) => {
+    if (path === "/" || path === "/dashboard") {
+      return pathname === "/" || pathname === "/dashboard";
+    }
+    return pathname.startsWith(path);
+  };
+
+  const getLinkClass = (path: string) => {
+    const base = "flex items-center gap-sm px-sm py-sm rounded-xl font-label-md text-label-md transition-all duration-300";
+    if (isActive(path)) {
+      return `${base} bg-primary-container/20 text-primary font-bold scale-95`;
+    }
+    return `${base} text-secondary hover:text-primary hover:bg-surface-container-high/50`;
+  };
 
   return (
-    <aside className="hidden md:flex fixed h-screen w-72 left-0 top-0 border-r border-outline-variant/30 bg-surface-container-lowest/70 backdrop-blur-xl shadow-sm z-50 flex-col py-base px-sm">
+    <aside
+      className={`fixed top-0 bottom-0 left-0 z-50 flex h-screen w-72 flex-col border-r border-outline-variant/30 bg-surface-container-lowest/90 backdrop-blur-xl py-base px-sm shadow-sm transition-transform duration-300 md:translate-x-0 ${
+        isOpen ? "translate-x-0" : "-translate-x-full"
+      }`}
+    >
+      {/* Mobile Close Button */}
+      {onClose && (
+        <button
+          onClick={onClose}
+          className="md:hidden absolute right-sm top-[18px] p-1 text-secondary hover:text-primary rounded hover:bg-surface-container-high transition-colors"
+          aria-label={t("close") as string}
+        >
+          <span className="material-symbols-outlined">close</span>
+        </button>
+      )}
+
       <div className="flex items-center gap-sm mb-lg px-sm pt-sm">
         <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-on-primary font-bold">
           {t("P")}
         </div>
         <div>
-          <h1 className="font-headline-md text-headline-md font-bold text-primary">{t("ProSync")}</h1>
-          <p className="font-label-sm text-label-sm text-secondary">{t("Enterprise")}</p>
+          <h1 className="font-headline-md text-headline-md font-bold text-primary">{t("ProjectFlow")}</h1>
+          <p className="font-label-sm text-label-sm text-secondary">{t("Enterprise Pro")}</p>
         </div>
       </div>
-      
+
       <nav className="flex-1 flex flex-col gap-xs">
-        <Link
-          href="#"
-          className="flex items-center gap-sm px-sm py-sm text-secondary hover:text-primary hover:bg-surface-container-high/50 transition-all duration-300 rounded-xl font-label-md text-label-md group"
-        >
-          <span className="material-symbols-outlined">{t("dashboard")}</span>
+        <Link href="/" className={getLinkClass("/")} onClick={onClose}>
+          <span
+            className="material-symbols-outlined"
+            style={isActive("/") ? { fontVariationSettings: "'FILL' 1" } : undefined}
+          >
+            {t("dashboard")}
+          </span>
           {t("Dashboard")}
         </Link>
-        <Link
-          href="#"
-          className="flex items-center gap-sm px-sm py-sm bg-primary-container/20 text-primary font-bold rounded-xl font-label-md text-label-md scale-95 transition-transform duration-150"
-        >
-          <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>{t("folder")}</span>
+        <Link href="/projects" className={getLinkClass("/projects")} onClick={onClose}>
+          <span
+            className="material-symbols-outlined"
+            style={isActive("/projects") ? { fontVariationSettings: "'FILL' 1" } : undefined}
+          >
+            {t("folder")}
+          </span>
           {t("Projects")}
         </Link>
-        <Link
-          href="#"
-          className="flex items-center gap-sm px-sm py-sm text-secondary hover:text-primary hover:bg-surface-container-high/50 transition-all duration-300 rounded-xl font-label-md text-label-md group"
-        >
+        <Link href="#" className={getLinkClass("/tasks")} onClick={onClose}>
           <span className="material-symbols-outlined">{t("assignment")}</span>
           {t("Tasks")}
         </Link>
-        <Link
-          href="#"
-          className="flex items-center gap-sm px-sm py-sm text-secondary hover:text-primary hover:bg-surface-container-high/50 transition-all duration-300 rounded-xl font-label-md text-label-md group"
-        >
+        <Link href="#" className={getLinkClass("/team")} onClick={onClose}>
           <span className="material-symbols-outlined">{t("group")}</span>
           {t("Team")}
         </Link>
-        <Link
-          href="#"
-          className="flex items-center gap-sm px-sm py-sm text-secondary hover:text-primary hover:bg-surface-container-high/50 transition-all duration-300 rounded-xl font-label-md text-label-md group"
-        >
+        <Link href="#" className={getLinkClass("/analytics")} onClick={onClose}>
           <span className="material-symbols-outlined">{t("analytics")}</span>
           {t("Analytics")}
         </Link>
-        <Link
-          href="#"
-          className="flex items-center gap-sm px-sm py-sm text-secondary hover:text-primary hover:bg-surface-container-high/50 transition-all duration-300 rounded-xl font-label-md text-label-md group"
-        >
+        <Link href="#" className={getLinkClass("/settings")} onClick={onClose}>
           <span className="material-symbols-outlined">{t("settings")}</span>
           {t("Settings")}
         </Link>
@@ -79,7 +109,7 @@ export function SideNavBar() {
           {t("Help Center")}
         </Link>
         <Link
-          href="#"
+          href="/login"
           className="flex items-center gap-sm px-sm py-xs text-secondary hover:text-primary transition-colors duration-200 font-label-md text-label-md"
         >
           <span className="material-symbols-outlined text-[18px]">{t("logout")}</span>
