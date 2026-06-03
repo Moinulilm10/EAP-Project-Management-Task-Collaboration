@@ -8,7 +8,21 @@ import { useTranslation } from "react-i18next";
 import { FcGoogle } from "react-icons/fc";
 import { MdMail, MdLock, MdBolt } from "react-icons/md";
 import { FormField } from "@/components/ui/FormField";
+import { motion } from "framer-motion";
 import "../../i18n";
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 15 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } }
+};
 
 export default function LoginPage() {
   const { t } = useTranslation();
@@ -124,34 +138,45 @@ export default function LoginPage() {
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5" id="loginForm">
+            <motion.form 
+              onSubmit={handleSubmit} 
+              className="space-y-5" 
+              id="loginForm"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+            >
               {/* Email Address */}
-              <FormField
-                label={t("Email Address")}
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                icon={<MdMail />}
-                placeholder="name@company.com"
-                isAnimating={isDemoAnimating}
-                required
-              />
+              <motion.div variants={itemVariants}>
+                <FormField
+                  label={t("Email Address")}
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  icon={<MdMail />}
+                  placeholder="name@company.com"
+                  isAnimating={isDemoAnimating}
+                  required
+                />
+              </motion.div>
 
               {/* Password */}
-              <FormField
-                label={t("Password")}
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                icon={<MdLock />}
-                placeholder="••••••••"
-                isAnimating={isDemoAnimating}
-                required
-              />
+              <motion.div variants={itemVariants}>
+                <FormField
+                  label={t("Password")}
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  icon={<MdLock />}
+                  placeholder="••••••••"
+                  isAnimating={isDemoAnimating}
+                  required
+                />
+              </motion.div>
 
-              <div className="flex items-center justify-between pt-2">
+              <motion.div variants={itemVariants} className="flex items-center justify-between pt-2">
                 <div className="flex items-center">
                   <input
                     type="checkbox"
@@ -170,9 +195,9 @@ export default function LoginPage() {
                     {t("Forgot password?")}
                   </a>
                 </div>
-              </div>
+              </motion.div>
 
-              <div className="pt-4 space-y-4">
+              <motion.div variants={itemVariants} className="pt-4 space-y-4">
                 <button
                   type="submit"
                   disabled={isDemoAnimating}
@@ -213,8 +238,8 @@ export default function LoginPage() {
                   <FcGoogle className="text-[20px] w-5 h-5 group-hover:scale-110 transition-transform" />
                   {t("Sign in with Google")}
                 </button>
-              </div>
-            </form>
+              </motion.div>
+            </motion.form>
 
             <p className="mt-8 text-center font-body-md text-body-md text-on-surface-variant">
               {t("Don't have an account?")}{" "}

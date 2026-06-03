@@ -9,7 +9,21 @@ import { FcGoogle } from "react-icons/fc";
 import { MdPerson, MdMail, MdLock } from "react-icons/md";
 import { FormField } from "@/components/ui/FormField";
 import { PasswordStrengthIndicator } from "@/components/ui/PasswordStrengthIndicator";
+import { motion } from "framer-motion";
 import "../../i18n";
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 15 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } }
+};
 
 export default function SignupPage() {
   const { t } = useTranslation();
@@ -132,33 +146,44 @@ export default function SignupPage() {
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-3.5" id="signupForm">
+            <motion.form 
+              onSubmit={handleSubmit} 
+              className="space-y-3.5" 
+              id="signupForm"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+            >
               {/* Full Name */}
-              <FormField
-                label={t("Full Name")}
-                id="name"
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                icon={<MdPerson />}
-                placeholder="John Doe"
-                required
-              />
+              <motion.div variants={itemVariants}>
+                <FormField
+                  label={t("Full Name")}
+                  id="name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  icon={<MdPerson />}
+                  placeholder="John Doe"
+                  required
+                />
+              </motion.div>
 
               {/* Email Address */}
-              <FormField
-                label={t("Email Address")}
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                icon={<MdMail />}
-                placeholder="name@company.com"
-                required
-              />
+              <motion.div variants={itemVariants}>
+                <FormField
+                  label={t("Email Address")}
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  icon={<MdMail />}
+                  placeholder="name@company.com"
+                  required
+                />
+              </motion.div>
 
               {/* Password */}
-              <div>
+              <motion.div variants={itemVariants}>
                 <FormField
                   label={t("Password")}
                   id="password"
@@ -173,23 +198,25 @@ export default function SignupPage() {
                   password={password}
                   onStrengthChange={setIsPasswordValid}
                 />
-              </div>
+              </motion.div>
 
               {/* Confirm Password */}
-              <FormField
-                label={t("Confirm Password")}
-                id="confirmPassword"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                icon={<MdLock />}
-                placeholder="••••••••"
-                error={showConfirmError ? t("Passwords do not match.") : undefined}
-                required
-              />
+              <motion.div variants={itemVariants}>
+                <FormField
+                  label={t("Confirm Password")}
+                  id="confirmPassword"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  icon={<MdLock />}
+                  placeholder="••••••••"
+                  error={showConfirmError ? t("Passwords do not match.") : undefined}
+                  required
+                />
+              </motion.div>
 
               {/* Terms Checkbox */}
-              <div className="flex items-start pt-1">
+              <motion.div variants={itemVariants} className="flex items-start pt-1">
                 <div className="flex items-center h-5">
                   <input
                     type="checkbox"
@@ -209,10 +236,10 @@ export default function SignupPage() {
                     <a href="#" className="text-primary hover:underline">{t("Privacy Policy")}</a>
                   </label>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Submit / Actions */}
-              <div className="pt-2 space-y-3.5">
+              <motion.div variants={itemVariants} className="pt-2 space-y-3.5">
                 <button
                   type="submit"
                   disabled={!canSubmit}
@@ -241,8 +268,8 @@ export default function SignupPage() {
                   <FcGoogle className="text-[20px] w-5 h-5 group-hover:scale-110 transition-transform" />
                   {t("Sign up with Google")}
                 </button>
-              </div>
-            </form>
+              </motion.div>
+            </motion.form>
 
             <p className="mt-5 text-center font-body-md text-body-md text-on-surface-variant">
               {t("Already have an account?")}{" "}

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { MdCheck, MdClose } from "react-icons/md";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface PasswordStrengthIndicatorProps {
   password?: string;
@@ -68,7 +69,12 @@ export function PasswordStrengthIndicator({ password = "", onStrengthChange }: P
   const strengthMeta = getStrengthMeta();
 
   return (
-    <div className="mt-2 space-y-2 p-2 bg-surface-container/30 border border-outline-variant/30 rounded-lg animate-fade-in">
+    <motion.div 
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: "auto" }}
+      exit={{ opacity: 0, height: 0 }}
+      className="mt-2 space-y-2 p-2 bg-surface-container/30 border border-outline-variant/30 rounded-lg overflow-hidden"
+    >
       <div className="flex items-center justify-between">
         <span className="font-label-sm text-label-sm text-on-surface-variant">
           {t("Password Strength")}
@@ -79,14 +85,16 @@ export function PasswordStrengthIndicator({ password = "", onStrengthChange }: P
       </div>
 
       {/* Progress Bar Segments */}
-      <div className="grid grid-cols-5 gap-1.5 h-1.5 w-full">
+      <div className="grid grid-cols-5 gap-1.5 h-1.5 w-full relative">
         {[1, 2, 3, 4, 5].map((level) => (
-          <div
-            key={level}
-            className={`h-full rounded-full transition-all duration-300 ${
-              strength.score >= level ? strengthMeta.colorClass : "bg-outline-variant/20"
-            }`}
-          />
+          <div key={level} className="h-full rounded-full bg-outline-variant/20 overflow-hidden relative">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: strength.score >= level ? "100%" : "0%" }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className={`absolute top-0 left-0 h-full ${strengthMeta.colorClass}`}
+            />
+          </div>
         ))}
       </div>
 
@@ -147,6 +155,6 @@ export function PasswordStrengthIndicator({ password = "", onStrengthChange }: P
           </span>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -1,8 +1,11 @@
+"use client";
+
 import React from "react";
+import { motion, HTMLMotionProps } from "framer-motion";
 
 export type ButtonVariant = "primary" | "secondary" | "ghost";
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends HTMLMotionProps<"button"> {
   variant?: ButtonVariant;
   children: React.ReactNode;
 }
@@ -17,8 +20,13 @@ export function Button({ variant = "primary", children, className = "", ...props
   };
 
   return (
-    <button className={`${baseStyles} ${variants[variant]} ${className}`} {...props}>
+    <motion.button 
+      className={`${baseStyles} ${variants[variant]} ${className}`} 
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      {...props}
+    >
       {children}
-    </button>
+    </motion.button>
   );
 }

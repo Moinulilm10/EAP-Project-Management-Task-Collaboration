@@ -1,6 +1,9 @@
-import React from "react";
+"use client";
 
-interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+import React from "react";
+import { motion, HTMLMotionProps } from "framer-motion";
+
+interface IconButtonProps extends HTMLMotionProps<"button"> {
   icon: React.ReactNode;
   variant?: "ghost" | "surface" | "primary";
 }
@@ -15,8 +18,13 @@ export function IconButton({ icon, variant = "ghost", className = "", ...props }
   };
 
   return (
-    <button className={`${baseStyles} ${variants[variant]} ${className}`} {...props}>
+    <motion.button 
+      className={`${baseStyles} ${variants[variant]} ${className}`} 
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      {...props}
+    >
       {icon}
-    </button>
+    </motion.button>
   );
 }
