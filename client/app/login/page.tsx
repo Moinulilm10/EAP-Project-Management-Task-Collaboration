@@ -235,9 +235,12 @@ export default function LoginPage() {
 
             <p className="mt-8 text-center font-body-md text-body-md text-on-surface-variant">
               {t("Don't have an account?")}{" "}
-              <a className="font-label-md text-label-md text-primary hover:text-primary-container transition-colors" href="#">
-                {t("Request Access")}
-              </a>
+              <button
+                onClick={() => router.push("/signup")}
+                className="font-label-md text-label-md text-primary hover:text-primary-container transition-colors cursor-pointer bg-transparent border-0 p-0"
+              >
+                {t("Sign Up")}
+              </button>
             </p>
           </div>
         </section>
