@@ -1,4 +1,5 @@
 import React from "react";
+import { MdExpandMore } from "react-icons/md";
 
 interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   options: { label: string; value: string }[];
@@ -18,9 +19,7 @@ export function Select({ options, className = "", containerClassName = "", ...pr
           </option>
         ))}
       </select>
-      <span className="material-symbols-outlined absolute right-sm top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">
-        expand_more
-      </span>
+      <MdExpandMore className="absolute right-sm top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none w-5 h-5" />
     </div>
   );
 }

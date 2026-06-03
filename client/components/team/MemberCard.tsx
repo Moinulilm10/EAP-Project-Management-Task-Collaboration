@@ -4,6 +4,7 @@ import { Avatar } from "../ui/Avatar";
 import { IconButton } from "../ui/IconButton";
 import { ProgressBar } from "../ui/ProgressBar";
 import { useTranslation } from "react-i18next";
+import { MdMoreVert } from "react-icons/md";
 
 export interface Member {
   id: string;
@@ -62,7 +63,7 @@ export function MemberCard({ member }: MemberCardProps) {
             </p>
           </div>
         </div>
-        <IconButton icon="more_vert" aria-label={t("More options")} />
+        <IconButton icon={<MdMoreVert className="w-5 h-5" />} aria-label={t("More options")} />
       </div>
 
       <div className="grid grid-cols-3 gap-xs mb-md p-sm bg-surface-container-low rounded-lg text-center">

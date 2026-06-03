@@ -5,6 +5,19 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "../ui/Button";
 import { useTranslation } from "react-i18next";
+import {
+  MdClose,
+  MdOutlineDashboard,
+  MdDashboard,
+  MdOutlineFolder,
+  MdFolder,
+  MdAssignment,
+  MdGroup,
+  MdAnalytics,
+  MdSettings,
+  MdHelpOutline,
+  MdLogout,
+} from "react-icons/md";
 import "../../i18n";
 
 interface SideNavBarProps {
@@ -27,7 +40,7 @@ export function SideNavBar({ isOpen = false, onClose }: SideNavBarProps) {
   const getLinkClass = (path: string) => {
     const base = "flex items-center gap-sm px-sm py-sm rounded-xl font-label-md text-label-md transition-all duration-300";
     if (isActive(path)) {
-      return `${base} bg-primary-container/20 text-primary font-bold scale-95`;
+      return `${base} bg-primary-container/20 text-primary font-bold`;
     }
     return `${base} text-secondary hover:text-primary hover:bg-surface-container-high/50`;
   };
@@ -45,7 +58,7 @@ export function SideNavBar({ isOpen = false, onClose }: SideNavBarProps) {
           className="md:hidden absolute right-sm top-[18px] p-1 text-secondary hover:text-primary rounded hover:bg-surface-container-high transition-colors"
           aria-label={t("close") as string}
         >
-          <span className="material-symbols-outlined">close</span>
+          <MdClose className="w-6 h-6" />
         </button>
       )}
 
@@ -61,37 +74,35 @@ export function SideNavBar({ isOpen = false, onClose }: SideNavBarProps) {
 
       <nav className="flex-1 flex flex-col gap-xs">
         <Link href="/" className={getLinkClass("/")} onClick={onClose}>
-          <span
-            className="material-symbols-outlined"
-            style={isActive("/") ? { fontVariationSettings: "'FILL' 1" } : undefined}
-          >
-            {t("dashboard")}
-          </span>
+          {isActive("/") ? (
+            <MdDashboard className="w-5 h-5" />
+          ) : (
+            <MdOutlineDashboard className="w-5 h-5" />
+          )}
           {t("Dashboard")}
         </Link>
         <Link href="/projects" className={getLinkClass("/projects")} onClick={onClose}>
-          <span
-            className="material-symbols-outlined"
-            style={isActive("/projects") ? { fontVariationSettings: "'FILL' 1" } : undefined}
-          >
-            {t("folder")}
-          </span>
+          {isActive("/projects") ? (
+            <MdFolder className="w-5 h-5" />
+          ) : (
+            <MdOutlineFolder className="w-5 h-5" />
+          )}
           {t("Projects")}
         </Link>
         <Link href="#" className={getLinkClass("/tasks")} onClick={onClose}>
-          <span className="material-symbols-outlined">{t("assignment")}</span>
+          <MdAssignment className="w-5 h-5" />
           {t("Tasks")}
         </Link>
         <Link href="/team" className={getLinkClass("/team")} onClick={onClose}>
-          <span className="material-symbols-outlined">{t("group")}</span>
+          <MdGroup className="w-5 h-5" />
           {t("Team")}
         </Link>
         <Link href="/analytics" className={getLinkClass("/analytics")} onClick={onClose}>
-          <span className="material-symbols-outlined">{t("analytics")}</span>
+          <MdAnalytics className="w-5 h-5" />
           {t("Analytics")}
         </Link>
         <Link href="/settings" className={getLinkClass("/settings")} onClick={onClose}>
-          <span className="material-symbols-outlined">{t("settings")}</span>
+          <MdSettings className="w-5 h-5" />
           {t("Settings")}
         </Link>
       </nav>
@@ -105,14 +116,14 @@ export function SideNavBar({ isOpen = false, onClose }: SideNavBarProps) {
           href="#"
           className="flex items-center gap-sm px-sm py-xs text-secondary hover:text-primary transition-colors duration-200 font-label-md text-label-md"
         >
-          <span className="material-symbols-outlined text-[18px]">{t("help")}</span>
+          <MdHelpOutline className="w-[18px] h-[18px]" />
           {t("Help Center")}
         </Link>
         <Link
           href="/login"
           className="flex items-center gap-sm px-sm py-xs text-secondary hover:text-primary transition-colors duration-200 font-label-md text-label-md"
         >
-          <span className="material-symbols-outlined text-[18px]">{t("logout")}</span>
+          <MdLogout className="w-[18px] h-[18px]" />
           {t("Log Out")}
         </Link>
       </div>

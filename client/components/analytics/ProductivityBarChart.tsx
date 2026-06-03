@@ -45,13 +45,13 @@ export function ProductivityBarChart() {
         labels: {
           usePointStyle: true,
           boxWidth: 8,
-          font: { family: "'Inter', sans-serif", size: 12, weight: "600" },
+          font: { family: "'Inter', sans-serif", size: 12, weight: "bold" as const },
           color: "#505f76",
         },
       },
       tooltip: {
         backgroundColor: "rgba(25, 28, 30, 0.9)",
-        titleFont: { family: "'Inter', sans-serif", size: 12, weight: "600" },
+        titleFont: { family: "'Inter', sans-serif", size: 12, weight: "bold" as const },
         bodyFont: { family: "'Inter', sans-serif", size: 14 },
         padding: 12,
         cornerRadius: 8,

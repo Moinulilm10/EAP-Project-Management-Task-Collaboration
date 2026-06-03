@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
+import { FcGoogle } from "react-icons/fc";
+import { MdDashboard, MdMail, MdLock, MdBolt } from "react-icons/md";
 import "../../i18n";
 
 export default function LoginPage() {
@@ -52,9 +54,7 @@ export default function LoginPage() {
 
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-12">
-              <span className="material-symbols-outlined text-white text-[32px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                dashboard
-              </span>
+              <MdDashboard className="text-white text-[32px] w-8 h-8" />
               <h1 className="font-display-lg text-display-lg text-white tracking-tight">
                 {t("ProjectFlow")}
               </h1>
@@ -97,9 +97,7 @@ export default function LoginPage() {
         {/* Right Side: Login Form */}
         <section className="w-full md:w-1/2 p-6 md:p-12 lg:p-16 flex flex-col justify-center relative bg-surface-container-lowest">
           <div className="md:hidden flex items-center gap-2 mb-8">
-            <span className="material-symbols-outlined text-primary text-[28px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-              dashboard
-            </span>
+            <MdDashboard className="text-primary text-[28px] w-7 h-7" />
             <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-primary font-bold">
               {t("ProjectFlow")}
             </h1>
@@ -122,7 +120,7 @@ export default function LoginPage() {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span className="material-symbols-outlined text-outline text-[20px]">mail</span>
+                    <MdMail className="text-outline text-[20px] w-5 h-5" />
                   </div>
                   <input
                     type="email"
@@ -144,7 +142,7 @@ export default function LoginPage() {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span className="material-symbols-outlined text-outline text-[20px]">lock</span>
+                    <MdLock className="text-outline text-[20px] w-5 h-5" />
                   </div>
                   <input
                     type="password"
@@ -208,10 +206,19 @@ export default function LoginPage() {
                   className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-outline-variant rounded-lg bg-surface-container-lowest font-label-md text-label-md text-on-surface hover:bg-surface-container-low transition-all duration-200 group disabled:opacity-50 cursor-pointer"
                   id="demoLoginBtn"
                 >
-                  <span className="material-symbols-outlined text-[20px] text-tertiary-container group-hover:scale-110 transition-transform">
-                    bolt
-                  </span>
+                  <MdBolt className="text-[20px] w-5 h-5 text-tertiary-container group-hover:scale-110 transition-transform" />
                   {t("Quick Demo Login")}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => router.push("/")}
+                  disabled={isDemoAnimating}
+                  className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-outline-variant rounded-lg bg-surface-container-lowest font-label-md text-label-md text-on-surface hover:bg-surface-container-low transition-all duration-200 group disabled:opacity-50 cursor-pointer"
+                  id="googleLoginBtn"
+                >
+                  <FcGoogle className="text-[20px] w-5 h-5 group-hover:scale-110 transition-transform" />
+                  {t("Sign in with Google")}
                 </button>
               </div>
             </form>

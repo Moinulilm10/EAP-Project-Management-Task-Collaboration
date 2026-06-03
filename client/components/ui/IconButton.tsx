@@ -1,7 +1,7 @@
 import React from "react";
 
 interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  icon: string;
+  icon: React.ReactNode;
   variant?: "ghost" | "surface" | "primary";
 }
 
@@ -16,7 +16,7 @@ export function IconButton({ icon, variant = "ghost", className = "", ...props }
 
   return (
     <button className={`${baseStyles} ${variants[variant]} ${className}`} {...props}>
-      <span className="material-symbols-outlined">{icon}</span>
+      {icon}
     </button>
   );
 }

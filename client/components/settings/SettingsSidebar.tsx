@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { MdChevronRight } from "react-icons/md";
 
 interface SettingsSidebarProps {
   activeSection: string;
@@ -31,12 +32,10 @@ export function SettingsSidebar({ activeSection, onSectionChange }: SettingsSide
                 }`}
             >
               {section.label}
-              <span
-                className={`material-symbols-outlined text-[18px] transition-opacity ${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+              <MdChevronRight
+                className={`text-[18px] transition-opacity w-5 h-5 ${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
                   }`}
-              >
-                chevron_right
-              </span>
+              />
             </button>
           );
         })}

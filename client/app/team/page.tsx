@@ -9,6 +9,7 @@ import { TeamOverview } from "@/components/team/TeamOverview";
 import { MemberCard, Member } from "@/components/team/MemberCard";
 import { Button } from "@/components/ui/Button";
 import { useTranslation } from "react-i18next";
+import { MdFilterList, MdPersonAdd } from "react-icons/md";
 
 const TEAM_MEMBERS: Member[] = [
   {
@@ -57,12 +58,12 @@ export default function TeamPage() {
           description={t("Manage team members, roles, and current workload capacity.")}
           actions={
             <>
-              <Button variant="secondary">
-                <span className="material-symbols-outlined text-[18px]">{t("filter_list")}</span>
+              <Button variant="secondary" className="flex items-center gap-1">
+                <MdFilterList className="w-[18px] h-[18px]" />
                 {t("Filter")}
               </Button>
-              <Button variant="primary">
-                <span className="material-symbols-outlined text-[18px]">{t("person_add")}</span>
+              <Button variant="primary" className="flex items-center gap-1">
+                <MdPersonAdd className="w-[18px] h-[18px]" />
                 {t("Add Member")}
               </Button>
             </>

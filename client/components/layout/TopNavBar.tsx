@@ -7,6 +7,7 @@ import { Input } from "../ui/Input";
 import { IconButton } from "../ui/IconButton";
 import { Avatar } from "../ui/Avatar";
 import { useTranslation } from "react-i18next";
+import { MdMenu, MdAdd, MdSearch, MdNotifications, MdDarkMode } from "react-icons/md";
 import "../../i18n";
 
 interface TopNavBarProps {
@@ -23,10 +24,10 @@ export function TopNavBar({ onMenuClick }: TopNavBarProps) {
         {onMenuClick && (
           <button
             onClick={onMenuClick}
-            className="text-on-surface-variant hover:text-primary p-1 rounded-md hover:bg-surface-container-high/40 transition-colors"
+            className="text-on-surface-variant hover:text-primary p-1 rounded-md hover:bg-surface-container-high/40 transition-colors flex items-center justify-center"
             aria-label={t("menu") as string}
           >
-            <span className="material-symbols-outlined">{t("menu")}</span>
+            <MdMenu className="w-6 h-6" />
           </button>
         )}
         <Link href="/" className="font-headline-md text-headline-md font-black text-primary">
@@ -36,18 +37,27 @@ export function TopNavBar({ onMenuClick }: TopNavBarProps) {
 
       {/* Desktop Search */}
       <div className="hidden md:flex items-center w-96 relative">
-        <Input icon="search" placeholder={t("Search workspace...") as string} />
+        <Input
+          icon={<MdSearch className="w-5 h-5 text-on-surface-variant/60" />}
+          placeholder={t("Search workspace...") as string}
+        />
       </div>
 
       <div className="flex items-center gap-md">
-        <Button className="hidden md:flex">
-          <span className="material-symbols-outlined text-[18px]">{t("add")}</span>
+        <Button className="hidden md:flex items-center gap-1">
+          <MdAdd className="w-[18px] h-[18px]" />
           {t("Create Task")}
         </Button>
 
         <div className="flex items-center gap-xs">
-          <IconButton icon="notifications" aria-label={t("notifications") as string} />
-          <IconButton icon="dark_mode" aria-label={t("dark mode") as string} />
+          <IconButton
+            icon={<MdNotifications className="w-5 h-5" />}
+            aria-label={t("notifications") as string}
+          />
+          <IconButton
+            icon={<MdDarkMode className="w-5 h-5" />}
+            aria-label={t("dark mode") as string}
+          />
         </div>
 
         <div className="h-8 w-px bg-outline-variant/40 mx-xs hidden lg:block"></div>

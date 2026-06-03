@@ -1,10 +1,11 @@
 import React from "react";
 import { Card } from "../ui/Card";
+import { MdTrendingUp, MdTrendingDown } from "react-icons/md";
 
 interface KpiCardProps {
   title: string;
   value: string | number;
-  icon: string;
+  icon: React.ReactNode;
   iconColorClass?: string; // e.g. text-on-tertiary-container
   iconBgClass?: string; // e.g. bg-on-tertiary-container/20
   trend?: {
@@ -30,8 +31,8 @@ export function KpiCard({
     <Card className="justify-between h-full relative overflow-hidden">
       <div className="flex justify-between items-start mb-sm z-10">
         <h3 className="font-label-md text-label-md text-secondary">{title}</h3>
-        <div className={`${iconBgClass} ${iconColorClass} p-xs rounded`}>
-          <span className="material-symbols-outlined text-[18px]">{icon}</span>
+        <div className={`${iconBgClass} ${iconColorClass} p-xs rounded flex items-center justify-center`}>
+          {icon}
         </div>
       </div>
       <div className="flex items-baseline gap-sm z-10">
@@ -53,11 +54,8 @@ export function KpiCard({
                 : "text-secondary bg-surface-container-high"
             }`}
           >
-            {trend.direction !== "neutral" && (
-              <span className="material-symbols-outlined text-[12px]">
-                {trend.direction === "up" ? "trending_up" : "trending_down"}
-              </span>
-            )}
+            {trend.direction === "up" && <MdTrendingUp className="w-3.5 h-3.5" />}
+            {trend.direction === "down" && <MdTrendingDown className="w-3.5 h-3.5" />}
             {trend.value}
           </span>
         )}

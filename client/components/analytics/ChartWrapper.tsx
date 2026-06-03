@@ -2,6 +2,7 @@ import React from "react";
 import { Card } from "../ui/Card";
 import { IconButton } from "../ui/IconButton";
 import { Select } from "../ui/Select";
+import { MdMoreVert } from "react-icons/md";
 
 interface ChartWrapperProps {
   title: string;
@@ -31,7 +32,7 @@ export function ChartWrapper({
         </div>
         
         {actionMenu && (
-          <IconButton icon="more_vert" aria-label="More options" variant="surface" />
+          <IconButton icon={<MdMoreVert className="w-5 h-5" />} aria-label="More options" variant="surface" />
         )}
         
         {filterOptions && (

@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { MdCalendarToday } from "react-icons/md";
 
 export function AnalyticsTimeFilter() {
   const { t } = useTranslation();
@@ -16,7 +17,7 @@ export function AnalyticsTimeFilter() {
         {t("3M")}
       </button>
       <button className="px-sm py-xs rounded text-secondary font-label-md text-label-md hover:bg-surface-container-high transition-colors flex items-center gap-xs">
-        <span className="material-symbols-outlined text-[16px]">calendar_today</span>
+        <MdCalendarToday className="w-4 h-4" />
         {t("Custom")}
       </button>
     </div>

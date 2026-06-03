@@ -4,6 +4,7 @@ import React from "react";
 import { Card } from "../ui/Card";
 import { Badge } from "../ui/Badge";
 import { useTranslation } from "react-i18next";
+import { MdWarning, MdCalendarToday } from "react-icons/md";
 
 interface ProjectProgress {
   title: string;
@@ -60,12 +61,12 @@ export function ProjectProgressList() {
                 <div className="flex items-center gap-xs mt-1">
                   {project.isWarning ? (
                     <span className="text-error flex items-center gap-xs font-bold text-[12px]">
-                      <span className="material-symbols-outlined text-[14px]">warning</span>
+                      <MdWarning className="w-3.5 h-3.5" />
                       {t(project.dueDate)}
                     </span>
                   ) : (
                     <span className="text-secondary flex items-center gap-xs text-[12px]">
-                      <span className="material-symbols-outlined text-[14px]">calendar_today</span>
+                      <MdCalendarToday className="w-3.5 h-3.5" />
                       {t(project.dueDate)}
                     </span>
                   )}

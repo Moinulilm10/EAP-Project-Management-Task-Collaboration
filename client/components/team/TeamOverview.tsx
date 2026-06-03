@@ -3,6 +3,7 @@ import { KpiCard } from "../shared/KpiCard";
 import { Card } from "../ui/Card";
 import { ProgressBar } from "../ui/ProgressBar";
 import { useTranslation } from "react-i18next";
+import { MdGroup, MdSpeed, MdAssignmentLate } from "react-icons/md";
 
 export function TeamOverview() {
   const { t } = useTranslation();
@@ -13,11 +14,11 @@ export function TeamOverview() {
       <KpiCard
         title={t("Total Team")}
         value="24"
-        icon="group"
+        icon={<MdGroup className="w-[18px] h-[18px]" />}
         subtitle={t("Active Members")}
         customDecorative={
           <div className="absolute bottom-0 right-0 opacity-10 pointer-events-none transform translate-x-1/4 translate-y-1/4">
-            <span className="material-symbols-outlined text-[120px]">group</span>
+            <MdGroup className="text-[120px]" />
           </div>
         }
       />
@@ -26,8 +27,8 @@ export function TeamOverview() {
       <Card className="justify-between relative overflow-hidden h-full">
         <div className="flex justify-between items-start mb-md z-10">
           <h3 className="font-title-md text-title-md text-on-surface">{t("Overall Capacity")}</h3>
-          <span className="p-sm bg-secondary-container rounded-full text-on-secondary-container">
-            <span className="material-symbols-outlined">speed</span>
+          <span className="p-xs bg-secondary-container rounded-full text-on-secondary-container flex items-center justify-center">
+            <MdSpeed className="w-6 h-6" />
           </span>
         </div>
         <div className="z-10">
@@ -41,8 +42,8 @@ export function TeamOverview() {
       <Card className="justify-between relative overflow-hidden bg-primary text-on-primary border-none h-full">
         <div className="flex justify-between items-start mb-md z-10">
           <h3 className="font-title-md text-title-md text-on-primary/90">{t("Pending Tasks")}</h3>
-          <span className="p-sm bg-on-primary/20 rounded-full text-on-primary">
-            <span className="material-symbols-outlined">assignment_late</span>
+          <span className="p-xs bg-on-primary/20 rounded-full text-on-primary flex items-center justify-center">
+            <MdAssignmentLate className="w-6 h-6" />
           </span>
         </div>
         <div className="z-10">

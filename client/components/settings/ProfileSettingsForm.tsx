@@ -3,6 +3,7 @@ import { Input } from "../ui/Input";
 import { Avatar } from "../ui/Avatar";
 import { IconButton } from "../ui/IconButton";
 import { useTranslation } from "react-i18next";
+import { MdEdit, MdMail } from "react-icons/md";
 
 export function ProfileSettingsForm() {
   const { t } = useTranslation();
@@ -16,8 +17,8 @@ export function ProfileSettingsForm() {
             alt="User Avatar"
             size="xl"
           />
-          <button className="absolute -bottom-1 -right-1 bg-surface-container-lowest text-primary rounded-full p-1 hover:bg-surface-container-low transition-colors">
-            <span className="material-symbols-outlined text-[18px]">edit</span>
+          <button className="absolute -bottom-0 -right-1 bg-surface-container-lowest text-primary rounded-full p-1 hover:bg-surface-container-low transition-colors flex items-center justify-center">
+            <MdEdit className="w-[22px] h-[22px]" />
           </button>
         </div>
         <div className="flex flex-col gap-xs">
@@ -49,7 +50,11 @@ export function ProfileSettingsForm() {
         <label className="font-label-md text-label-md text-on-surface-variant">
           {t("Email Address")}
         </label>
-        <Input icon="mail" type="email" defaultValue="alex.morgan@example.com" />
+        <Input
+          icon={<MdMail className="w-5 h-5 text-on-surface-variant/60" />}
+          type="email"
+          defaultValue="alex.morgan@example.com"
+        />
       </div>
 
       <div className="flex flex-col gap-xs">

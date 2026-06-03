@@ -5,6 +5,7 @@ import { DashboardLayout } from "../../components/layout/DashboardLayout";
 import { Button } from "../../components/ui/Button";
 import { ProjectCard, Project } from "../../components/projects/ProjectCard";
 import { useTranslation } from "react-i18next";
+import { MdFilterList, MdAdd, MdFolderOpen } from "react-icons/md";
 import "../../i18n";
 
 const MOCK_PROJECTS: Project[] = [
@@ -68,9 +69,7 @@ export default function ProjectsPage() {
         </div>
         <div className="flex items-center gap-sm">
           <div className="relative flex-1 md:w-64">
-            <span className="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">
-              {t("filter_list")}
-            </span>
+            <MdFilterList className="absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px] w-[18px] h-[18px]" />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
@@ -82,8 +81,8 @@ export default function ProjectsPage() {
               <option>{t("On Hold")}</option>
             </select>
           </div>
-          <Button variant="primary" className="whitespace-nowrap">
-            <span className="material-symbols-outlined text-[18px]">{t("add")}</span>
+          <Button variant="primary" className="whitespace-nowrap flex items-center gap-1">
+            <MdAdd className="w-[18px] h-[18px]" />
             {t("New Project")}
           </Button>
         </div>
@@ -91,7 +90,7 @@ export default function ProjectsPage() {
 
       {filteredProjects.length === 0 ? (
         <div className="flex flex-col items-center justify-center p-xl border-2 border-dashed border-outline-variant/30 rounded-xl bg-surface-container-lowest/50">
-          <span className="material-symbols-outlined text-[48px] text-secondary mb-sm">folder_open</span>
+          <MdFolderOpen className="text-[48px] text-secondary mb-sm w-12 h-12" />
           <p className="font-title-md text-secondary">{t("No projects found matching the filter")}</p>
         </div>
       ) : (

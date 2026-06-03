@@ -3,6 +3,7 @@
 import React from "react";
 import { Card } from "../ui/Card";
 import { useTranslation } from "react-i18next";
+import { MdCheckCircle, MdUpdate, MdChat } from "react-icons/md";
 
 interface ActivityItem {
   id: string;
@@ -10,7 +11,7 @@ interface ActivityItem {
   action: string;
   target: string;
   time: string;
-  icon: string;
+  icon: React.ReactNode;
   iconBg: string;
   iconColor: string;
 }
@@ -25,7 +26,7 @@ export function ActivityTimeline() {
       action: "completed the task",
       target: "Design portal high-fi mockups",
       time: "2h ago",
-      icon: "check_circle",
+      icon: <MdCheckCircle className="text-[18px]" />,
       iconBg: "bg-tertiary-container/10",
       iconColor: "text-tertiary-container",
     },
@@ -35,7 +36,7 @@ export function ActivityTimeline() {
       action: "updated status of",
       target: "Server Migration V2 to Completed",
       time: "5h ago",
-      icon: "update",
+      icon: <MdUpdate className="text-[18px]" />,
       iconBg: "bg-secondary-container/30",
       iconColor: "text-on-secondary-container",
     },
@@ -45,7 +46,7 @@ export function ActivityTimeline() {
       action: "added a new comment to",
       target: "Q3 Marketing Campaign",
       time: "1d ago",
-      icon: "chat",
+      icon: <MdChat className="text-[18px]" />,
       iconBg: "bg-primary-fixed/30",
       iconColor: "text-primary",
     },
@@ -72,9 +73,7 @@ export function ActivityTimeline() {
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm ${activity.iconBg} ${activity.iconColor}`}
             >
-              <span className="material-symbols-outlined text-[18px]">
-                {activity.icon}
-              </span>
+              {activity.icon}
             </div>
 
             {/* Content block */}

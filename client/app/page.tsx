@@ -8,6 +8,7 @@ import { ProjectProgressList } from "../components/dashboard/ProjectProgressList
 import { PriorityTasks } from "../components/dashboard/PriorityTasks";
 import { ActivityTimeline } from "../components/dashboard/ActivityTimeline";
 import { useTranslation } from "react-i18next";
+import { MdCalendarMonth, MdDownload } from "react-icons/md";
 import "../i18n";
 
 export default function DashboardHome() {
@@ -27,11 +28,11 @@ export default function DashboardHome() {
         </div>
         <div className="flex gap-sm">
           <button className="px-4 py-2 border border-outline-variant rounded-lg font-label-md text-label-md text-secondary hover:bg-surface-container-low hover:text-primary transition-colors flex items-center gap-2">
-            <span className="material-symbols-outlined text-[18px]">calendar_month</span>
+            <MdCalendarMonth className="w-[18px] h-[18px]" />
             {t("Last 30 Days")}
           </button>
           <button className="px-4 py-2 border border-outline-variant rounded-lg font-label-md text-label-md text-secondary hover:bg-surface-container-low hover:text-primary transition-colors flex items-center gap-2">
-            <span className="material-symbols-outlined text-[18px]">download</span>
+            <MdDownload className="w-[18px] h-[18px]" />
             {t("Export Report")}
           </button>
         </div>

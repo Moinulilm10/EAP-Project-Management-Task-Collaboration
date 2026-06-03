@@ -4,6 +4,7 @@ import React from "react";
 import { Card } from "../ui/Card";
 import { Badge } from "../ui/Badge";
 import { useTranslation } from "react-i18next";
+import { MdEdit, MdDelete, MdWarning, MdCheckCircle, MdCalendarToday } from "react-icons/md";
 
 export interface Project {
   id: string;
@@ -35,19 +36,19 @@ export function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
           {onEdit && (
             <button
               onClick={() => onEdit(project.id)}
-              className="p-1 text-secondary hover:text-primary rounded hover:bg-surface-container-high transition-colors"
+              className="p-1 text-secondary hover:text-primary rounded hover:bg-surface-container-high transition-colors flex items-center justify-center"
               aria-label={t("Edit Project") as string}
             >
-              <span className="material-symbols-outlined text-[18px]">{t("edit")}</span>
+              <MdEdit className="w-[18px] h-[18px]" />
             </button>
           )}
           {onDelete && (
             <button
               onClick={() => onDelete(project.id)}
-              className="p-1 text-secondary hover:text-error rounded hover:bg-error-container/50 transition-colors"
+              className="p-1 text-secondary hover:text-error rounded hover:bg-error-container/50 transition-colors flex items-center justify-center"
               aria-label={t("Delete Project") as string}
             >
-              <span className="material-symbols-outlined text-[18px]">{t("delete")}</span>
+              <MdDelete className="w-[18px] h-[18px]" />
             </button>
           )}
         </div>
@@ -65,14 +66,16 @@ export function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
         <div className="flex justify-between items-center mb-xs font-label-sm text-label-sm">
           {project.isWarning ? (
             <span className="text-error flex items-center gap-xs font-bold">
-              <span className="material-symbols-outlined text-[14px]">{t("warning")}</span>
+              <MdWarning className="w-3.5 h-3.5" />
               {t(project.dueDate)}
             </span>
           ) : (
             <span className="text-secondary flex items-center gap-xs">
-              <span className="material-symbols-outlined text-[14px]">
-                {isCompleted ? "check_circle" : "calendar_today"}
-              </span>
+              {isCompleted ? (
+                <MdCheckCircle className="w-3.5 h-3.5" />
+              ) : (
+                <MdCalendarToday className="w-3.5 h-3.5" />
+              )}
               {t(project.dueDate)}
             </span>
           )}
