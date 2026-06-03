@@ -1,8 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useTheme } from "next-themes";
 import { Button } from "../ui/Button";
 import { useTranslation } from "react-i18next";
 import {
@@ -28,6 +30,10 @@ interface SideNavBarProps {
 export function SideNavBar({ isOpen = false, onClose }: SideNavBarProps) {
   const { t } = useTranslation();
   const pathname = usePathname();
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
 
   // Helper to check if a route is active
   const isActive = (path: string) => {
@@ -44,6 +50,10 @@ export function SideNavBar({ isOpen = false, onClose }: SideNavBarProps) {
     }
     return `${base} text-secondary hover:text-primary hover:bg-surface-container-high/50`;
   };
+
+  const logoSrc = mounted && resolvedTheme === "dark"
+    ? "/img/logo-dark-mode.png"
+    : "/img/logo-light-mode.png";
 
   return (
     <aside
@@ -63,9 +73,13 @@ export function SideNavBar({ isOpen = false, onClose }: SideNavBarProps) {
       )}
 
       <div className="flex items-center gap-sm mb-lg px-sm pt-sm">
-        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-on-primary font-bold">
-          {t("P")}
-        </div>
+        <Image
+          src={logoSrc}
+          alt="ProjectFlow Logo"
+          width={32}
+          height={32}
+          className="rounded-lg"
+        />
         <div>
           <h1 className="font-headline-md text-headline-md font-bold text-primary">{t("ProjectFlow")}</h1>
           <p className="font-label-sm text-label-sm text-secondary">{t("Enterprise Pro")}</p>

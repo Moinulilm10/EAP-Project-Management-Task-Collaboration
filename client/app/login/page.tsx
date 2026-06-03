@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { useTheme } from "next-themes";
 import { useTranslation } from "react-i18next";
 import { FcGoogle } from "react-icons/fc";
 import { MdDashboard, MdMail, MdLock, MdBolt } from "react-icons/md";
@@ -14,6 +16,14 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [isDemoAnimating, setIsDemoAnimating] = useState(false);
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  const logoSrc = mounted && resolvedTheme === "dark"
+    ? "/img/logo-dark-mode.png"
+    : "/img/logo-light-mode.png";
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,7 +64,7 @@ export default function LoginPage() {
 
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-12">
-              <MdDashboard className="text-white text-[32px] w-8 h-8" />
+              <Image src="/img/logo-dark-mode.png" alt="ProjectFlow Logo" width={40} height={40} className="rounded-lg" />
               <h1 className="font-display-lg text-display-lg text-white tracking-tight">
                 {t("ProjectFlow")}
               </h1>
@@ -97,7 +107,7 @@ export default function LoginPage() {
         {/* Right Side: Login Form */}
         <section className="w-full md:w-1/2 p-6 md:p-12 lg:p-16 flex flex-col justify-center relative bg-surface-container-lowest">
           <div className="md:hidden flex items-center gap-2 mb-8">
-            <MdDashboard className="text-primary text-[28px] w-7 h-7" />
+            <Image src={logoSrc} alt="ProjectFlow Logo" width={28} height={28} className="rounded-lg" />
             <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-primary font-bold">
               {t("ProjectFlow")}
             </h1>

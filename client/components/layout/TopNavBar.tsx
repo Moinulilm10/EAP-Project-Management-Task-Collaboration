@@ -1,13 +1,14 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { useTheme } from "next-themes";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
 import { IconButton } from "../ui/IconButton";
 import { Avatar } from "../ui/Avatar";
 import { useTranslation } from "react-i18next";
-import { MdMenu, MdAdd, MdSearch, MdNotifications, MdDarkMode } from "react-icons/md";
+import { MdMenu, MdAdd, MdSearch, MdNotifications, MdDarkMode, MdLightMode } from "react-icons/md";
 import "../../i18n";
 
 interface TopNavBarProps {
@@ -16,6 +17,15 @@ interface TopNavBarProps {
 
 export function TopNavBar({ onMenuClick }: TopNavBarProps) {
   const { t } = useTranslation();
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  // Avoid hydration mismatch by waiting for mount
+  useEffect(() => setMounted(true), []);
+
+  const toggleTheme = () => {
+    setTheme(resolvedTheme === "dark" ? "light" : "dark");
+  };
 
   return (
     <header className="fixed top-0 right-0 w-full md:w-[calc(100%-280px)] z-40 bg-surface/80 backdrop-blur-md border-b border-outline-variant/20 flex justify-between items-center h-16 px-margin-mobile md:px-margin-desktop ml-auto">
@@ -55,8 +65,15 @@ export function TopNavBar({ onMenuClick }: TopNavBarProps) {
             aria-label={t("notifications") as string}
           />
           <IconButton
-            icon={<MdDarkMode className="w-5 h-5" />}
-            aria-label={t("dark mode") as string}
+            icon={
+              mounted && resolvedTheme === "dark" ? (
+                <MdLightMode className="w-5 h-5" />
+              ) : (
+                <MdDarkMode className="w-5 h-5" />
+              )
+            }
+            onClick={toggleTheme}
+            aria-label={t("toggle theme") as string}
           />
         </div>
 
@@ -74,3 +91,4 @@ export function TopNavBar({ onMenuClick }: TopNavBarProps) {
     </header>
   );
 }
+
