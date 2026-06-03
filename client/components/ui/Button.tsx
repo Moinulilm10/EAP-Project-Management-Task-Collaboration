@@ -11,7 +11,7 @@ interface ButtonProps extends HTMLMotionProps<"button"> {
 }
 
 export function Button({ variant = "primary", children, className = "", ...props }: ButtonProps) {
-  const baseStyles = "inline-flex items-center justify-center rounded-md text-label-md font-label-md transition-colors gap-xs focus:ring-2 focus:ring-primary focus:outline-none";
+  const baseStyles = "inline-flex items-center justify-center rounded-md text-label-md font-label-md transition-colors gap-xs focus:ring-2 focus:ring-primary focus:outline-none cursor-pointer";
   
   const variants = {
     primary: "bg-primary text-on-primary px-md py-sm hover:bg-primary/90 shadow-sm",

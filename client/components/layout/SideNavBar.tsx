@@ -103,7 +103,7 @@ export function SideNavBar({ isOpen = false, onClose }: SideNavBarProps) {
           )}
           {t("Projects")}
         </Link>
-        <Link href="#" className={getLinkClass("/tasks")} onClick={onClose}>
+        <Link href="/tasks" className={getLinkClass("/tasks")} onClick={onClose}>
           <MdAssignment className="w-5 h-5" />
           {t("Tasks")}
         </Link>
@@ -128,14 +128,14 @@ export function SideNavBar({ isOpen = false, onClose }: SideNavBarProps) {
         <div className="h-px w-full bg-outline-variant/30 my-xs"></div>
         <Link
           href="#"
-          className="flex items-center gap-sm px-sm py-xs text-secondary hover:text-primary transition-colors duration-200 font-label-md text-label-md"
+          className="flex items-center gap-sm px-sm py-xs text-secondary hover:text-primary transition-colors duration-200 font-label-md text-label-md cursor-pointer"
         >
           <MdHelpOutline className="w-[18px] h-[18px]" />
           {t("Help Center")}
         </Link>
         <Link
           href="/login"
-          className="flex items-center gap-sm px-sm py-xs text-secondary hover:text-primary transition-colors duration-200 font-label-md text-label-md"
+          className="flex items-center gap-sm px-sm py-xs text-secondary hover:text-error transition-colors duration-200 font-label-md text-label-md cursor-pointer"
         >
           <MdLogout className="w-[18px] h-[18px]" />
           {t("Log Out")}

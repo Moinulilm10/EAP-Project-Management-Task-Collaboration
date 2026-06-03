@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { Card } from "../ui/Card";
 import { Badge } from "../ui/Badge";
 import { useTranslation } from "react-i18next";
@@ -56,16 +57,16 @@ export function PriorityTasks() {
         <h3 className="font-title-md text-title-md text-on-surface">
           {t("High Priority Tasks")}
         </h3>
-        <span className="font-label-sm text-label-sm text-secondary">
+        <Link href="/tasks" className="font-label-sm text-label-sm text-primary hover:text-primary/70 cursor-pointer transition-colors">
           {t("See All Tasks")}
-        </span>
+        </Link>
       </div>
 
       <div className="space-y-4 flex-1 flex flex-col justify-center">
         {tasks.map((task) => (
           <div
             key={task.id}
-            className="flex items-center justify-between p-sm rounded-lg hover:bg-surface-container-low transition-colors duration-200 border border-outline-variant/10"
+            className="flex items-center justify-between p-sm rounded-lg hover:bg-surface-container-low transition-colors duration-200 border border-outline-variant/10 cursor-pointer"
           >
             <div className="flex items-center gap-sm min-w-0">
               {/* Assignee Avatar */}

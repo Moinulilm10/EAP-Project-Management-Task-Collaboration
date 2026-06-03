@@ -9,7 +9,7 @@ interface IconButtonProps extends HTMLMotionProps<"button"> {
 }
 
 export function IconButton({ icon, variant = "ghost", className = "", ...props }: IconButtonProps) {
-  const baseStyles = "flex items-center justify-center p-xs rounded-full transition-colors duration-200";
+  const baseStyles = "flex items-center justify-center p-xs rounded-full transition-colors duration-200 cursor-pointer";
   
   const variants = {
     ghost: "text-on-surface-variant hover:text-primary hover:bg-surface-container-high/40",

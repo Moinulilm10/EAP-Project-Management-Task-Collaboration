@@ -9,20 +9,20 @@ import { FcGoogle } from "react-icons/fc";
 import { MdPerson, MdMail, MdLock } from "react-icons/md";
 import { FormField } from "@/components/ui/FormField";
 import { PasswordStrengthIndicator } from "@/components/ui/PasswordStrengthIndicator";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import "../../i18n";
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.1 }
-  }
+    transition: { staggerChildren: 0.1 },
+  },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 15 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } }
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
 };
 
 export default function SignupPage() {

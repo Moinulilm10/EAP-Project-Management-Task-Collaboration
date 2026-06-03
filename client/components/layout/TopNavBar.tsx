@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
@@ -17,6 +18,7 @@ interface TopNavBarProps {
 
 export function TopNavBar({ onMenuClick }: TopNavBarProps) {
   const { t } = useTranslation();
+  const router = useRouter();
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -34,7 +36,7 @@ export function TopNavBar({ onMenuClick }: TopNavBarProps) {
         {onMenuClick && (
           <button
             onClick={onMenuClick}
-            className="text-on-surface-variant hover:text-primary p-1 rounded-md hover:bg-surface-container-high/40 transition-colors flex items-center justify-center"
+            className="text-on-surface-variant hover:text-primary p-1 rounded-md hover:bg-surface-container-high/40 transition-colors flex items-center justify-center cursor-pointer"
             aria-label={t("menu") as string}
           >
             <MdMenu className="w-6 h-6" />
@@ -54,7 +56,7 @@ export function TopNavBar({ onMenuClick }: TopNavBarProps) {
       </div>
 
       <div className="flex items-center gap-md">
-        <Button className="hidden md:flex items-center gap-1">
+        <Button className="hidden md:flex items-center gap-1 cursor-pointer" onClick={() => router.push('/tasks')}>
           <MdAdd className="w-[18px] h-[18px]" />
           {t("Create Task")}
         </Button>
