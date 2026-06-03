@@ -4,6 +4,9 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "ProSync Task Management System",
   description: "Enterprise project management",
+  icons: {
+    icon: "/img/favicon.png",
+  },
 };
 
 import { ThemeProvider } from "../components/providers/ThemeProvider";

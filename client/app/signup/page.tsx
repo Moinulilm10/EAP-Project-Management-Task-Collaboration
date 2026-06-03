@@ -87,7 +87,7 @@ export default function SignupPage() {
 
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-12">
-              <Image src="/img/logo-dark-mode.png" alt="ProjectFlow Logo" width={40} height={40} className="rounded-lg" />
+              <Image src="/img/logo-dark-mode.png" alt="ProjectFlow Logo" width={50} height={50} className="rounded-lg" />
               <h1 className="font-display-lg text-display-lg text-white tracking-tight">
                 {t("ProjectFlow")}
               </h1>
@@ -146,9 +146,9 @@ export default function SignupPage() {
               </p>
             </div>
 
-            <motion.form 
-              onSubmit={handleSubmit} 
-              className="space-y-3.5" 
+            <motion.form
+              onSubmit={handleSubmit}
+              className="space-y-3.5"
               id="signupForm"
               variants={containerVariants}
               initial="hidden"

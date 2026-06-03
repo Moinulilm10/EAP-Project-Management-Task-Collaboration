@@ -57,9 +57,8 @@ export function SideNavBar({ isOpen = false, onClose }: SideNavBarProps) {
 
   return (
     <aside
-      className={`fixed top-0 bottom-0 left-0 z-50 flex h-screen w-72 flex-col border-r border-outline-variant/30 bg-surface-container-lowest/90 backdrop-blur-xl py-base px-sm shadow-sm transition-transform duration-300 md:translate-x-0 ${
-        isOpen ? "translate-x-0" : "-translate-x-full"
-      }`}
+      className={`fixed top-0 bottom-0 left-0 z-50 flex h-screen w-72 flex-col border-r border-outline-variant/30 bg-surface-container-lowest/90 backdrop-blur-xl py-base px-sm shadow-sm transition-transform duration-300 md:translate-x-0 ${isOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
     >
       {/* Mobile Close Button */}
       {onClose && (
@@ -76,8 +75,8 @@ export function SideNavBar({ isOpen = false, onClose }: SideNavBarProps) {
         <Image
           src={logoSrc}
           alt="ProjectFlow Logo"
-          width={32}
-          height={32}
+          width={65}
+          height={65}
           className="rounded-lg"
         />
         <div>
