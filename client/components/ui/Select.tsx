@@ -10,7 +10,7 @@ export function Select({ options, className = "", containerClassName = "", ...pr
   return (
     <div className={`relative ${containerClassName}`}>
       <select
-        className={`w-full bg-surface-bright border border-outline-variant/50 rounded-lg px-md py-sm text-body-md font-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all shadow-sm appearance-none cursor-pointer ${className}`}
+        className={`w-full bg-surface-bright border border-outline-variant/50 rounded-lg pl-md pr-lg py-sm text-body-md font-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all shadow-sm appearance-none cursor-pointer ${className}`}
         {...props}
       >
         {options.map((opt) => (
