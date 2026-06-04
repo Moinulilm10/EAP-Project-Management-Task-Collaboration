@@ -1,7 +1,9 @@
+import './instrument'; // must be first
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { AppDataSource } from './utils/data-source';
+import * as Sentry from '@sentry/node';
 
 // Load environment variables
 dotenv.config();
@@ -18,6 +20,9 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/', (req: Request, res: Response) => {
   res.json({ message: 'Welcome to the Task Collaboration API' });
 });
+
+// Sentry error handler must be registered after all routes
+Sentry.setupExpressErrorHandler(app);
 
 // Initialize Database Connection first, then start Express
 AppDataSource.initialize()
