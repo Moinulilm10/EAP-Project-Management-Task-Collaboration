@@ -1,0 +1,27 @@
+{
+  "name": "eap-project-management-task-collaboration",
+  "version": "1.0.0",
+  "description": "This project is about project management and task collaboration",
+  "main": "index.js",
+  "scripts": {
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:report": "playwright show-report"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Moinulilm10/EAP-Project-Management-Task-Collaboration.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Moinulilm10/EAP-Project-Management-Task-Collaboration/issues"
+  },
+  "homepage": "https://github.com/Moinulilm10/EAP-Project-Management-Task-Collaboration#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.60.0",
+    "@types/node": "^25.9.1"
+  }
+}
