@@ -16,22 +16,20 @@ export const FormField = React.forwardRef<HTMLInputElement, FormFieldProps>(
         </label>
         <div className="relative">
           {icon && (
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-outline text-[20px] w-5 h-5">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-outline text-[20px] w-10 h-10">
               {icon}
             </div>
           )}
           <input
             ref={ref}
             id={id}
-            className={`block w-full pr-3 py-2.5 border rounded-lg bg-surface focus:bg-surface-container-lowest input-glow font-body-md text-body-md text-on-surface transition-all duration-200 ${
-              icon ? "pl-10" : "px-3"
-            } ${
-              error
+            className={`block w-full pr-3 py-2.5 border rounded-lg bg-surface focus:bg-surface-container-lowest input-glow font-body-md text-body-md text-on-surface transition-all duration-200 ${icon ? "pl-10" : "px-3"
+              } ${error
                 ? "border-error focus:ring-error/50"
                 : isAnimating
-                ? "ring-2 ring-primary border-transparent"
-                : "border-outline-variant"
-            } ${className}`}
+                  ? "ring-2 ring-primary border-transparent"
+                  : "border-outline-variant"
+              } ${className}`}
             {...props}
           />
         </div>
