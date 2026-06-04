@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { DashboardLayout } from "../components/layout/DashboardLayout";
 import { KPICard } from "../components/dashboard/KPICard";
 import { TaskChart } from "../components/dashboard/TaskChart";
@@ -13,6 +13,7 @@ import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { MdCalendarMonth, MdDownload, MdCheck } from "react-icons/md";
 import "../i18n";
+import * as Sentry from "@sentry/nextjs";
 
 const DATE_RANGES = ["Last 7 Days", "Last 30 Days", "Last 90 Days", "This Year"];
 
@@ -22,6 +23,10 @@ export default function DashboardHome() {
   const [isRangeOpen, setIsRangeOpen] = useState(false);
   const [exportDone, setExportDone] = useState(false);
   const [taskModalOpen, setTaskModalOpen] = useState(false);
+
+  useEffect(() => {
+    Sentry.logger.info('User triggered test log', { log_source: 'sentry_test' });
+  }, []);
 
   const handleExport = () => {
     setExportDone(true);

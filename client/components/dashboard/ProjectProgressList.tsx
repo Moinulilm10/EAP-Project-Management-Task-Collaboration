@@ -40,7 +40,7 @@ export function ProjectProgressList() {
   ];
 
   return (
-    <Card className="p-md flex flex-col h-full min-h-[350px]">
+    <Card className="p-md flex flex-col h-full min-h-[400px]">
       <div className="flex justify-between items-center mb-md">
         <h3 className="font-title-md text-title-md text-on-surface">
           {t("Active Project Progress")}
@@ -85,9 +85,8 @@ export function ProjectProgressList() {
               </div>
               <div className="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
                 <div
-                  className={`h-full rounded-full transition-all duration-500 ${
-                    project.status === "completed" ? "bg-secondary" : "bg-primary"
-                  }`}
+                  className={`h-full rounded-full transition-all duration-500 ${project.status === "completed" ? "bg-secondary" : "bg-primary"
+                    }`}
                   style={{ width: `${project.progress}%` }}
                 />
               </div>
