@@ -12,7 +12,7 @@
     "emitDecoratorMetadata": true
   },
   "include": [
-    "app.ts",
+    "src/app.ts",
     "**/*.ts"
   ],
   "exclude": [
