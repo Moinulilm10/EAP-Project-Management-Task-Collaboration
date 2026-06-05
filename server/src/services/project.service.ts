@@ -1,3 +1,4 @@
+import { IsNull } from "typeorm";
 import { Project, ProjectStatus } from "../entities/Project.entity";
 import {
   ProjectMember,
@@ -132,7 +133,7 @@ export const projectService = {
 
   async findById(id: string): Promise<Project> {
     const project = await projectRepo().findOne({
-      where: { id, deletedAt: null },
+      where: { id, deletedAt: IsNull() },
       relations: { owner: true, projectMembers: true, tasks: true },
     });
 
@@ -185,7 +186,7 @@ export const projectService = {
     requesterRole: UserRole,
   ): Promise<Project> {
     const project = await projectRepo().findOne({
-      where: { id, deletedAt: null },
+      where: { id, deletedAt: IsNull() },
     });
     if (!project) {
       throw { status: 404, message: "Project not found." };
@@ -225,7 +226,7 @@ export const projectService = {
     requesterRole: UserRole,
   ): Promise<void> {
     const project = await projectRepo().findOne({
-      where: { id, deletedAt: null },
+      where: { id, deletedAt: IsNull() },
     });
     if (!project) {
       throw { status: 404, message: "Project not found." };

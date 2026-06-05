@@ -1,17 +1,25 @@
 import { Response } from "express";
+import { ProjectStatus } from "../entities/Project.entity";
 import { UserRole } from "../entities/User.entity";
 import { AuthenticatedRequest } from "../middleware/auth";
 import { projectService } from "../services/project.service";
 
+const isValidProjectStatus = (
+  value: string | undefined,
+): value is ProjectStatus =>
+  value === "active" || value === "completed" || value === "on_hold";
+
 export const projectController = {
   async getAll(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const filters = {
-        status: req.query.status as string | undefined,
-        search: req.query.search as string | undefined,
-        page: req.query.page ? Number(req.query.page) : undefined,
-        limit: req.query.limit ? Number(req.query.limit) : undefined,
-      };
+      const statusQuery = req.query.status as string | undefined;
+      const filters: import("../services/project.service").ProjectQueryOptions =
+        {
+          status: isValidProjectStatus(statusQuery) ? statusQuery : undefined,
+          search: req.query.search as string | undefined,
+          page: req.query.page ? Number(req.query.page) : undefined,
+          limit: req.query.limit ? Number(req.query.limit) : undefined,
+        };
       const result = await projectService.findAll(filters);
       res.status(200).json(result);
     } catch (error: any) {
