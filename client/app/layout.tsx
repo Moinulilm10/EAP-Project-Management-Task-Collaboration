@@ -11,6 +11,8 @@ export const metadata: Metadata = {
 
 import { ThemeProvider } from "../components/providers/ThemeProvider";
 import { AuthProvider } from "../components/providers/AuthProvider";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function RootLayout({
   children,
@@ -31,6 +33,7 @@ export default function RootLayout({
         <AuthProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             {children}
+            <ToastContainer />
           </ThemeProvider>
         </AuthProvider>
       </body>

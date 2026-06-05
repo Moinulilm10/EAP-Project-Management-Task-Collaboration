@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { FcGoogle } from "react-icons/fc";
 import { MdMail, MdLock, MdBolt } from "react-icons/md";
 import { FormField } from "@/components/ui/FormField";
+import { notification } from "@/utils/notification";
 import { motion, type Variants } from "framer-motion";
 import "../../i18n";
 
@@ -54,9 +55,9 @@ export default function LoginPage() {
     setIsDemoAnimating(false);
 
     if (result?.error) {
-      // Show error handling (using browser alert as placeholder, ideally use toast)
-      alert(result.error || "Login failed");
+      notification.errorToast(result.error || "Login failed");
     } else {
+      notification.successToast(t("Welcome back!"));
       router.push("/dashboard");
     }
   };
@@ -66,23 +67,27 @@ export default function LoginPage() {
     setEmail("");
     setPassword("");
 
+    const demoEmail = process.env.NEXT_PUBLIC_DEMO_EMAIL || "admin@projectflow.com";
+    const demoPassword = process.env.NEXT_PUBLIC_DEMO_PASSWORD || "demo12345";
+
     // Simulate keystrokes/autofill animation
     setTimeout(() => {
-      setEmail("admin@projectflow.com");
+      setEmail(demoEmail);
       setTimeout(() => {
-        setPassword("demo12345");
+        setPassword(demoPassword);
         setTimeout(async () => {
           const result = await signIn("credentials", {
-            email: "admin@projectflow.com",
-            password: "demo12345",
+            email: demoEmail,
+            password: demoPassword,
             redirect: false,
           });
           
           setIsDemoAnimating(false);
           if (result?.ok) {
+            notification.successToast(t("Demo access granted!"));
             router.push("/dashboard");
           } else {
-             alert(result?.error || "Demo login failed");
+             notification.errorToast(result?.error || "Demo login failed");
           }
         }, 500);
       }, 400);
@@ -201,6 +206,7 @@ export default function LoginPage() {
                   icon={<MdLock />}
                   placeholder="••••••••"
                   isAnimating={isDemoAnimating}
+                  showPasswordToggle={true}
                   required
                 />
               </motion.div>

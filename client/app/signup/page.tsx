@@ -9,6 +9,7 @@ import { FcGoogle } from "react-icons/fc";
 import { MdPerson, MdMail, MdLock } from "react-icons/md";
 import { FormField } from "@/components/ui/FormField";
 import { PasswordStrengthIndicator } from "@/components/ui/PasswordStrengthIndicator";
+import { notification } from "@/utils/notification";
 import { motion, type Variants } from "framer-motion";
 import "../../i18n";
 
@@ -60,13 +61,21 @@ export default function SignupPage() {
     e.preventDefault();
     if (password !== confirmPassword) {
       setShowConfirmError(true);
+      notification.errorToast(t("Passwords do not match."));
       return;
     }
-    if (!isPasswordValid) return;
-    if (!agreeTerms) return;
+    if (!isPasswordValid) {
+      notification.errorToast(t("Please choose a stronger password."));
+      return;
+    }
+    if (!agreeTerms) {
+      notification.warningToast(t("Please agree to the Terms of Service."));
+      return;
+    }
 
     // Simulate signup success and route to dashboard (home page)
-    router.push("/");
+    notification.successToast(t("Account created successfully!"));
+    router.push("/login");
   };
 
   const passwordsMatch = password === confirmPassword;
@@ -192,6 +201,7 @@ export default function SignupPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   icon={<MdLock />}
                   placeholder="••••••••"
+                  showPasswordToggle={true}
                   required
                 />
                 <PasswordStrengthIndicator
@@ -210,6 +220,7 @@ export default function SignupPage() {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   icon={<MdLock />}
                   placeholder="••••••••"
+                  showPasswordToggle={true}
                   error={showConfirmError ? t("Passwords do not match.") : undefined}
                   required
                 />
