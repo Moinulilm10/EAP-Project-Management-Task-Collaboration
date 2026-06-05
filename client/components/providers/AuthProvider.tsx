@@ -12,7 +12,6 @@ function SessionHydrator({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (status === "loading") {
-      // Tell our app we're syncing auth state so UI shows loading skeletons
       setLoading(true);
       return;
     }

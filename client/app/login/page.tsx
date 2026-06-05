@@ -276,7 +276,7 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={isDemoAnimating}
-                  className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm font-label-md text-label-md text-on-primary bg-primary hover:bg-on-primary-fixed-variant focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-50 cursor-pointer"
+                  className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm font-label-md text-label-md text-on-primary bg-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-50 cursor-pointer"
                 >
                   {t("Sign In")}
                 </button>
