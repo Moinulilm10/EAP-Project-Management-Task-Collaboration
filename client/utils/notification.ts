@@ -1,23 +1,23 @@
-import Swal from 'sweetalert2';
-import { toast, ToastOptions } from 'react-toastify';
+import { toast, ToastOptions } from "react-toastify";
+import Swal from "sweetalert2";
 
 // Define a unified styled theme matching the modern, premium dark/light HSL scheme
 const swalCustomClass = {
-  popup: 'swal-premium-popup',
-  title: 'swal-premium-title',
-  htmlContainer: 'swal-premium-text',
-  confirmButton: 'swal-premium-btn swal-premium-confirm-btn',
-  cancelButton: 'swal-premium-btn swal-premium-cancel-btn',
+  popup: "swal-premium-popup",
+  title: "swal-premium-title",
+  htmlContainer: "swal-premium-text",
+  confirmButton: "swal-premium-btn swal-premium-confirm-btn",
+  cancelButton: "swal-premium-btn swal-premium-cancel-btn",
 };
 
 const toastConfig: ToastOptions = {
-  position: 'top-right',
+  position: "top-right",
   autoClose: 4000,
   hideProgressBar: false,
   closeOnClick: true,
   pauseOnHover: true,
   draggable: true,
-  theme: 'colored',
+  theme: "colored",
 };
 
 export const notification = {
@@ -26,14 +26,17 @@ export const notification = {
   successToast(message: string) {
     toast.success(message, {
       ...toastConfig,
-      style: { background: 'var(--color-primary, #005fcc)', color: '#ffffff' },
+      style: {
+        background: "var(--color-surface-container-highest, #33353a)",
+        color: "var(--color-on-surface, #e2e2e9)",
+      },
     });
   },
 
   errorToast(message: string) {
     toast.error(message, {
       ...toastConfig,
-      style: { background: 'var(--color-error, #ba1a1a)', color: '#ffffff' },
+      style: { background: "var(--color-error, #ba1a1a)", color: "#ffffff" },
     });
   },
 
@@ -47,45 +50,58 @@ export const notification = {
 
   // ─── Rich Dialogs (SweetAlert2) ───────────────────────────────────────────
 
-  alert(title: string, text: string, icon: 'success' | 'error' | 'warning' | 'info' = 'info') {
+  alert(
+    title: string,
+    text: string,
+    icon: "success" | "error" | "warning" | "info" = "info",
+  ) {
     return Swal.fire({
       title,
       text,
       icon,
       customClass: swalCustomClass,
       buttonsStyling: false,
-      background: 'var(--color-surface-container-lowest, #ffffff)',
-      color: 'var(--color-on-surface, #1a1a1a)',
+      background: "var(--color-surface-container-lowest, #ffffff)",
+      color: "var(--color-on-surface, #1a1a1a)",
     });
   },
 
-  async confirm(title: string, text: string, confirmText = 'Confirm', cancelText = 'Cancel'): Promise<boolean> {
+  async confirm(
+    title: string,
+    text: string,
+    confirmText = "Confirm",
+    cancelText = "Cancel",
+  ): Promise<boolean> {
     const result = await Swal.fire({
       title,
       text,
-      icon: 'warning',
+      icon: "warning",
       showCancelButton: true,
       confirmButtonText: confirmText,
       cancelButtonText: cancelText,
       customClass: swalCustomClass,
       buttonsStyling: false,
-      background: 'var(--color-surface-container-lowest, #ffffff)',
-      color: 'var(--color-on-surface, #1a1a1a)',
+      background: "var(--color-surface-container-lowest, #ffffff)",
+      color: "var(--color-on-surface, #1a1a1a)",
     });
     return result.isConfirmed;
   },
 
-  async prompt(title: string, placeholder: string, defaultValue = ''): Promise<string | null> {
+  async prompt(
+    title: string,
+    placeholder: string,
+    defaultValue = "",
+  ): Promise<string | null> {
     const result = await Swal.fire({
       title,
-      input: 'text',
+      input: "text",
       inputPlaceholder: placeholder,
       inputValue: defaultValue,
       showCancelButton: true,
       customClass: swalCustomClass,
       buttonsStyling: false,
-      background: 'var(--color-surface-container-lowest, #ffffff)',
-      color: 'var(--color-on-surface, #1a1a1a)',
+      background: "var(--color-surface-container-lowest, #ffffff)",
+      color: "var(--color-on-surface, #1a1a1a)",
     });
     return result.isConfirmed ? result.value : null;
   },

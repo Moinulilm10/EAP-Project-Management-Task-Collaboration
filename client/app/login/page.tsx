@@ -32,7 +32,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
-  const [isDemoAnimating, setIsDemoAnimating] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -49,7 +49,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsDemoAnimating(true);
+    setIsSubmitting(true);
 
     const result = await signIn("credentials", {
       email,
@@ -57,9 +57,8 @@ export default function LoginPage() {
       redirect: false,
     });
 
-    setIsDemoAnimating(false);
-
     if (result?.error) {
+      setIsSubmitting(false);
       notification.errorToast(result.error || "Login failed");
     } else {
       notification.successToast(t("Welcome back!"));
@@ -68,7 +67,7 @@ export default function LoginPage() {
   };
 
   const handleDemoLogin = () => {
-    setIsDemoAnimating(true);
+    setIsSubmitting(true);
     setEmail("");
     setPassword("");
 
@@ -88,7 +87,7 @@ export default function LoginPage() {
             redirect: false,
           });
 
-          setIsDemoAnimating(false);
+          setIsSubmitting(false);
           if (result?.ok) {
             notification.successToast(t("Demo access granted!"));
             router.push("/dashboard");
@@ -101,6 +100,7 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = () => {
+    setIsSubmitting(true);
     signIn("google", { callbackUrl: "/dashboard" });
   };
 
@@ -180,6 +180,23 @@ export default function LoginPage() {
 
         {/* Right Side: Login Form */}
         <section className="w-full md:w-1/2 p-6 md:p-12 lg:p-16 flex flex-col justify-center relative bg-surface-container-lowest">
+          {isSubmitting ? (
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-surface-container-high/95 backdrop-blur-sm">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/15 ring-1 ring-primary/30">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary/70 border-t-transparent" />
+              </div>
+              <div className="text-center">
+                <p className="font-headline-sm text-headline-sm text-on-surface font-semibold">
+                  {t("Signing in...")}
+                </p>
+                <p className="mt-2 text-sm text-on-surface-variant">
+                  {t(
+                    "Please wait while we securely redirect you to your dashboard.",
+                  )}
+                </p>
+              </div>
+            </div>
+          ) : null}
           <div className="md:hidden flex items-center gap-2 mb-8">
             <Image
               src={logoSrc}
@@ -221,7 +238,7 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   icon={<MdMail />}
                   placeholder="name@company.com"
-                  isAnimating={isDemoAnimating}
+                  isAnimating={isSubmitting}
                   required
                 />
               </motion.div>
@@ -236,7 +253,7 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   icon={<MdLock />}
                   placeholder="••••••••"
-                  isAnimating={isDemoAnimating}
+                  isAnimating={isSubmitting}
                   showPasswordToggle={true}
                   required
                 />
@@ -275,7 +292,7 @@ export default function LoginPage() {
               <motion.div variants={itemVariants} className="pt-4 space-y-4">
                 <button
                   type="submit"
-                  disabled={isDemoAnimating}
+                  disabled={isSubmitting}
                   className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm font-label-md text-label-md text-on-primary bg-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-50 cursor-pointer"
                 >
                   {t("Sign In")}
@@ -295,7 +312,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={handleDemoLogin}
-                  disabled={isDemoAnimating}
+                  disabled={isSubmitting}
                   className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-outline-variant rounded-lg bg-surface-container-lowest font-label-md text-label-md text-on-surface hover:bg-surface-container-low transition-all duration-200 group disabled:opacity-50 cursor-pointer"
                   id="demoLoginBtn"
                 >
@@ -306,7 +323,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={handleGoogleLogin}
-                  disabled={isDemoAnimating}
+                  disabled={isSubmitting}
                   className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-outline-variant rounded-lg bg-surface-container-lowest font-label-md text-label-md text-on-surface hover:bg-surface-container-low transition-all duration-200 group disabled:opacity-50 cursor-pointer"
                   id="googleLoginBtn"
                 >
