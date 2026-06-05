@@ -187,7 +187,14 @@ export default function ProjectsPage() {
             <div className="flex justify-between gap-4">
               <span>{t("Project load")}</span>
               <strong className="text-on-surface">
-                {loading ? t("Refreshing...") : `${uiProjects.length}`}
+                {loading ? (
+                  <span className="inline-flex items-center gap-2">
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
+                    <span>{t("Loading")}</span>
+                  </span>
+                ) : (
+                  `${uiProjects.length}`
+                )}
               </strong>
             </div>
           </div>
