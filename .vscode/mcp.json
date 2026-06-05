@@ -2,9 +2,14 @@
   "servers": {
     "postman": {
       "command": "npx",
-      "args": ["-y", "@postman/postman-mcp-server", "--tools", "minimal"],
+      "args": [
+        "-y",
+        "@postman/postman-mcp-server",
+        "--tools",
+        "minimal"
+      ],
       "env": {
-        "POSTMAN_API_KEY": "${POSTMAN_API_KEY}"
+        "POSTMAN_API_KEY": "process.env.POSTMAN_API_KEY"
       }
     }
   }
