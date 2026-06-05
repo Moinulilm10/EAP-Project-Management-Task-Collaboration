@@ -38,34 +38,44 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 require("./instrument"); // must be first
 const express_1 = __importDefault(require("express"));
-const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const data_source_1 = require("./utils/data-source");
 const Sentry = __importStar(require("@sentry/node"));
+const security_1 = require("./middleware/security");
+const rateLimiter_1 = require("./middleware/rateLimiter");
+const routes_1 = __importDefault(require("./routes"));
 // Load environment variables
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 5001;
-// Middleware
-app.use((0, cors_1.default)());
+// Apply Security Middleware (Helmet, CORS, CookieParser)
+(0, security_1.applySecurityMiddleware)(app);
+// General rate limiter for all non-auth routes (auth routes have their own)
+app.use(rateLimiter_1.generalRateLimiter);
+// Body parsing middleware
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
 // Basic route
 app.get('/', (req, res) => {
     res.json({ message: 'Welcome to the Task Collaboration API' });
 });
+// API v1 Routes
+app.use('/api/v1', routes_1.default);
 // Sentry error handler must be registered after all routes
 Sentry.setupExpressErrorHandler(app);
 // Initialize Database Connection first, then start Express
-data_source_1.AppDataSource.initialize()
-    .then(() => {
-    console.log('Successfully connected to Neon PostgreSQL DB!');
-    // Start server only after database is ready
-    app.listen(PORT, () => {
-        console.log(`Server is running on http://localhost:${PORT}`);
+if (process.env.NODE_ENV !== 'test') {
+    data_source_1.AppDataSource.initialize()
+        .then(() => {
+        console.log('Successfully connected to Neon PostgreSQL DB!');
+        // Start server only after database is ready
+        app.listen(PORT, () => {
+            console.log(`Server is running on http://localhost:${PORT}`);
+        });
+    })
+        .catch((error) => {
+        console.error('Error during Data Source initialization:', error);
+        process.exit(1); // Stop the server if database connection fails
     });
-})
-    .catch((error) => {
-    console.error('Error during Data Source initialization:', error);
-    process.exit(1); // Stop the server if database connection fails
-});
+}
+exports.default = app;

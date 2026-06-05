@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import Image from "next/image";
 import { useTheme } from "next-themes";
 import { useTranslation } from "react-i18next";
@@ -40,10 +41,24 @@ export default function LoginPage() {
     ? "/img/logo-dark-mode.png"
     : "/img/logo-light-mode.png";
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate authentication and route to dashboard (home page)
-    router.push("/");
+    setIsDemoAnimating(true);
+    
+    const result = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
+
+    setIsDemoAnimating(false);
+
+    if (result?.error) {
+      // Show error handling (using browser alert as placeholder, ideally use toast)
+      alert(result.error || "Login failed");
+    } else {
+      router.push("/dashboard");
+    }
   };
 
   const handleDemoLogin = () => {
@@ -56,12 +71,26 @@ export default function LoginPage() {
       setEmail("admin@projectflow.com");
       setTimeout(() => {
         setPassword("demo12345");
-        setTimeout(() => {
+        setTimeout(async () => {
+          const result = await signIn("credentials", {
+            email: "admin@projectflow.com",
+            password: "demo12345",
+            redirect: false,
+          });
+          
           setIsDemoAnimating(false);
-          router.push("/");
+          if (result?.ok) {
+            router.push("/dashboard");
+          } else {
+             alert(result?.error || "Demo login failed");
+          }
         }, 500);
       }, 400);
     }, 300);
+  };
+
+  const handleGoogleLogin = () => {
+    signIn("google", { callbackUrl: "/dashboard" });
   };
 
   return (
@@ -230,7 +259,7 @@ export default function LoginPage() {
 
                 <button
                   type="button"
-                  onClick={() => router.push("/")}
+                  onClick={handleGoogleLogin}
                   disabled={isDemoAnimating}
                   className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-outline-variant rounded-lg bg-surface-container-lowest font-label-md text-label-md text-on-surface hover:bg-surface-container-low transition-all duration-200 group disabled:opacity-50 cursor-pointer"
                   id="googleLoginBtn"
