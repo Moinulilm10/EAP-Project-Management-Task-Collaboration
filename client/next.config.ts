@@ -19,8 +19,8 @@ const nextConfig: NextConfig = {
 };
 
 export default withSentryConfig(nextConfig, {
-  org: "eap-project-management-task-c", // Replace with your Sentry org slug if needed
-  project: "javascript-nextjs",         // Replace with your Sentry project slug if needed
+  org: "eap-project-management-task-c",
+  project: "javascript-nextjs",
   widenClientFileUpload: true,
   tunnelRoute: "/monitoring",
   silent: !process.env.CI,
