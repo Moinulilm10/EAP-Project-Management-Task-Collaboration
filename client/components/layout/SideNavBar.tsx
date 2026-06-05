@@ -7,6 +7,8 @@ import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import { Button } from "../ui/Button";
 import { useTranslation } from "react-i18next";
+import { useAuthStore } from "@/stores/authStore";
+import { signOut } from "next-auth/react";
 import {
   MdClose,
   MdOutlineDashboard,
@@ -32,8 +34,16 @@ export function SideNavBar({ isOpen = false, onClose }: SideNavBarProps) {
   const pathname = usePathname();
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const { clearAuth } = useAuthStore();
 
   useEffect(() => setMounted(true), []);
+
+  const handleLogout = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (onClose) onClose();
+    clearAuth();
+    await signOut({ callbackUrl: "/login" });
+  };
 
   // Helper to check if a route is active
   const isActive = (path: string) => {
@@ -132,13 +142,13 @@ export function SideNavBar({ isOpen = false, onClose }: SideNavBarProps) {
           <MdHelpOutline className="w-[18px] h-[18px]" />
           {t("Help Center")}
         </Link>
-        <Link
-          href="/login"
-          className="flex items-center gap-sm px-sm py-xs text-secondary hover:text-error transition-colors duration-200 font-label-md text-label-md cursor-pointer"
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-sm px-sm py-xs text-secondary hover:text-error transition-colors duration-200 font-label-md text-label-md cursor-pointer text-left focus:outline-none"
         >
           <MdLogout className="w-[18px] h-[18px]" />
           {t("Log Out")}
-        </Link>
+        </button>
       </div>
     </aside>
   );

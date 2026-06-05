@@ -5,6 +5,7 @@ export interface User {
   email: string;
   name: string;
   role: 'admin' | 'project_manager' | 'team_member';
+  image?: string | null;
 }
 
 interface AuthState {
@@ -36,6 +37,7 @@ export const useAuthStore = create<AuthState>((set) => ({
           email: session.user.email,
           name: session.user.name,
           role: session.user.role,
+          image: session.user.image || null,
         },
         isAuthenticated: true,
         isLoading: false,
