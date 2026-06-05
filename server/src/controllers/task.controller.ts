@@ -1,12 +1,19 @@
 import { Response } from 'express';
 import { AuthenticatedRequest } from '../middleware/auth';
 import { taskService } from '../services/task.service';
-import { UserRole } from '../entities/User.entity';
+import { ProjectMember, ProjectMemberRole } from '../entities/ProjectMember.entity';
+import { AppDataSource } from '../utils/data-source';
+
+const memberRepo = () => AppDataSource.getRepository(ProjectMember);
 
 export const taskController = {
   async getAll(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const tasks = await taskService.findAll(req.user!.id, req.user!.role);
+      if (!req.user) {
+        res.status(401).json({ error: 'Authentication required.' });
+        return;
+      }
+      const tasks = await taskService.findAll(req.user.id);
       res.status(200).json({ tasks });
     } catch (error: any) {
       res.status(error.status || 500).json({ error: error.message || 'Failed to fetch tasks.' });
@@ -15,7 +22,22 @@ export const taskController = {
 
   async getById(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
+      if (!req.user) {
+        res.status(401).json({ error: 'Authentication required.' });
+        return;
+      }
       const task = await taskService.findById(req.params.id as string);
+
+      // Check if user is a member of the project
+      const isMember = await memberRepo().count({
+        where: { projectId: task.projectId, userId: req.user.id }
+      });
+
+      if (!isMember) {
+        res.status(403).json({ error: 'Forbidden', message: 'You are not a member of this project.' });
+        return;
+      }
+
       res.status(200).json({ task });
     } catch (error: any) {
       res.status(error.status || 500).json({ error: error.message || 'Failed to fetch task.' });
@@ -24,9 +46,32 @@ export const taskController = {
 
   async create(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
+      if (!req.user) {
+        res.status(401).json({ error: 'Authentication required.' });
+        return;
+      }
+
+      const { projectId } = req.body;
+      if (!projectId) {
+        res.status(400).json({ error: 'Project ID is required.' });
+        return;
+      }
+
+      const membership = await memberRepo().findOne({
+        where: { projectId, userId: req.user.id }
+      });
+
+      if (!membership || (membership.role !== ProjectMemberRole.ADMIN && membership.role !== ProjectMemberRole.PROJECT_MANAGER)) {
+        res.status(403).json({
+          error: 'Forbidden',
+          message: 'Only project admins and project managers can create tasks.',
+        });
+        return;
+      }
+
       const task = await taskService.create({
         ...req.body,
-        createdById: req.user!.id,
+        createdById: req.user.id,
       });
       res.status(201).json({ task });
     } catch (error: any) {
@@ -34,28 +79,39 @@ export const taskController = {
     }
   },
 
-  /**
-   * Update endpoint with role-aware logic:
-   * - Admin/PM: Full field update
-   * - Team Member: Status-only update (enforced at service layer)
-   */
   async update(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      let task;
+      if (!req.user) {
+        res.status(401).json({ error: 'Authentication required.' });
+        return;
+      }
 
-      if (req.user!.role === UserRole.TEAM_MEMBER) {
+      const taskId = req.params.id as string;
+      const task = await taskService.findById(taskId);
+
+      const membership = await memberRepo().findOne({
+        where: { projectId: task.projectId, userId: req.user.id }
+      });
+
+      if (!membership) {
+        res.status(403).json({ error: 'Forbidden', message: 'You are not a member of this project.' });
+        return;
+      }
+
+      let updatedTask;
+      if (membership.role === ProjectMemberRole.TEAM_MEMBER) {
         // Team member: status-only update with ownership verification
-        task = await taskService.updateStatus(
-          req.params.id as string,
+        updatedTask = await taskService.updateStatus(
+          taskId,
           req.body.status,
-          req.user!.id
+          req.user.id
         );
       } else {
         // Admin/PM: full update
-        task = await taskService.update(req.params.id as string, req.body);
+        updatedTask = await taskService.update(taskId, req.body);
       }
 
-      res.status(200).json({ task });
+      res.status(200).json({ task: updatedTask });
     } catch (error: any) {
       res.status(error.status || 500).json({ error: error.message || 'Failed to update task.' });
     }
@@ -63,7 +119,27 @@ export const taskController = {
 
   async delete(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      await taskService.delete(req.params.id as string);
+      if (!req.user) {
+        res.status(401).json({ error: 'Authentication required.' });
+        return;
+      }
+
+      const taskId = req.params.id as string;
+      const task = await taskService.findById(taskId);
+
+      const membership = await memberRepo().findOne({
+        where: { projectId: task.projectId, userId: req.user.id }
+      });
+
+      if (!membership || (membership.role !== ProjectMemberRole.ADMIN && membership.role !== ProjectMemberRole.PROJECT_MANAGER)) {
+        res.status(403).json({
+          error: 'Forbidden',
+          message: 'Only project admins and project managers can delete tasks.',
+        });
+        return;
+      }
+
+      await taskService.delete(taskId);
       res.status(200).json({ message: 'Task deleted successfully.' });
     } catch (error: any) {
       res.status(error.status || 500).json({ error: error.message || 'Failed to delete task.' });

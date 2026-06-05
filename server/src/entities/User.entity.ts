@@ -10,12 +10,6 @@ import {
 import { ProjectMember } from "./ProjectMember.entity";
 import { RefreshToken } from "./RefreshToken.entity";
 
-export enum UserRole {
-  ADMIN = "admin",
-  PROJECT_MANAGER = "project_manager",
-  TEAM_MEMBER = "team_member",
-}
-
 export enum AuthProvider {
   CREDENTIALS = "credentials",
   GOOGLE = "google",
@@ -35,13 +29,6 @@ export class User {
 
   @Column({ type: "varchar", length: 100 })
   name!: string;
-
-  @Column({
-    type: "enum",
-    enum: UserRole,
-    default: UserRole.TEAM_MEMBER,
-  })
-  role!: UserRole;
 
   @Column({
     type: "enum",

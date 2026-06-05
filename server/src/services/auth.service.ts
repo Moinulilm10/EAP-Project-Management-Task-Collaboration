@@ -1,14 +1,14 @@
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import crypto from 'crypto';
-import { v4 as uuidv4 } from 'uuid';
-import { AppDataSource } from '../utils/data-source';
-import { User, UserRole, AuthProvider } from '../entities/User.entity';
-import { RefreshToken } from '../entities/RefreshToken.entity';
-import { logger } from '../utils/logger';
+import bcrypt from "bcryptjs";
+import crypto from "crypto";
+import jwt from "jsonwebtoken";
+import { v4 as uuidv4 } from "uuid";
+import { RefreshToken } from "../entities/RefreshToken.entity";
+import { AuthProvider, User } from "../entities/User.entity";
+import { AppDataSource } from "../utils/data-source";
+import { logger } from "../utils/logger";
 
 const BCRYPT_ROUNDS = 12;
-const ACCESS_TOKEN_EXPIRY = '15m';
+const ACCESS_TOKEN_EXPIRY = "15m";
 const REFRESH_TOKEN_EXPIRY_DAYS = 7;
 
 interface TokenPair {
@@ -20,29 +20,28 @@ interface UserProfile {
   id: string;
   email: string;
   name: string;
-  role: UserRole;
   provider: AuthProvider;
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 function hashToken(token: string): string {
-  return crypto.createHash('sha256').update(token).digest('hex');
+  return crypto.createHash("sha256").update(token).digest("hex");
 }
 
-function generateAccessToken(user: { id: string; email: string; role: UserRole }): string {
+function generateAccessToken(user: { id: string; email: string }): string {
   return jwt.sign(
-    { id: user.id, email: user.email, role: user.role },
+    { id: user.id, email: user.email },
     process.env.ACCESS_TOKEN_SECRET as string,
-    { expiresIn: ACCESS_TOKEN_EXPIRY }
+    { expiresIn: ACCESS_TOKEN_EXPIRY },
   );
 }
 
 async function generateRefreshToken(
   userId: string,
-  family?: string
+  family?: string,
 ): Promise<{ rawToken: string; entity: RefreshToken }> {
-  const rawToken = uuidv4() + '.' + crypto.randomBytes(32).toString('hex');
+  const rawToken = uuidv4() + "." + crypto.randomBytes(32).toString("hex");
   const tokenHash = hashToken(rawToken);
   const tokenFamily = family || uuidv4();
 
@@ -51,7 +50,9 @@ async function generateRefreshToken(
     tokenHash,
     userId,
     family: tokenFamily,
-    expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000),
+    expiresAt: new Date(
+      Date.now() + REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000,
+    ),
     isRevoked: false,
   });
   await repo.save(entity);
@@ -70,7 +71,6 @@ function toProfile(user: User): UserProfile {
     id: user.id,
     email: user.email,
     name: user.name,
-    role: user.role,
     provider: user.provider,
   };
 }
@@ -88,9 +88,11 @@ export const authService = {
   }): Promise<{ tokens: TokenPair; user: UserProfile }> {
     const userRepo = AppDataSource.getRepository(User);
 
-    const existingUser = await userRepo.findOne({ where: { email: data.email } });
+    const existingUser = await userRepo.findOne({
+      where: { email: data.email },
+    });
     if (existingUser) {
-      throw { status: 409, message: 'A user with this email already exists.' };
+      throw { status: 409, message: "A user with this email already exists." };
     }
 
     const passwordHash = await bcrypt.hash(data.password, BCRYPT_ROUNDS);
@@ -99,7 +101,6 @@ export const authService = {
       email: data.email,
       passwordHash,
       name: data.name,
-      role: UserRole.TEAM_MEMBER,
       provider: AuthProvider.CREDENTIALS,
     });
     await userRepo.save(user);
@@ -119,22 +120,22 @@ export const authService = {
    */
   async login(
     email: string,
-    password: string
+    password: string,
   ): Promise<{ tokens: TokenPair; user: UserProfile }> {
     const userRepo = AppDataSource.getRepository(User);
 
     const user = await userRepo.findOne({ where: { email } });
     if (!user || !user.passwordHash) {
-      throw { status: 401, message: 'Invalid email or password.' };
+      throw { status: 401, message: "Invalid email or password." };
     }
 
     if (!user.isActive) {
-      throw { status: 403, message: 'Account is deactivated.' };
+      throw { status: 403, message: "Account is deactivated." };
     }
 
     const isValid = await bcrypt.compare(password, user.passwordHash);
     if (!isValid) {
-      throw { status: 401, message: 'Invalid email or password.' };
+      throw { status: 401, message: "Invalid email or password." };
     }
 
     const accessToken = generateAccessToken(user);
@@ -161,7 +162,7 @@ export const authService = {
     const storedToken = await repo.findOne({ where: { tokenHash } });
 
     if (!storedToken) {
-      throw { status: 401, message: 'Invalid refresh token.' };
+      throw { status: 401, message: "Invalid refresh token." };
     }
 
     // Reuse detection: if token is already revoked, someone stole the old token
@@ -169,7 +170,8 @@ export const authService = {
       await revokeTokenFamily(storedToken.family);
       throw {
         status: 401,
-        message: 'Refresh token reuse detected. All sessions revoked for security.',
+        message:
+          "Refresh token reuse detected. All sessions revoked for security.",
       };
     }
 
@@ -177,7 +179,7 @@ export const authService = {
     if (new Date() > storedToken.expiresAt) {
       storedToken.isRevoked = true;
       await repo.save(storedToken);
-      throw { status: 401, message: 'Refresh token expired.' };
+      throw { status: 401, message: "Refresh token expired." };
     }
 
     // Revoke current token
@@ -186,7 +188,7 @@ export const authService = {
     const user = await userRepo.findOne({ where: { id: storedToken.userId } });
     if (!user || !user.isActive) {
       await revokeTokenFamily(storedToken.family);
-      throw { status: 401, message: 'User account not found or deactivated.' };
+      throw { status: 401, message: "User account not found or deactivated." };
     }
 
     // Generate new pair in the same family
@@ -213,7 +215,7 @@ export const authService = {
     if (storedToken) {
       await revokeTokenFamily(storedToken.family);
     }
-    logger.info('User logged out, token family revoked');
+    logger.info("User logged out, token family revoked");
   },
 
   /**
@@ -228,7 +230,9 @@ export const authService = {
     const userRepo = AppDataSource.getRepository(User);
 
     // Try to find by googleId first
-    let user = await userRepo.findOne({ where: { googleId: profile.googleId } });
+    let user = await userRepo.findOne({
+      where: { googleId: profile.googleId },
+    });
 
     if (!user) {
       // Try to find by email (link accounts)
@@ -244,7 +248,6 @@ export const authService = {
           name: profile.name,
           googleId: profile.googleId,
           provider: AuthProvider.GOOGLE,
-          role: UserRole.TEAM_MEMBER,
           passwordHash: null,
         });
         await userRepo.save(user);
@@ -252,7 +255,7 @@ export const authService = {
     }
 
     if (!user.isActive) {
-      throw { status: 403, message: 'Account is deactivated.' };
+      throw { status: 403, message: "Account is deactivated." };
     }
 
     const accessToken = generateAccessToken(user);
@@ -272,7 +275,7 @@ export const authService = {
     const userRepo = AppDataSource.getRepository(User);
     const user = await userRepo.findOne({ where: { id: userId } });
     if (!user) {
-      throw { status: 404, message: 'User not found.' };
+      throw { status: 404, message: "User not found." };
     }
     return toProfile(user);
   },

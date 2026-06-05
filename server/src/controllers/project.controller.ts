@@ -1,6 +1,5 @@
 import { Response } from "express";
 import { ProjectStatus } from "../entities/Project.entity";
-import { UserRole } from "../entities/User.entity";
 import { AuthenticatedRequest } from "../middleware/auth";
 import { projectService } from "../services/project.service";
 
@@ -69,11 +68,15 @@ export const projectController = {
 
   async update(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
+      if (!req.user) {
+        res.status(401).json({ error: "Authentication required." });
+        return;
+      }
+
       const project = await projectService.update(
         req.params.id as string,
         req.body,
-        req.user!.id,
-        req.user!.role as UserRole,
+        req.user.id,
       );
       res.status(200).json({ project });
     } catch (error: any) {
@@ -85,11 +88,12 @@ export const projectController = {
 
   async delete(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      await projectService.delete(
-        req.params.id as string,
-        req.user!.id,
-        req.user!.role as UserRole,
-      );
+      if (!req.user) {
+        res.status(401).json({ error: "Authentication required." });
+        return;
+      }
+
+      await projectService.delete(req.params.id as string, req.user.id);
       res.status(200).json({ message: "Project deleted successfully." });
     } catch (error: any) {
       res

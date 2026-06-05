@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { authService } from '../../services/auth.service';
 import { AppDataSource } from '../../utils/data-source';
 import bcrypt from 'bcryptjs';
-import { UserRole, AuthProvider } from '../../entities/User.entity';
+import { AuthProvider } from '../../entities/User.entity';
 
 process.env.ACCESS_TOKEN_SECRET = 'test-secret-key-for-jwt-signing';
 
@@ -63,7 +63,6 @@ describe('authService', () => {
         id: 'user-1',
         email: data.email,
         name: data.name,
-        role: UserRole.TEAM_MEMBER,
         provider: AuthProvider.CREDENTIALS,
       });
     });

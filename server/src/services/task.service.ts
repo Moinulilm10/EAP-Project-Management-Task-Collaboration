@@ -1,24 +1,26 @@
 import { AppDataSource } from '../utils/data-source';
 import { Task, TaskStatus, TaskPriority } from '../entities/Task.entity';
-import { UserRole } from '../entities/User.entity';
+import { ProjectMemberRole } from '../entities/ProjectMember.entity';
 
 const repo = () => AppDataSource.getRepository(Task);
 
 export const taskService = {
-  async findAll(userId: string, userRole: UserRole): Promise<Task[]> {
-    const qb = repo()
+  async findAll(userId: string): Promise<Task[]> {
+    return repo()
       .createQueryBuilder('task')
       .leftJoinAndSelect('task.assignee', 'assignee')
       .leftJoinAndSelect('task.createdBy', 'createdBy')
-      .leftJoinAndSelect('task.project', 'project')
-      .orderBy('task.createdAt', 'DESC');
-
-    // Team members only see tasks assigned to them
-    if (userRole === UserRole.TEAM_MEMBER) {
-      qb.where('task.assigneeId = :userId', { userId });
-    }
-
-    return qb.getMany();
+      .innerJoinAndSelect('task.project', 'project')
+      .innerJoin('project.projectMembers', 'pm', 'pm.userId = :userId', { userId })
+      .where(
+        '(pm.role IN (:...allAccessRoles) OR task.assigneeId = :userId)',
+        {
+          userId,
+          allAccessRoles: [ProjectMemberRole.ADMIN, ProjectMemberRole.PROJECT_MANAGER],
+        }
+      )
+      .orderBy('task.createdAt', 'DESC')
+      .getMany();
   },
 
   async findById(id: string): Promise<Task> {

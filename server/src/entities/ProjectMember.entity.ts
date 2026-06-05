@@ -12,7 +12,8 @@ import { User } from "./User.entity";
 
 export enum ProjectMemberRole {
   ADMIN = "admin",
-  MEMBER = "member",
+  PROJECT_MANAGER = "project_manager",
+  TEAM_MEMBER = "team_member",
 }
 
 @Entity("project_members")
@@ -32,7 +33,7 @@ export class ProjectMember {
   @Column({
     type: "enum",
     enum: ProjectMemberRole,
-    default: ProjectMemberRole.MEMBER,
+    default: ProjectMemberRole.TEAM_MEMBER,
   })
   role!: ProjectMemberRole;
 
@@ -48,3 +49,13 @@ export class ProjectMember {
   @JoinColumn({ name: "userId" })
   user!: User;
 }
+
+/**
+ * Role hierarchy for project members.
+ * Higher values = more permissions.
+ */
+export const ProjectMemberRoleHierarchy: Record<ProjectMemberRole, number> = {
+  [ProjectMemberRole.ADMIN]: 3,
+  [ProjectMemberRole.PROJECT_MANAGER]: 2,
+  [ProjectMemberRole.TEAM_MEMBER]: 1,
+};

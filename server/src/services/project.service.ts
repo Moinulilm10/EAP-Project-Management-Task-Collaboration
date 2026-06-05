@@ -4,7 +4,6 @@ import {
   ProjectMember,
   ProjectMemberRole,
 } from "../entities/ProjectMember.entity";
-import { UserRole } from "../entities/User.entity";
 import { AppDataSource } from "../utils/data-source";
 
 const projectRepo = () => AppDataSource.getRepository(Project);
@@ -34,6 +33,7 @@ export interface ProjectSummary {
     email: string;
   };
   memberCount: number;
+  currentUserRole?: ProjectMemberRole;
 }
 
 export interface ProjectPaginationResponse {
@@ -49,6 +49,12 @@ export const projectService = {
       .createQueryBuilder("project")
       .leftJoin("project.owner", "owner")
       .leftJoin("project.projectMembers", "member")
+      .leftJoin(
+        "project.projectMembers",
+        "currentUserMember",
+        "currentUserMember.userId = :requestingUserId",
+        { requestingUserId: filters.userId || "" }
+      )
       .where("project.deletedAt IS NULL")
       .andWhere("owner.id IS NOT NULL");
 
@@ -57,7 +63,7 @@ export const projectService = {
       if (filters.admin) {
         query.andWhere(
           "(owner.id = :userId OR (member.userId = :userId AND member.role = 'admin'))",
-          { userId: filters.userId }
+          { userId: filters.userId },
         );
       } else {
         query.andWhere("(owner.id = :userId OR member.userId = :userId)", {
@@ -91,10 +97,12 @@ export const projectService = {
         "owner.id",
         "owner.name",
         "owner.email",
+        "currentUserMember.role",
       ])
       .addSelect("COUNT(member.id)", "memberCount")
       .groupBy("project.id")
       .addGroupBy("owner.id")
+      .addGroupBy("currentUserMember.role")
       .orderBy("project.createdAt", "DESC");
 
     // Optimized total count (distinct projects matching filters)
@@ -109,7 +117,7 @@ export const projectService = {
       if (filters.admin) {
         countQuery.andWhere(
           "(owner.id = :userId OR (member.userId = :userId AND member.role = 'admin'))",
-          { userId: filters.userId }
+          { userId: filters.userId },
         );
       } else {
         countQuery.andWhere("(owner.id = :userId OR member.userId = :userId)", {
@@ -163,6 +171,7 @@ export const projectService = {
           email: row.owner_email,
         },
         memberCount: Number(row.memberCount) || 0,
+        currentUserRole: row.currentUserMember_role || undefined,
       })),
       total,
     };
@@ -220,7 +229,6 @@ export const projectService = {
       progress: number;
     }>,
     requesterId: string,
-    requesterRole: UserRole,
   ): Promise<Project> {
     const project = await projectRepo().findOne({
       where: { id, deletedAt: IsNull() },
@@ -229,21 +237,20 @@ export const projectService = {
       throw { status: 404, message: "Project not found." };
     }
 
-    if (requesterRole !== UserRole.ADMIN) {
-      const isAdmin = await memberRepo().count({
-        where: {
-          projectId: project.id,
-          userId: requesterId,
-          role: ProjectMemberRole.ADMIN,
-        },
-      });
+    // Only project admin can update
+    const isAdmin = await memberRepo().count({
+      where: {
+        projectId: project.id,
+        userId: requesterId,
+        role: ProjectMemberRole.ADMIN,
+      },
+    });
 
-      if (!isAdmin) {
-        throw {
-          status: 403,
-          message: "Project update requires project admin membership.",
-        };
-      }
+    if (!isAdmin) {
+      throw {
+        status: 403,
+        message: "Project update requires project admin membership.",
+      };
     }
 
     if (data.name !== undefined) project.name = data.name;
@@ -257,11 +264,7 @@ export const projectService = {
     return projectRepo().save(project);
   },
 
-  async delete(
-    id: string,
-    requesterId: string,
-    requesterRole: UserRole,
-  ): Promise<void> {
+  async delete(id: string, requesterId: string): Promise<void> {
     const project = await projectRepo().findOne({
       where: { id, deletedAt: IsNull() },
     });
@@ -269,21 +272,20 @@ export const projectService = {
       throw { status: 404, message: "Project not found." };
     }
 
-    if (requesterRole !== UserRole.ADMIN) {
-      const isAdmin = await memberRepo().count({
-        where: {
-          projectId: project.id,
-          userId: requesterId,
-          role: ProjectMemberRole.ADMIN,
-        },
-      });
+    // Only project admin can delete
+    const isAdmin = await memberRepo().count({
+      where: {
+        projectId: project.id,
+        userId: requesterId,
+        role: ProjectMemberRole.ADMIN,
+      },
+    });
 
-      if (!isAdmin) {
-        throw {
-          status: 403,
-          message: "Project deletion requires project admin membership.",
-        };
-      }
+    if (!isAdmin) {
+      throw {
+        status: 403,
+        message: "Project deletion requires project admin membership.",
+      };
     }
 
     project.deletedAt = new Date();
