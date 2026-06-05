@@ -1,28 +1,28 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { usePathname } from "next/navigation";
-import { useTheme } from "next-themes";
-import { Button } from "../ui/Button";
-import { useTranslation } from "react-i18next";
 import { useAuthStore } from "@/stores/authStore";
 import { signOut } from "next-auth/react";
+import { useTheme } from "next-themes";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
-  MdClose,
-  MdOutlineDashboard,
-  MdDashboard,
-  MdOutlineFolder,
-  MdFolder,
-  MdAssignment,
-  MdGroup,
   MdAnalytics,
-  MdSettings,
+  MdAssignment,
+  MdClose,
+  MdDashboard,
+  MdFolder,
+  MdGroup,
   MdHelpOutline,
   MdLogout,
+  MdOutlineDashboard,
+  MdOutlineFolder,
+  MdSettings,
 } from "react-icons/md";
 import "../../i18n";
+import { Button } from "../ui/Button";
 
 interface SideNavBarProps {
   isOpen?: boolean;
@@ -34,15 +34,26 @@ export function SideNavBar({ isOpen = false, onClose }: SideNavBarProps) {
   const pathname = usePathname();
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const { clearAuth } = useAuthStore();
+  const router = useRouter();
+  const { clearAuth, setLoading } = useAuthStore();
 
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    let raf = 0 as number;
+    raf = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(raf);
+  }, []);
 
   const handleLogout = async (e: React.MouseEvent) => {
     e.preventDefault();
     if (onClose) onClose();
+
+    // Show app loading state to avoid white flash
+    setLoading(true);
+
+    // Client-side signOut (no full reload) then navigate
+    await signOut({ redirect: false });
     clearAuth();
-    await signOut({ callbackUrl: "/login" });
+    router.push("/login");
   };
 
   // Helper to check if a route is active
@@ -54,21 +65,24 @@ export function SideNavBar({ isOpen = false, onClose }: SideNavBarProps) {
   };
 
   const getLinkClass = (path: string) => {
-    const base = "flex items-center gap-sm px-sm py-sm rounded-xl font-label-md text-label-md transition-all duration-300";
+    const base =
+      "flex items-center gap-sm px-sm py-sm rounded-xl font-label-md text-label-md transition-all duration-300";
     if (isActive(path)) {
       return `${base} bg-primary-container/20 text-primary font-bold`;
     }
     return `${base} text-secondary hover:text-primary hover:bg-surface-container-high/50`;
   };
 
-  const logoSrc = mounted && resolvedTheme === "dark"
-    ? "/img/logo-dark-mode.png"
-    : "/img/logo-light-mode.png";
+  const logoSrc =
+    mounted && resolvedTheme === "dark"
+      ? "/img/logo-dark-mode.png"
+      : "/img/logo-light-mode.png";
 
   return (
     <aside
-      className={`fixed top-0 bottom-0 left-0 z-50 flex h-screen w-72 flex-col border-r border-outline-variant/30 bg-surface-container-lowest/90 backdrop-blur-xl py-base px-sm shadow-sm transition-transform duration-300 md:translate-x-0 ${isOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+      className={`fixed top-0 bottom-0 left-0 z-50 flex h-screen w-72 flex-col border-r border-outline-variant/30 bg-surface-container-lowest/90 backdrop-blur-xl py-base px-sm shadow-sm transition-transform duration-300 md:translate-x-0 ${
+        isOpen ? "translate-x-0" : "-translate-x-full"
+      }`}
     >
       {/* Mobile Close Button */}
       {onClose && (
@@ -90,8 +104,12 @@ export function SideNavBar({ isOpen = false, onClose }: SideNavBarProps) {
           className="rounded-lg"
         />
         <div>
-          <h1 className="font-headline-md text-headline-md font-bold text-primary">{t("ProjectFlow")}</h1>
-          <p className="font-label-sm text-label-sm text-secondary">{t("Enterprise Pro")}</p>
+          <h1 className="font-headline-md text-headline-md font-bold text-primary">
+            {t("ProjectFlow")}
+          </h1>
+          <p className="font-label-sm text-label-sm text-secondary">
+            {t("Enterprise Pro")}
+          </p>
         </div>
       </div>
 
@@ -104,7 +122,11 @@ export function SideNavBar({ isOpen = false, onClose }: SideNavBarProps) {
           )}
           {t("Dashboard")}
         </Link>
-        <Link href="/projects" className={getLinkClass("/projects")} onClick={onClose}>
+        <Link
+          href="/projects"
+          className={getLinkClass("/projects")}
+          onClick={onClose}
+        >
           {isActive("/projects") ? (
             <MdFolder className="w-5 h-5" />
           ) : (
@@ -112,7 +134,11 @@ export function SideNavBar({ isOpen = false, onClose }: SideNavBarProps) {
           )}
           {t("Projects")}
         </Link>
-        <Link href="/tasks" className={getLinkClass("/tasks")} onClick={onClose}>
+        <Link
+          href="/tasks"
+          className={getLinkClass("/tasks")}
+          onClick={onClose}
+        >
           <MdAssignment className="w-5 h-5" />
           {t("Tasks")}
         </Link>
@@ -120,11 +146,19 @@ export function SideNavBar({ isOpen = false, onClose }: SideNavBarProps) {
           <MdGroup className="w-5 h-5" />
           {t("Team")}
         </Link>
-        <Link href="/analytics" className={getLinkClass("/analytics")} onClick={onClose}>
+        <Link
+          href="/analytics"
+          className={getLinkClass("/analytics")}
+          onClick={onClose}
+        >
           <MdAnalytics className="w-5 h-5" />
           {t("Analytics")}
         </Link>
-        <Link href="/settings" className={getLinkClass("/settings")} onClick={onClose}>
+        <Link
+          href="/settings"
+          className={getLinkClass("/settings")}
+          onClick={onClose}
+        >
           <MdSettings className="w-5 h-5" />
           {t("Settings")}
         </Link>

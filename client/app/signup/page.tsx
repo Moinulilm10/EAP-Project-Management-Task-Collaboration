@@ -1,16 +1,16 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
-import { useTheme } from "next-themes";
-import { useTranslation } from "react-i18next";
-import { FcGoogle } from "react-icons/fc";
-import { MdPerson, MdMail, MdLock } from "react-icons/md";
 import { FormField } from "@/components/ui/FormField";
 import { PasswordStrengthIndicator } from "@/components/ui/PasswordStrengthIndicator";
 import { notification } from "@/utils/notification";
 import { motion, type Variants } from "framer-motion";
+import { useTheme } from "next-themes";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { FcGoogle } from "react-icons/fc";
+import { MdLock, MdMail, MdPerson } from "react-icons/md";
 import "../../i18n";
 
 const containerVariants: Variants = {
@@ -37,30 +37,25 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [isPasswordValid, setIsPasswordValid] = useState(false);
-  const [showConfirmError, setShowConfirmError] = useState(false);
 
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
-
-  // Check matching password validation on input change
   useEffect(() => {
-    if (confirmPassword && password !== confirmPassword) {
-      setShowConfirmError(true);
-    } else {
-      setShowConfirmError(false);
-    }
-  }, [password, confirmPassword]);
+    let raf = 0 as number;
+    raf = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(raf);
+  }, []);
 
-  const logoSrc = mounted && resolvedTheme === "dark"
-    ? "/img/logo-dark-mode.png"
-    : "/img/logo-light-mode.png";
+  const showConfirmError = confirmPassword && password !== confirmPassword;
+
+  const logoSrc =
+    mounted && resolvedTheme === "dark"
+      ? "/img/logo-dark-mode.png"
+      : "/img/logo-light-mode.png";
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      setShowConfirmError(true);
       notification.errorToast(t("Passwords do not match."));
       return;
     }
@@ -79,24 +74,33 @@ export default function SignupPage() {
   };
 
   const passwordsMatch = password === confirmPassword;
-  const canSubmit = name && email && isPasswordValid && passwordsMatch && agreeTerms;
+  const canSubmit =
+    name && email && isPasswordValid && passwordsMatch && agreeTerms;
 
   return (
     <div className="bg-animated-gradient min-h-screen text-on-surface antialiased flex items-center justify-center p-4 md:p-8">
-      <main className="w-full max-w-[1200px] h-full min-h-[600px] max-h-[950px] bg-surface-container-lowest/40 backdrop-blur-3xl rounded-[24px] shadow-2xl overflow-hidden flex flex-col md:flex-row border border-outline-variant/20 relative animate-fade-in">
+      <main className="w-full max-w-300 h-full min-h-150 max-h-237.5 bg-surface-container-lowest/40 backdrop-blur-3xl rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row border border-outline-variant/20 relative animate-fade-in">
         {/* Left Side: Branding / Illustration */}
-        <section className="hidden md:flex flex-col justify-between w-1/2 p-12 relative overflow-hidden bg-primary">
+        <section className="hidden md:flex flex-col justify-between w-1/2 p-12 relative overflow-hidden">
           <div className="absolute inset-0 z-0 opacity-20">
-            <img
-              alt="Abstract geometric shapes"
-              className="w-full h-full object-cover mix-blend-overlay"
+            <Image
               src="https://lh3.googleusercontent.com/aida-public/AB6AXuCyAkzt0Lh8dZWf_34twn_9WnXUG5xUR7UbcFqioQUX06NJkBPbWIoLxoRAs07LdtbiKn2fS3XfEaKDg12SRWa4aG6bgFwzP_E7h2cjnAvbT6N5niGucpr5dQNuT3VbzLCwf0sxVxRuWCSCFeFkJZF-n-GTzbdoQ6TL5Xct_qwPMonH0nbQIH1VVcd5v6WlppiNpI6WfoIqaDBbgbx6UzPmMZX0ZR7paXYQZhgy-K_G_VuCyhpEiNSNx0UuOD9ZrfSV-BMp7nFwwec"
+              alt="Abstract geometric shapes"
+              fill
+              className="object-cover mix-blend-overlay"
+              unoptimized
             />
           </div>
 
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-12">
-              <Image src="/img/logo-dark-mode.png" alt="ProjectFlow Logo" width={50} height={50} className="rounded-lg" />
+              <Image
+                src="/img/logo-dark-mode.png"
+                alt="ProjectFlow Logo"
+                width={50}
+                height={50}
+                className="rounded-lg"
+              />
               <h1 className="font-display-lg text-display-lg text-white tracking-tight">
                 {t("ProjectFlow")}
               </h1>
@@ -107,27 +111,38 @@ export default function SignupPage() {
                 {t("Join ProjectFlow today.")}
               </h2>
               <p className="font-body-lg text-body-lg text-primary-fixed leading-relaxed">
-                {t("Experience the clarity of enterprise-grade project management. Seamlessly align your team, track complex tasks, and deliver with precision.")}
+                {t(
+                  "Experience the clarity of enterprise-grade project management. Seamlessly align your team, track complex tasks, and deliver with precision.",
+                )}
               </p>
             </div>
           </div>
 
           <div className="relative z-10 flex items-center gap-4 mt-auto">
             <div className="flex -space-x-3">
-              <img
-                alt="Team member"
-                className="w-10 h-10 rounded-full border-2 border-primary object-cover"
+              <Image
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuCdZqIe-3d1BH4Eaeak6eq7SHap8Diep4uQjV2FZGapxGYaN4XkWhxTN5oADB6iw0UWUxZ3DiDOEgssK-LpoCepzm0rUq2obHlPo8Xji46n8ZwG4Bt-SXmQ_jTsCxzk2kW2ze4ogCrVAGn378ctHGCPt8-SOZCPD1U8llOQM2ng57T_wn3kfYRUG5fPCz_L4QJdmLZ389KhaSi07m6jNQdqc43h6LoQESpQZX-WrfLy7i7_-mwZvgZJLtQnvQC_INkDyOfStiny838"
-              />
-              <img
                 alt="Team member"
-                className="w-10 h-10 rounded-full border-2 border-primary object-cover"
+                width={40}
+                height={40}
+                className="rounded-full border-2 border-primary object-cover"
+                unoptimized
+              />
+              <Image
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQGDo5bfDZUm9KqMmlBgDEIk1NTWhtgy1zkWQcz6WcX6sMWJHBfgAU3T1WLQ8iFtJPtoBEcAPEOKM76UO6h3RYG5EHZprYhDJXsSn82y7foy_XUr12sj7yTxpSxbgiQNDyXQfRxk9FXnD_oglog7wHSL7rcE1O--jEnmUM2_1CfzqJUK4HTHcC_KXV84XFho4ABDbGrLOfI9fX1CTo0S5QOaszQpA373O1gRNlUm31ssgBcj56Ty-L1Jk4r8LAam3JA-iQM3hCnt0"
-              />
-              <img
                 alt="Team member"
-                className="w-10 h-10 rounded-full border-2 border-primary object-cover"
+                width={40}
+                height={40}
+                className="rounded-full border-2 border-primary object-cover"
+                unoptimized
+              />
+              <Image
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0R7CTVPEq2cfgtUaJsfjpo3ui8M4vfJHdeoN3Z8krErrc7uNwYuphE6UNOjEGiGh-_6vV0J31QcgtHRvhV-kGyI_2E9RBfizZPMMppcYFVkknOTzbJ4ZfVKtm_nobXjSILw1YFRUlQa-ONZoHUxkndT581WoGh0uk1IZWldvk8jIQAr3OqVQf1bVB1giQebPH0xAAyraVvvBOFQE39gs3Zw1mf5Kf7KgUU0ttARk8DVWJ8TN_L8veZBamqeNjkVgJz3T_f01op8M"
+                alt="Team member"
+                width={40}
+                height={40}
+                className="rounded-full border-2 border-primary object-cover"
+                unoptimized
               />
             </div>
             <div className="text-sm font-body-md text-primary-fixed">
@@ -139,13 +154,19 @@ export default function SignupPage() {
         {/* Right Side: Signup Form */}
         <section className="w-full md:w-1/2 p-6 md:p-10 lg:p-12 flex flex-col justify-center relative bg-surface-container-lowest overflow-y-auto">
           <div className="md:hidden flex items-center gap-2 mb-6">
-            <Image src={logoSrc} alt="ProjectFlow Logo" width={28} height={28} className="rounded-lg" />
+            <Image
+              src={logoSrc}
+              alt="ProjectFlow Logo"
+              width={28}
+              height={28}
+              className="rounded-lg"
+            />
             <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-primary font-bold">
               {t("ProjectFlow")}
             </h1>
           </div>
 
-          <div className="max-w-[400px] w-full mx-auto">
+          <div className="max-w-100 w-full mx-auto">
             <div className="mb-5">
               <h2 className="font-headline-lg text-headline-lg text-on-surface mb-1">
                 {t("Create your account")}
@@ -221,13 +242,18 @@ export default function SignupPage() {
                   icon={<MdLock />}
                   placeholder="••••••••"
                   showPasswordToggle={true}
-                  error={showConfirmError ? t("Passwords do not match.") : undefined}
+                  error={
+                    showConfirmError ? t("Passwords do not match.") : undefined
+                  }
                   required
                 />
               </motion.div>
 
               {/* Terms Checkbox */}
-              <motion.div variants={itemVariants} className="flex items-start pt-1">
+              <motion.div
+                variants={itemVariants}
+                className="flex items-start pt-1"
+              >
                 <div className="flex items-center h-5">
                   <input
                     type="checkbox"
@@ -240,11 +266,18 @@ export default function SignupPage() {
                   />
                 </div>
                 <div className="ml-2 text-sm leading-5">
-                  <label htmlFor="agree-terms" className="font-body-md text-body-md text-on-surface-variant cursor-pointer">
+                  <label
+                    htmlFor="agree-terms"
+                    className="font-body-md text-body-md text-on-surface-variant cursor-pointer"
+                  >
                     {t("I agree to the")}{" "}
-                    <a href="#" className="text-primary hover:underline">{t("Terms of Service")}</a>{" "}
+                    <a href="#" className="text-primary hover:underline">
+                      {t("Terms of Service")}
+                    </a>{" "}
                     {t("and")}{" "}
-                    <a href="#" className="text-primary hover:underline">{t("Privacy Policy")}</a>
+                    <a href="#" className="text-primary hover:underline">
+                      {t("Privacy Policy")}
+                    </a>
                   </label>
                 </div>
               </motion.div>
@@ -254,7 +287,7 @@ export default function SignupPage() {
                 <button
                   type="submit"
                   disabled={!canSubmit}
-                  className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm font-label-md text-label-md text-on-primary bg-primary hover:bg-on-primary-fixed-variant focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200 hover:-translate-y-[2px] disabled:opacity-50 disabled:translate-y-0 disabled:cursor-not-allowed cursor-pointer"
+                  className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm font-label-md text-label-md text-on-primary bg-primary hover:bg-on-primary-fixed-variant focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-50 disabled:translate-y-0 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {t("Sign Up")}
                 </button>
@@ -276,7 +309,7 @@ export default function SignupPage() {
                   className="w-full flex justify-center items-center gap-2 py-2.5 px-4 border border-outline-variant rounded-lg bg-surface-container-lowest font-label-md text-label-md text-on-surface hover:bg-surface-container-low transition-all duration-200 group cursor-pointer"
                   id="googleSignupBtn"
                 >
-                  <FcGoogle className="text-[20px] w-5 h-5 group-hover:scale-110 transition-transform" />
+                  <FcGoogle className="text-title-sm-line-height w-5 h-5 group-hover:scale-110 transition-transform" />
                   {t("Sign up with Google")}
                 </button>
               </motion.div>

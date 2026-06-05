@@ -1,30 +1,30 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import { useAuthStore } from "@/stores/authStore";
+import { AnimatePresence, motion } from "framer-motion";
+import { signOut } from "next-auth/react";
+import { useTheme } from "next-themes";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useTheme } from "next-themes";
-import { Button } from "../ui/Button";
-import { Input } from "../ui/Input";
-import { IconButton } from "../ui/IconButton";
-import { Avatar } from "../ui/Avatar";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useAuthStore } from "@/stores/authStore";
-import { signOut } from "next-auth/react";
-import { motion, AnimatePresence } from "framer-motion";
 import {
-  MdMenu,
   MdAdd,
-  MdSearch,
-  MdNotifications,
   MdDarkMode,
   MdLightMode,
-  MdPerson,
-  MdSettings,
   MdLogout,
-  MdShield
+  MdMenu,
+  MdNotifications,
+  MdPerson,
+  MdSearch,
+  MdSettings,
+  MdShield,
 } from "react-icons/md";
 import "../../i18n";
+import { Avatar } from "../ui/Avatar";
+import { Button } from "../ui/Button";
+import { IconButton } from "../ui/IconButton";
+import { Input } from "../ui/Input";
 
 interface TopNavBarProps {
   onMenuClick?: () => void;
@@ -37,22 +37,30 @@ export function TopNavBar({ onMenuClick }: TopNavBarProps) {
   const [mounted, setMounted] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const { user, clearAuth } = useAuthStore();
+  const { user, clearAuth, setLoading } = useAuthStore();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Avoid hydration mismatch by waiting for mount
   useEffect(() => {
-    setMounted(true);
+    // Defer mounting to the next animation frame to avoid synchronous setState in effect
+    let raf = 0 as number;
+    raf = requestAnimationFrame(() => setMounted(true));
 
     // Close dropdown on click outside
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsDropdownOpen(false);
       }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () => {
+      cancelAnimationFrame(raf);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   const toggleTheme = () => {
@@ -60,8 +68,15 @@ export function TopNavBar({ onMenuClick }: TopNavBarProps) {
   };
 
   const handleLogout = async () => {
+    // Show the app loading state immediately to avoid a white flash
+    setLoading(true);
+
+    // Use client-side signOut (no full-page redirect) and then navigate
+    await signOut({ redirect: false });
+
+    // Clear local auth and navigate to login client-side
     clearAuth();
-    await signOut({ callbackUrl: "/login" });
+    router.push("/login");
   };
 
   // Helper to format role names
@@ -103,7 +118,10 @@ export function TopNavBar({ onMenuClick }: TopNavBarProps) {
             <MdMenu className="w-6 h-6" />
           </button>
         )}
-        <Link href="/" className="font-headline-md text-headline-md font-black text-primary">
+        <Link
+          href="/"
+          className="font-headline-md text-headline-md font-black text-primary"
+        >
           {t("ProjectFlow")}
         </Link>
       </div>
@@ -117,8 +135,11 @@ export function TopNavBar({ onMenuClick }: TopNavBarProps) {
       </div>
 
       <div className="flex items-center gap-md">
-        <Button className="hidden md:flex items-center gap-1 cursor-pointer" onClick={() => router.push('/tasks')}>
-          <MdAdd className="w-[18px] h-[18px]" />
+        <Button
+          className="hidden md:flex items-center gap-1 cursor-pointer"
+          onClick={() => router.push("/tasks")}
+        >
+          <MdAdd className="w-4.5 h-4.5" />
           {t("Create Task")}
         </Button>
 
@@ -176,15 +197,17 @@ export function TopNavBar({ onMenuClick }: TopNavBarProps) {
                     size="md"
                     className="mb-sm"
                   />
-                  <h4 className="font-title-md text-title-md text-on-surface font-semibold truncate w-full max-w-[240px]">
+                  <h4 className="font-title-md text-title-md text-on-surface font-semibold truncate w-full max-w-60">
                     {user?.name || "Anonymous User"}
                   </h4>
-                  <p className="font-body-sm text-body-sm text-on-surface-variant truncate w-full max-w-[240px] mb-xs">
+                  <p className="font-body-sm text-body-sm text-on-surface-variant truncate w-full max-w-60 mb-xs">
                     {user?.email || "no-email@projectflow.com"}
                   </p>
 
                   {/* Role Badge */}
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-label-sm font-medium ${getRoleBadgeClass(user?.role)}`}>
+                  <span
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-label-sm font-medium ${getRoleBadgeClass(user?.role)}`}
+                  >
                     <MdShield className="w-3.5 h-3.5 mr-1" />
                     {getRoleLabel(user?.role)}
                   </span>
@@ -231,4 +254,3 @@ export function TopNavBar({ onMenuClick }: TopNavBarProps) {
     </header>
   );
 }
-
