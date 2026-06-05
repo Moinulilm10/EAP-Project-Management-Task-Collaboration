@@ -1,66 +1,70 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  UpdateDateColumn,
-  OneToMany,
+  Entity,
   Index,
-} from 'typeorm';
-import { RefreshToken } from './RefreshToken.entity';
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from "typeorm";
+import { ProjectMember } from "./ProjectMember.entity";
+import { RefreshToken } from "./RefreshToken.entity";
 
 export enum UserRole {
-  ADMIN = 'admin',
-  PROJECT_MANAGER = 'project_manager',
-  TEAM_MEMBER = 'team_member',
+  ADMIN = "admin",
+  PROJECT_MANAGER = "project_manager",
+  TEAM_MEMBER = "team_member",
 }
 
 export enum AuthProvider {
-  CREDENTIALS = 'credentials',
-  GOOGLE = 'google',
+  CREDENTIALS = "credentials",
+  GOOGLE = "google",
 }
 
-@Entity('users')
+@Entity("users")
 export class User {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id!: string;
 
   @Index({ unique: true })
-  @Column({ type: 'varchar', length: 255, unique: true })
+  @Column({ type: "varchar", length: 255, unique: true })
   email!: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
+  @Column({ type: "varchar", length: 255, nullable: true })
   passwordHash!: string | null;
 
-  @Column({ type: 'varchar', length: 100 })
+  @Column({ type: "varchar", length: 100 })
   name!: string;
 
   @Column({
-    type: 'enum',
+    type: "enum",
     enum: UserRole,
     default: UserRole.TEAM_MEMBER,
   })
   role!: UserRole;
 
   @Column({
-    type: 'enum',
+    type: "enum",
     enum: AuthProvider,
     default: AuthProvider.CREDENTIALS,
   })
   provider!: AuthProvider;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
+  @Column({ type: "varchar", length: 255, nullable: true })
   googleId!: string | null;
 
-  @Column({ type: 'boolean', default: true })
+  @Column({ type: "boolean", default: true })
   isActive!: boolean;
 
-  @CreateDateColumn({ type: 'timestamptz' })
+  @CreateDateColumn({ type: "timestamptz" })
   createdAt!: Date;
 
-  @UpdateDateColumn({ type: 'timestamptz' })
+  @UpdateDateColumn({ type: "timestamptz" })
   updatedAt!: Date;
 
   @OneToMany(() => RefreshToken, (token) => token.user)
   refreshTokens!: RefreshToken[];
+
+  @OneToMany(() => ProjectMember, (membership) => membership.user)
+  projectMemberships!: ProjectMember[];
 }

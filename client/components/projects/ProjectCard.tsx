@@ -1,18 +1,24 @@
 "use client";
 
-import React from "react";
-import { Card } from "../ui/Card";
-import { Badge } from "../ui/Badge";
 import { useTranslation } from "react-i18next";
-import { MdEdit, MdDelete, MdWarning, MdCheckCircle, MdCalendarToday } from "react-icons/md";
+import {
+  MdCalendarToday,
+  MdCheckCircle,
+  MdDelete,
+  MdEdit,
+  MdWarning,
+} from "react-icons/md";
+import { Badge } from "../ui/Badge";
+import { Card } from "../ui/Card";
 
 export interface Project {
   id: string;
   title: string;
   description: string;
-  status: "active" | "completed" | "on-hold";
+  status: "active" | "completed" | "on_hold";
   dueDate: string;
   progress: number;
+  memberCount?: number;
   isWarning?: boolean;
 }
 
@@ -25,12 +31,20 @@ interface ProjectCardProps {
 export function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
   const { t } = useTranslation();
   const isCompleted = project.status === "completed";
+  const normalizedStatus =
+    project.status === "on_hold" ? "on-hold" : project.status;
 
   return (
     <Card className={isCompleted ? "opacity-75 hover:opacity-100" : ""}>
       <div className="flex justify-between items-start mb-sm">
-        <Badge variant={project.status === "on-hold" ? "on-hold" : project.status}>
-          {t(project.status === "active" ? "Active" : project.status === "completed" ? "Completed" : "On Hold")}
+        <Badge variant={normalizedStatus}>
+          {t(
+            normalizedStatus === "active"
+              ? "Active"
+              : normalizedStatus === "completed"
+                ? "Completed"
+                : "On Hold",
+          )}
         </Badge>
         <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-xs">
           {onEdit && (
@@ -39,7 +53,7 @@ export function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
               className="p-1 text-secondary hover:text-primary rounded hover:bg-surface-container-high transition-colors flex items-center justify-center"
               aria-label={t("Edit Project") as string}
             >
-              <MdEdit className="w-[18px] h-[18px]" />
+              <MdEdit className="w-4.5 h-4.5" />
             </button>
           )}
           {onDelete && (
@@ -48,20 +62,28 @@ export function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
               className="p-1 text-secondary hover:text-error rounded hover:bg-error-container/50 transition-colors flex items-center justify-center"
               aria-label={t("Delete Project") as string}
             >
-              <MdDelete className="w-[18px] h-[18px]" />
+              <MdDelete className="w-4.5 h-4.5" />
             </button>
           )}
         </div>
       </div>
-      
+
       <h3 className="font-title-md text-title-md text-on-surface mb-xs">
         {t(project.title)}
       </h3>
-      
+
+      <div className="flex items-center gap-2 text-label-sm text-secondary mb-2">
+        {project.memberCount !== undefined && (
+          <span className="px-2 py-1 rounded-full bg-surface-container-low text-on-surface">
+            {`${project.memberCount} members`}
+          </span>
+        )}
+      </div>
+
       <p className="font-body-md text-body-md text-secondary line-clamp-2 mb-md flex-1">
         {t(project.description)}
       </p>
-      
+
       <div className="mt-auto">
         <div className="flex justify-between items-center mb-xs font-label-sm text-label-sm">
           {project.isWarning ? (
@@ -79,11 +101,13 @@ export function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
               {t(project.dueDate)}
             </span>
           )}
-          <span className={`${isCompleted ? "text-secondary" : "text-primary"} font-bold`}>
+          <span
+            className={`${isCompleted ? "text-secondary" : "text-primary"} font-bold`}
+          >
             {project.progress}%
           </span>
         </div>
-        
+
         <div className="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-500 ${
