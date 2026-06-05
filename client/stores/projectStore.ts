@@ -60,7 +60,6 @@ export const useProjectStore = create<ProjectStoreState>((set, get) => ({
         loading: false,
         error: error.message || "Unable to load projects",
       });
-      throw error;
     }
   },
 

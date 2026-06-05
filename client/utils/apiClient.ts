@@ -3,6 +3,19 @@ import { getSession } from 'next-auth/react';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
+/** Custom error class for API failures — extends Error so Next.js can serialize it properly. */
+export class ApiError extends Error {
+  status: number;
+  details?: unknown;
+
+  constructor(status: number, message: string, details?: unknown) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.details = details;
+  }
+}
+
 class ApiClient {
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const session = await getSession() as any;
@@ -43,16 +56,18 @@ class ApiClient {
       const data = await response.json().catch(() => null);
 
       if (!response.ok) {
-        throw {
-          status: response.status,
-          message: data?.error || data?.message || 'API request failed',
-          details: data?.details,
-        };
+        throw new ApiError(
+          response.status,
+          data?.error || data?.message || 'API request failed',
+          data?.details,
+        );
       }
 
       return data as T;
     } catch (error) {
-      throw error;
+      // Re-wrap non-Error objects (e.g. network failures) into proper Errors
+      if (error instanceof Error) throw error;
+      throw new ApiError(0, String(error));
     }
   }
 
