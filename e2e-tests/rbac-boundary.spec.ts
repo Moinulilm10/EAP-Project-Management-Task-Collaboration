@@ -12,13 +12,13 @@ test.describe('RBAC Security Boundary Enforcement', () => {
     // this test serves as the structure for how it will be executed.
     
     /*
-    const loginRes = await request.post('http://localhost:5001/api/v1/auth/login', {
+    const loginRes = await request.post('http://localhost:5005/api/v1/auth/login', {
       data: { email: 'team@example.com', password: 'Password123!' }
     });
     
     const token = await loginRes.json().then(j => j.accessToken);
     
-    const forbiddenRes = await request.post('http://localhost:5001/api/v1/projects', {
+    const forbiddenRes = await request.post('http://localhost:5005/api/v1/projects', {
       headers: { Authorization: `Bearer ${token}`, 'X-Idempotency-Key': '1234' },
       data: { name: 'Hack attempt' }
     });

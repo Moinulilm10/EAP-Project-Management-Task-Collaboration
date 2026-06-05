@@ -1,4 +1,4 @@
-import './instrument'; // must be first
+import './instrument';
 import express, { Request, Response } from 'express';
 import dotenv from 'dotenv';
 import { AppDataSource } from './utils/data-source';
@@ -11,7 +11,12 @@ import apiRoutes from './routes';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5005;
+
+// Health check route (before CORS so any client can reach it)
+app.get('/', (req: Request, res: Response) => {
+  res.json({ message: 'Hello EAP project is running' });
+});
 
 // Apply Security Middleware (Helmet, CORS, CookieParser)
 applySecurityMiddleware(app);
@@ -22,11 +27,6 @@ app.use(generalRateLimiter);
 // Body parsing middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Basic route
-app.get('/', (req: Request, res: Response) => {
-  res.json({ message: 'Welcome to the Task Collaboration API' });
-});
 
 // API v1 Routes
 app.use('/api/v1', apiRoutes);

@@ -18,7 +18,7 @@ export const authOptions: NextAuthOptions = {
         if (!credentials?.email || !credentials?.password) return null;
 
         try {
-          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api/v1'}/auth/login`, {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email: credentials.email, password: credentials.password }),
@@ -50,7 +50,7 @@ export const authOptions: NextAuthOptions = {
       if (account?.provider === "google") {
         try {
           // Sync Google user with backend
-          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api/v1'}/auth/google-sync`, {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/google-sync`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -61,7 +61,7 @@ export const authOptions: NextAuthOptions = {
           });
           const data = await res.json();
           if (res.ok) {
-             // Store the backend access token and role on the user object temporarily
+            // Store the backend access token and role on the user object temporarily
             (user as any).accessToken = data.accessToken;
             (user as any).role = data.user.role;
             return true;
