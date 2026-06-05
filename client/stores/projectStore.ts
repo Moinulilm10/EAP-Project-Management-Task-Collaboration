@@ -15,8 +15,10 @@ export interface ProjectStoreState {
   limit: number;
   total: number;
   statusFilter: "all" | "active" | "completed" | "on_hold";
+  adminFilter: "all" | "admin";
   searchQuery: string;
   setStatusFilter: (status: ProjectStoreState["statusFilter"]) => void;
+  setAdminFilter: (filter: ProjectStoreState["adminFilter"]) => void;
   setSearchQuery: (query: string) => void;
   setPage: (page: number) => void;
   fetchProjects: () => Promise<void>;
@@ -33,18 +35,21 @@ export const useProjectStore = create<ProjectStoreState>((set, get) => ({
   limit: 12,
   total: 0,
   statusFilter: "all",
+  adminFilter: "all",
   searchQuery: "",
 
   setStatusFilter: (status) => set({ statusFilter: status, page: 1 }),
+  setAdminFilter: (filter) => set({ adminFilter: filter, page: 1 }),
   setSearchQuery: (query) => set({ searchQuery: query, page: 1 }),
   setPage: (page) => set({ page }),
 
   fetchProjects: async () => {
     set({ loading: true, error: null });
     try {
-      const { statusFilter, searchQuery, page, limit } = get();
+      const { statusFilter, adminFilter, searchQuery, page, limit } = get();
       const response = await projectService.getAll({
         status: statusFilter === "all" ? undefined : statusFilter,
+        admin: adminFilter === "admin",
         search: searchQuery.trim() || undefined,
         page,
         limit,
@@ -55,10 +60,11 @@ export const useProjectStore = create<ProjectStoreState>((set, get) => ({
         total: response.total || 0,
         loading: false,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       set({
         loading: false,
-        error: error.message || "Unable to load projects",
+        error:
+          error instanceof Error ? error.message : "Unable to load projects",
       });
     }
   },

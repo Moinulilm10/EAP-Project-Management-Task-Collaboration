@@ -19,8 +19,15 @@ export const projectController = {
           search: req.query.search as string | undefined,
           page: req.query.page ? Number(req.query.page) : undefined,
           limit: req.query.limit ? Number(req.query.limit) : undefined,
+          admin: req.query.admin === "true",
           userId: req.user?.id,
         };
+
+      // If caller requested admin-only view, ensure request is authenticated.
+      if (filters.admin && !req.user) {
+        res.status(401).json({ error: "Authentication required." });
+        return;
+      }
       const result = await projectService.findAll(filters);
       res.status(200).json(result);
     } catch (error: any) {
@@ -43,9 +50,14 @@ export const projectController = {
 
   async create(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
+      if (!req.user) {
+        res.status(401).json({ error: "Authentication required." });
+        return;
+      }
+
       const project = await projectService.create({
         ...req.body,
-        ownerId: req.user!.id,
+        ownerId: req.user.id,
       });
       res.status(201).json({ project });
     } catch (error: any) {

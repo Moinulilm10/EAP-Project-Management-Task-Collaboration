@@ -55,8 +55,10 @@ class ApiClient {
     try {
       const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
 
-      // Handle 401/403 Unauthorized/Forbidden: clear client auth and redirect to login.
-      if (response.status === 401 || response.status === 403) {
+      // Handle 401 Unauthorized: clear client auth and redirect to login.
+      // Do NOT auto-logout on 403 Forbidden — that indicates a permissions issue,
+      // not an invalid/expired token.
+      if (response.status === 401) {
         if (typeof window !== "undefined") {
           try {
             // Clear client-side auth state (Zustand)

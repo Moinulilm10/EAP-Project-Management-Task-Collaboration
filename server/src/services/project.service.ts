@@ -16,6 +16,7 @@ export interface ProjectQueryOptions {
   page?: number;
   limit?: number;
   userId?: string;
+  admin?: boolean;
 }
 
 export interface ProjectSummary {
@@ -53,9 +54,16 @@ export const projectService = {
 
     // If userId provided, only return projects where the user is owner or a member
     if (filters.userId) {
-      query.andWhere("(owner.id = :userId OR member.userId = :userId)", {
-        userId: filters.userId,
-      });
+      if (filters.admin) {
+        query.andWhere(
+          "(owner.id = :userId OR (member.userId = :userId AND member.role = 'admin'))",
+          { userId: filters.userId }
+        );
+      } else {
+        query.andWhere("(owner.id = :userId OR member.userId = :userId)", {
+          userId: filters.userId,
+        });
+      }
     }
 
     if (filters.status) {
@@ -98,9 +106,16 @@ export const projectService = {
       .andWhere("owner.id IS NOT NULL");
 
     if (filters.userId) {
-      countQuery.andWhere("(owner.id = :userId OR member.userId = :userId)", {
-        userId: filters.userId,
-      });
+      if (filters.admin) {
+        countQuery.andWhere(
+          "(owner.id = :userId OR (member.userId = :userId AND member.role = 'admin'))",
+          { userId: filters.userId }
+        );
+      } else {
+        countQuery.andWhere("(owner.id = :userId OR member.userId = :userId)", {
+          userId: filters.userId,
+        });
+      }
     }
 
     if (filters.status) {

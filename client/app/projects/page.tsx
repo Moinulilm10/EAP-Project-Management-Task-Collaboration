@@ -6,11 +6,19 @@ import { MdAdd, MdFilterList, MdFolderOpen } from "react-icons/md";
 import { DashboardLayout } from "../../components/layout/DashboardLayout";
 import { ProjectCard } from "../../components/projects/ProjectCard";
 import { ProjectCardSkeleton } from "../../components/projects/ProjectCardSkeleton";
+import { ProjectDetailsModal } from "../../components/projects/ProjectDetailsModal";
+import { ProjectModal } from "../../components/projects/ProjectModal";
 import { Button } from "../../components/ui/Button";
 import Pagination from "../../components/ui/Pagination";
 import { useDebounce } from "../../hooks/useDebounce";
 import "../../i18n";
+import {
+  ProjectCreateDTO,
+  ProjectUpdateDTO,
+} from "../../services/project.service";
+import { useAuthStore } from "../../stores/authStore";
 import { useProjectStore } from "../../stores/projectStore";
+import { notification } from "../../utils/notification";
 
 const statusOptions = [
   { label: "All Statuses", value: "all" },
@@ -28,6 +36,21 @@ const formatDueDate = (deadline: string | null) => {
   });
 };
 
+type ProjectView = {
+  id: string;
+  title: string;
+  description: string;
+  status: "active" | "completed" | "on_hold";
+  dueDate: string;
+  progress: number;
+  memberCount?: number;
+  isWarning?: boolean;
+  ownerId: string;
+  ownerName: string;
+  ownerEmail: string;
+  isAdmin: boolean;
+};
+
 export default function ProjectsPage() {
   const { t } = useTranslation();
   const {
@@ -37,14 +60,28 @@ export default function ProjectsPage() {
     page,
     limit,
     statusFilter,
+    adminFilter,
     searchQuery,
     setStatusFilter,
+    setAdminFilter,
     setSearchQuery,
     setPage,
     fetchProjects,
+    createProject,
+    updateProject,
+    deleteProject,
   } = useProjectStore();
+  const user = useAuthStore((state) => state.user);
 
   const [localSearch, setLocalSearch] = useState(searchQuery || "");
+  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<ProjectView | null>(
+    null,
+  );
+  const [selectedProject, setSelectedProject] = useState<ProjectView | null>(
+    null,
+  );
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const debouncedSearch = useDebounce(localSearch, 400);
 
   // update store search only after debounce
@@ -54,7 +91,7 @@ export default function ProjectsPage() {
 
   useEffect(() => {
     fetchProjects();
-  }, [fetchProjects, statusFilter, searchQuery, page]);
+  }, [fetchProjects, statusFilter, adminFilter, searchQuery, page]);
 
   const uiProjects = useMemo(
     () =>
@@ -70,8 +107,12 @@ export default function ProjectsPage() {
           project.deadline !== null &&
           new Date(project.deadline) < new Date() &&
           project.status !== "completed",
+        ownerId: project.owner.id,
+        ownerName: project.owner.name,
+        ownerEmail: project.owner.email,
+        isAdmin: user?.id === project.owner.id,
       })),
-    [projects],
+    [projects, user?.id],
   );
 
   return (
@@ -86,12 +127,20 @@ export default function ProjectsPage() {
           </p>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-[1fr_auto] items-center w-full max-w-screen-sm">
+        <div className="grid gap-3 sm:grid-cols-[1fr_auto_auto] items-center w-full max-w-screen-sm">
           <div className="relative w-full">
             <MdFilterList className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg" />
             <select
               value={statusFilter}
-              onChange={(event) => setStatusFilter(event.target.value as any)}
+              onChange={(event) =>
+                setStatusFilter(
+                  event.target.value as
+                    | "all"
+                    | "active"
+                    | "completed"
+                    | "on_hold",
+                )
+              }
               className="w-full pl-11 pr-4 py-3 bg-surface-container-lowest border border-outline-variant/50 rounded-xl text-body-md focus:ring-2 focus:ring-primary"
             >
               {statusOptions.map((option) => (
@@ -101,7 +150,28 @@ export default function ProjectsPage() {
               ))}
             </select>
           </div>
-          <Button variant="primary" className="min-w-45 justify-center">
+
+          <div className="relative w-full sm:w-auto">
+            <select
+              value={adminFilter}
+              onChange={(event) =>
+                setAdminFilter(event.target.value as "all" | "admin")
+              }
+              className="w-full pl-4 pr-4 py-3 bg-surface-container-lowest border border-outline-variant/50 rounded-xl text-body-md focus:ring-2 focus:ring-primary"
+            >
+              <option value="all">{t("All projects")}</option>
+              <option value="admin">{t("Admin only")}</option>
+            </select>
+          </div>
+
+          <Button
+            variant="primary"
+            className="min-w-45 justify-center"
+            onClick={() => {
+              setEditingProject(null);
+              setIsProjectModalOpen(true);
+            }}
+          >
             <MdAdd className="w-5 h-5" />
             {t("New Project")}
           </Button>
@@ -148,8 +218,54 @@ export default function ProjectsPage() {
                   <ProjectCard
                     key={project.id}
                     project={project}
-                    onEdit={() => undefined}
-                    onDelete={() => undefined}
+                    isAdmin={project.isAdmin}
+                    onOpenDetails={() => {
+                      setSelectedProject(project);
+                      setIsDetailsOpen(true);
+                    }}
+                    onEdit={
+                      project.isAdmin
+                        ? (id) => {
+                            const match = uiProjects.find(
+                              (item) => item.id === id,
+                            );
+                            if (match) {
+                              setEditingProject(match);
+                              setIsProjectModalOpen(true);
+                            }
+                          }
+                        : undefined
+                    }
+                    onDelete={
+                      project.isAdmin
+                        ? async (id) => {
+                            const selected = uiProjects.find(
+                              (item) => item.id === id,
+                            );
+                            if (!selected) return;
+                            const confirmed = await notification.confirm(
+                              t(
+                                "Are you sure you want to delete this project?",
+                              ) as string,
+                              "This action cannot be undone",
+                              t("Delete"),
+                              t("Cancel"),
+                            );
+                            if (!confirmed) return;
+                            try {
+                              await deleteProject(id);
+                              notification.successToast(
+                                t("Project deleted successfully") as string,
+                              );
+                            } catch (err: any) {
+                              notification.errorToast(
+                                err?.message ||
+                                  (t("Failed to delete project") as string),
+                              );
+                            }
+                          }
+                        : undefined
+                    }
                   />
                 ))}
               </div>
@@ -211,6 +327,60 @@ export default function ProjectsPage() {
           </div>
         </div>
       </div>
+
+      <ProjectModal
+        isOpen={isProjectModalOpen}
+        onClose={() => {
+          setIsProjectModalOpen(false);
+          setEditingProject(null);
+        }}
+        initial={
+          editingProject
+            ? {
+                id: editingProject.id,
+                name: editingProject.title,
+                description: editingProject.description,
+                deadline:
+                  editingProject.dueDate === "No deadline"
+                    ? null
+                    : new Date(editingProject.dueDate).toISOString(),
+                status: editingProject.status,
+              }
+            : null
+        }
+        onSave={async (payload: ProjectCreateDTO | ProjectUpdateDTO) => {
+          try {
+            if (editingProject) {
+              await updateProject(
+                editingProject.id,
+                payload as ProjectUpdateDTO,
+              );
+              notification.successToast(
+                t("Project updated successfully") as string,
+              );
+            } else {
+              await createProject(payload as ProjectCreateDTO);
+              notification.successToast(
+                t("Project created successfully") as string,
+              );
+            }
+            setIsProjectModalOpen(false);
+            setEditingProject(null);
+          } catch (err: any) {
+            notification.errorToast(
+              err?.message || (t("Failed to save project") as string),
+            );
+          }
+        }}
+      />
+
+      {selectedProject && (
+        <ProjectDetailsModal
+          isOpen={isDetailsOpen}
+          onClose={() => setIsDetailsOpen(false)}
+          project={selectedProject}
+        />
+      )}
     </DashboardLayout>
   );
 }
