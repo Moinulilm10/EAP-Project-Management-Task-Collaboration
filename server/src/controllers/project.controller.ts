@@ -19,6 +19,7 @@ export const projectController = {
           search: req.query.search as string | undefined,
           page: req.query.page ? Number(req.query.page) : undefined,
           limit: req.query.limit ? Number(req.query.limit) : undefined,
+          userId: req.user?.id,
         };
       const result = await projectService.findAll(filters);
       res.status(200).json(result);

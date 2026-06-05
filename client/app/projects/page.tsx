@@ -1,11 +1,14 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { MdAdd, MdFilterList, MdFolderOpen } from "react-icons/md";
 import { DashboardLayout } from "../../components/layout/DashboardLayout";
 import { ProjectCard } from "../../components/projects/ProjectCard";
+import { ProjectCardSkeleton } from "../../components/projects/ProjectCardSkeleton";
 import { Button } from "../../components/ui/Button";
+import Pagination from "../../components/ui/Pagination";
+import { useDebounce } from "../../hooks/useDebounce";
 import "../../i18n";
 import { useProjectStore } from "../../stores/projectStore";
 
@@ -32,6 +35,7 @@ export default function ProjectsPage() {
     loading,
     total,
     page,
+    limit,
     statusFilter,
     searchQuery,
     setStatusFilter,
@@ -39,6 +43,14 @@ export default function ProjectsPage() {
     setPage,
     fetchProjects,
   } = useProjectStore();
+
+  const [localSearch, setLocalSearch] = useState(searchQuery || "");
+  const debouncedSearch = useDebounce(localSearch, 400);
+
+  // update store search only after debounce
+  useEffect(() => {
+    setSearchQuery(debouncedSearch);
+  }, [debouncedSearch, setSearchQuery]);
 
   useEffect(() => {
     fetchProjects();
@@ -110,15 +122,17 @@ export default function ProjectsPage() {
             <input
               type="search"
               placeholder={t("Search projects") || ""}
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
+              value={localSearch}
+              onChange={(event) => setLocalSearch(event.target.value)}
               className="w-full sm:w-55 px-4 py-3 rounded-2xl border border-outline-variant/50 bg-surface-container-lowest text-body-md focus:ring-2 focus:ring-primary"
             />
           </div>
 
           {loading ? (
-            <div className="rounded-3xl bg-surface-container-lowest p-8 text-center text-body-md text-secondary">
-              {t("Loading projects...")}
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <ProjectCardSkeleton key={i} />
+              ))}
             </div>
           ) : uiProjects.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-outline-variant/30 bg-surface-container-lowest p-10 text-center gap-4">
@@ -128,16 +142,27 @@ export default function ProjectsPage() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-              {uiProjects.map((project) => (
-                <ProjectCard
-                  key={project.id}
-                  project={project}
-                  onEdit={() => undefined}
-                  onDelete={() => undefined}
+            <>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                {uiProjects.map((project) => (
+                  <ProjectCard
+                    key={project.id}
+                    project={project}
+                    onEdit={() => undefined}
+                    onDelete={() => undefined}
+                  />
+                ))}
+              </div>
+
+              <div className="mt-6 flex justify-center">
+                <Pagination
+                  total={total}
+                  page={page}
+                  limit={limit}
+                  onPageChange={(p) => setPage(p)}
                 />
-              ))}
-            </div>
+              </div>
+            </>
           )}
         </div>
 

@@ -1,5 +1,6 @@
-import { v4 as uuidv4 } from 'uuid';
-import { getSession } from 'next-auth/react';
+import { getSession, signOut } from "next-auth/react";
+import { v4 as uuidv4 } from "uuid";
+import { useAuthStore } from "../stores/authStore";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -10,29 +11,36 @@ export class ApiError extends Error {
 
   constructor(status: number, message: string, details?: unknown) {
     super(message);
-    this.name = 'ApiError';
+    this.name = "ApiError";
     this.status = status;
     this.details = details;
   }
 }
 
 class ApiClient {
-  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const session = await getSession() as any;
+  private async request<T>(
+    endpoint: string,
+    options: RequestInit = {},
+  ): Promise<T> {
+    const session = (await getSession()) as any;
 
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...((options.headers as Record<string, string>) || {}),
     };
 
     if (session?.accessToken) {
-      headers['Authorization'] = `Bearer ${session.accessToken}`;
+      headers["Authorization"] = `Bearer ${session.accessToken}`;
     }
 
     // Auto-inject Idempotency-Key for mutating requests if not provided
-    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(options.method?.toUpperCase() || 'GET')) {
-      if (!headers['X-Idempotency-Key']) {
-        headers['X-Idempotency-Key'] = uuidv4();
+    if (
+      ["POST", "PUT", "PATCH", "DELETE"].includes(
+        options.method?.toUpperCase() || "GET",
+      )
+    ) {
+      if (!headers["X-Idempotency-Key"]) {
+        headers["X-Idempotency-Key"] = uuidv4();
       }
     }
 
@@ -42,15 +50,36 @@ class ApiClient {
     };
 
     // Need credentials for HttpOnly cookies (refresh token)
-    config.credentials = 'include';
+    config.credentials = "include";
 
     try {
       const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
 
-      // Handle 401 Unauthorized (Trigger refresh logic here if needed, or rely on NextAuth)
-      if (response.status === 401) {
-        // Simple strategy: NextAuth or RouteGuard will detect session expiry.
-        // For robust token rotation on client side, we could call POST /auth/refresh here.
+      // Handle 401/403 Unauthorized/Forbidden: clear client auth and redirect to login.
+      if (response.status === 401 || response.status === 403) {
+        if (typeof window !== "undefined") {
+          try {
+            // Clear client-side auth state (Zustand)
+            const store = useAuthStore as any;
+            store.getState &&
+              store.getState().clearAuth &&
+              store.getState().clearAuth();
+          } catch (e) {
+            // swallow any errors while clearing state
+          }
+
+          try {
+            // Ask NextAuth to sign out (no redirect) to clear server session/cookies if any
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            await signOut({ redirect: false });
+          } catch (e) {
+            // ignore
+          }
+
+          // Redirect user to login page
+          window.location.href = "/login";
+        }
       }
 
       const data = await response.json().catch(() => null);
@@ -58,7 +87,7 @@ class ApiClient {
       if (!response.ok) {
         throw new ApiError(
           response.status,
-          data?.error || data?.message || 'API request failed',
+          data?.error || data?.message || "API request failed",
           data?.details,
         );
       }
@@ -72,13 +101,13 @@ class ApiClient {
   }
 
   get<T>(endpoint: string, options?: RequestInit) {
-    return this.request<T>(endpoint, { ...options, method: 'GET' });
+    return this.request<T>(endpoint, { ...options, method: "GET" });
   }
 
   post<T>(endpoint: string, body?: any, options?: RequestInit) {
     return this.request<T>(endpoint, {
       ...options,
-      method: 'POST',
+      method: "POST",
       body: body ? JSON.stringify(body) : undefined,
     });
   }
@@ -86,13 +115,13 @@ class ApiClient {
   put<T>(endpoint: string, body?: any, options?: RequestInit) {
     return this.request<T>(endpoint, {
       ...options,
-      method: 'PUT',
+      method: "PUT",
       body: body ? JSON.stringify(body) : undefined,
     });
   }
 
   delete<T>(endpoint: string, options?: RequestInit) {
-    return this.request<T>(endpoint, { ...options, method: 'DELETE' });
+    return this.request<T>(endpoint, { ...options, method: "DELETE" });
   }
 }
 

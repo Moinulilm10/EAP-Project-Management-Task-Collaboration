@@ -15,6 +15,7 @@ export interface ProjectQueryOptions {
   search?: string;
   page?: number;
   limit?: number;
+  userId?: string;
 }
 
 export interface ProjectSummary {
@@ -50,6 +51,13 @@ export const projectService = {
       .where("project.deletedAt IS NULL")
       .andWhere("owner.id IS NOT NULL");
 
+    // If userId provided, only return projects where the user is owner or a member
+    if (filters.userId) {
+      query.andWhere("(owner.id = :userId OR member.userId = :userId)", {
+        userId: filters.userId,
+      });
+    }
+
     if (filters.status) {
       query.andWhere("project.status = :status", { status: filters.status });
     }
@@ -81,26 +89,39 @@ export const projectService = {
       .addGroupBy("owner.id")
       .orderBy("project.createdAt", "DESC");
 
-    const total = await projectRepo()
+    // Optimized total count (distinct projects matching filters)
+    const countQuery = projectRepo()
       .createQueryBuilder("project")
       .leftJoin("project.owner", "owner")
       .leftJoin("project.projectMembers", "member")
       .where("project.deletedAt IS NULL")
-      .andWhere(filters.status ? "project.status = :status" : "1=1", {
+      .andWhere("owner.id IS NOT NULL");
+
+    if (filters.userId) {
+      countQuery.andWhere("(owner.id = :userId OR member.userId = :userId)", {
+        userId: filters.userId,
+      });
+    }
+
+    if (filters.status) {
+      countQuery.andWhere("project.status = :status", {
         status: filters.status,
-      })
-      .andWhere(
-        filters.search
-          ? "(LOWER(project.name) LIKE :search OR LOWER(project.description) LIKE :search)"
-          : "1=1",
-        {
-          search: filters.search
-            ? `%${filters.search.toLowerCase()}%`
-            : undefined,
-        },
-      )
-      .groupBy("project.id")
-      .getCount();
+      });
+    }
+
+    if (filters.search) {
+      const search = `%${filters.search.toLowerCase()}%`;
+      countQuery.andWhere(
+        "(LOWER(project.name) LIKE :search OR LOWER(project.description) LIKE :search)",
+        { search },
+      );
+    }
+
+    // Use DISTINCT count to avoid duplicates from joins
+    const totalRaw = await countQuery
+      .select("COUNT(DISTINCT project.id)", "total")
+      .getRawOne();
+    const total = Number(totalRaw?.total || 0);
 
     if (filters.page && filters.limit) {
       query.skip((filters.page - 1) * filters.limit).take(filters.limit);
