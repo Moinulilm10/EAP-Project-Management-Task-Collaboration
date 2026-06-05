@@ -123,8 +123,9 @@ export const projectService = {
       .getRawOne();
     const total = Number(totalRaw?.total || 0);
 
-    if (filters.page && filters.limit) {
-      query.skip((filters.page - 1) * filters.limit).take(filters.limit);
+    const page = filters.page ?? 1;
+    if (filters.limit != null) {
+      query.skip((page - 1) * filters.limit).take(filters.limit);
     }
 
     const raw = await query.getRawMany();

@@ -130,7 +130,7 @@ export default function ProjectsPage() {
 
           {loading ? (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-              {Array.from({ length: 6 }).map((_, i) => (
+              {Array.from({ length: limit }).map((_, i) => (
                 <ProjectCardSkeleton key={i} />
               ))}
             </div>

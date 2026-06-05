@@ -53,8 +53,8 @@ const buildQueryString = (params: ProjectQueryParams) => {
 
   if (params.status) query.set("status", params.status);
   if (params.search) query.set("search", params.search);
-  if (params.page) query.set("page", String(params.page));
-  if (params.limit) query.set("limit", String(params.limit));
+  if (params.page != null) query.set("page", String(params.page));
+  if (params.limit != null) query.set("limit", String(params.limit));
 
   return query.toString() ? `?${query.toString()}` : "";
 };
