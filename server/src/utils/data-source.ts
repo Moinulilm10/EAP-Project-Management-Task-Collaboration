@@ -24,6 +24,7 @@ export const AppDataSource = new DataSource({
     connectionTimeoutMillis: 30000,
   },
   synchronize: true,
+  schema: process.env.NODE_ENV === 'test' ? 'test' : 'public',
   logging: false,
   entities: [
     User,

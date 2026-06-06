@@ -5,6 +5,7 @@ import { AppDataSource } from '../../utils/data-source';
 import { v4 as uuidv4 } from 'uuid';
 import { Role } from '../../entities/Role.entity';
 import { ProjectRoleName } from '../../entities/ProjectMember.entity';
+import { ensureTestSchema } from '../../utils/test-setup';
 
 describe('Project Module Integration', () => {
   let userToken: string;
@@ -12,6 +13,7 @@ describe('Project Module Integration', () => {
   let createdProjectId: string;
 
   beforeAll(async () => {
+    await ensureTestSchema();
     if (!AppDataSource.isInitialized) await AppDataSource.initialize();
     await AppDataSource.synchronize(true);
 

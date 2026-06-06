@@ -4,9 +4,11 @@ import app from '../../app';
 import { AppDataSource } from '../../utils/data-source';
 import { User, AuthProvider } from '../../entities/User.entity';
 import bcrypt from 'bcryptjs';
+import { ensureTestSchema } from '../../utils/test-setup';
 
 describe('Auth Integration', () => {
   beforeAll(async () => {
+    await ensureTestSchema();
     if (!AppDataSource.isInitialized) {
       await AppDataSource.initialize();
     }

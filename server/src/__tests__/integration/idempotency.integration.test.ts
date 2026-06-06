@@ -4,11 +4,13 @@ import app from '../../app';
 import { AppDataSource } from '../../utils/data-source';
 import { Role } from '../../entities/Role.entity';
 import { ProjectRoleName } from '../../entities/ProjectMember.entity';
+import { ensureTestSchema } from '../../utils/test-setup';
 
 describe('Idempotency Integration', () => {
   let accessToken: string;
 
   beforeAll(async () => {
+    await ensureTestSchema();
     if (!AppDataSource.isInitialized) {
       await AppDataSource.initialize();
     }

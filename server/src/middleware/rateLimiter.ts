@@ -1,10 +1,13 @@
 import rateLimit from 'express-rate-limit';
+import { Request, Response, NextFunction } from 'express';
+
+const bypassMiddleware = (req: Request, res: Response, next: NextFunction) => next();
 
 /**
  * Aggressive rate limiter for auth endpoints: 10 requests per 15 minutes per IP.
  * Targets brute-force login/registration attacks.
  */
-export const authRateLimiter = rateLimit({
+export const authRateLimiter = process.env.NODE_ENV === 'test' ? bypassMiddleware : rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 10,
   standardHeaders: true,  // Return rate limit info in `RateLimit-*` headers
@@ -24,7 +27,7 @@ export const authRateLimiter = rateLimit({
 /**
  * General rate limiter for all API endpoints: 100 requests per 15 minutes per IP.
  */
-export const generalRateLimiter = rateLimit({
+export const generalRateLimiter = process.env.NODE_ENV === 'test' ? bypassMiddleware : rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
   standardHeaders: true,
@@ -39,3 +42,4 @@ export const generalRateLimiter = rateLimit({
            'unknown';
   },
 });
+

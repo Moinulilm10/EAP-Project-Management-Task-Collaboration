@@ -126,7 +126,7 @@ export const authService = {
 
     const user = await userRepo.findOne({ where: { email } });
     if (!user || !user.passwordHash) {
-      throw { status: 401, message: "Invalid email or password." };
+      throw { status: 404, message: "This email is not registered in our system." };
     }
 
     if (!user.isActive) {
@@ -135,7 +135,7 @@ export const authService = {
 
     const isValid = await bcrypt.compare(password, user.passwordHash);
     if (!isValid) {
-      throw { status: 401, message: "Invalid email or password." };
+      throw { status: 401, message: "Incorrect password. Please try again." };
     }
 
     const accessToken = generateAccessToken(user);
