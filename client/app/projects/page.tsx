@@ -9,6 +9,7 @@ import { ProjectCardSkeleton } from "../../components/projects/ProjectCardSkelet
 import { ProjectDetailsModal } from "../../components/projects/ProjectDetailsModal";
 import { ProjectModal } from "../../components/projects/ProjectModal";
 import { Button } from "../../components/ui/Button";
+import { Select } from "../../components/ui/Select";
 import Pagination from "../../components/ui/Pagination";
 import { useDebounce } from "../../hooks/useDebounce";
 import "../../i18n";
@@ -133,8 +134,8 @@ export default function ProjectsPage() {
 
         <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] items-center w-full max-w-screen-sm">
           <div className="relative w-full">
-            <MdFilterList className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg" />
-            <select
+            <MdFilterList className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg z-10" />
+            <Select
               value={statusFilter}
               onChange={(event) =>
                 setStatusFilter(
@@ -145,28 +146,24 @@ export default function ProjectsPage() {
                     | "on_hold",
                 )
               }
-              className="w-full pl-11 pr-4 py-3 bg-surface-container-lowest border border-outline-variant/50 rounded-xl text-body-md focus:ring-2 focus:ring-primary"
-            >
-              {statusOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {t(option.label)}
-                </option>
-              ))}
-            </select>
+              options={statusOptions.map((opt) => ({ label: t(opt.label), value: opt.value }))}
+              className="pl-11"
+            />
           </div>
 
           <div className="relative w-full">
-            <MdFilterList className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg" />
-            <select
+            <MdFilterList className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg z-10" />
+            <Select
               value={adminOnlyFilter ? "admin" : "all"}
               onChange={(event) =>
                 setAdminOnlyFilter(event.target.value === "admin")
               }
-              className="w-full pl-11 pr-4 py-3 bg-surface-container-lowest border border-outline-variant/50 rounded-xl text-body-md focus:ring-2 focus:ring-primary"
-            >
-              <option value="all">{t("All Projects")}</option>
-              <option value="admin">{t("Admin Only")}</option>
-            </select>
+              options={[
+                { label: t("All Projects"), value: "all" },
+                { label: t("Admin Only"), value: "admin" },
+              ]}
+              className="pl-11"
+            />
           </div>
 
 

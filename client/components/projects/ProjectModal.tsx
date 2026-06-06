@@ -8,6 +8,7 @@ import {
   ProjectCreateDTO,
   ProjectUpdateDTO,
 } from "../../services/project.service";
+import { Select } from "../ui/Select";
 
 interface ProjectModalProps {
   isOpen: boolean;
@@ -26,7 +27,7 @@ const STATUS_OPTIONS = [
   { label: "Active", value: "active" },
   { label: "Completed", value: "completed" },
   { label: "On Hold", value: "on_hold" },
-];
+] as const;
 
 export function ProjectModal({
   isOpen,
@@ -169,19 +170,16 @@ export function ProjectModal({
                       <MdLabel className="w-4 h-4" />
                       {t("Status")}
                     </label>
-                    <select
+                    <Select
                       value={status}
                       onChange={(e) =>
                         setStatus(e.target.value as "active" | "completed" | "on_hold")
                       }
-                      className="w-full rounded-2xl border border-outline-variant/50 bg-surface-container-lowest px-4 py-3 text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"
-                    >
-                      {STATUS_OPTIONS.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {t(option.label)}
-                        </option>
-                      ))}
-                    </select>
+                      options={STATUS_OPTIONS.map((option) => ({
+                        label: t(option.label),
+                        value: option.value,
+                      }))}
+                    />
                   </div>
                 </div>
               </div>

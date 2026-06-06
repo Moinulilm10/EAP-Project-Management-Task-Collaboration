@@ -11,6 +11,7 @@ import {
   MdFolder,
 } from "react-icons/md";
 import { Task, TaskStatus, TaskPriority } from "./taskTypes";
+import { Select } from "../ui/Select";
 
 interface TaskModalProps {
   isOpen: boolean;
@@ -165,29 +166,25 @@ export function TaskModal({ isOpen, onClose, onSave, initial }: TaskModalProps) 
                       <MdFolder className="w-4 h-4" />
                       Project
                     </label>
-                    <select
+                    <Select
                       value={form.project}
                       onChange={(e) => handleChange("project", e.target.value)}
-                      className={`${inputCls} cursor-pointer`}
-                    >
-                      {PROJECTS.map((p) => (
-                        <option key={p}>{p}</option>
-                      ))}
-                    </select>
+                      options={PROJECTS.map((p) => ({ label: p, value: p }))}
+                    />
                   </div>
 
                   <div>
                     <label className={labelCls}>Status</label>
-                    <select
+                    <Select
                       value={form.status}
                       onChange={(e) => handleChange("status", e.target.value as TaskStatus)}
-                      className={`${inputCls} cursor-pointer`}
-                    >
-                      <option value="todo">To Do</option>
-                      <option value="in-progress">In Progress</option>
-                      <option value="review">In Review</option>
-                      <option value="done">Done</option>
-                    </select>
+                      options={[
+                        { label: "To Do", value: "todo" },
+                        { label: "In Progress", value: "in-progress" },
+                        { label: "In Review", value: "review" },
+                        { label: "Done", value: "done" },
+                      ]}
+                    />
                   </div>
                 </div>
 
@@ -198,15 +195,15 @@ export function TaskModal({ isOpen, onClose, onSave, initial }: TaskModalProps) 
                       <MdFlag className="w-4 h-4" />
                       Priority
                     </label>
-                    <select
+                    <Select
                       value={form.priority}
                       onChange={(e) => handleChange("priority", e.target.value as TaskPriority)}
-                      className={`${inputCls} cursor-pointer`}
-                    >
-                      <option value="high">High</option>
-                      <option value="medium">Medium</option>
-                      <option value="low">Low</option>
-                    </select>
+                      options={[
+                        { label: "High", value: "high" },
+                        { label: "Medium", value: "medium" },
+                        { label: "Low", value: "low" },
+                      ]}
+                    />
                   </div>
 
                   <div>

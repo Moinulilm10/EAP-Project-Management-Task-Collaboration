@@ -11,6 +11,8 @@ import {
   MdPersonAdd,
 } from "react-icons/md";
 
+import { Select } from "../ui/Select";
+
 interface ProjectDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -206,18 +208,15 @@ export function ProjectDetailsModal({
                         <label className="block text-label-sm text-secondary mb-2">
                           {t("Role")}
                         </label>
-                        <select
+                        <Select
                           value={inviteRole}
                           onChange={(e) => setInviteRole(e.target.value)}
                           disabled={!project.canManage}
-                          className="w-full rounded-2xl border border-outline-variant/50 bg-surface-container-lowest px-4 py-3 text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                          {ROLE_OPTIONS.map((role) => (
-                            <option key={role} value={role}>
-                              {t(role)}
-                            </option>
-                          ))}
-                        </select>
+                          options={ROLE_OPTIONS.map((role) => ({
+                            label: t(role),
+                            value: role,
+                          }))}
+                        />
                       </div>
                       <button
                         type="button"
