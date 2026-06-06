@@ -31,6 +31,11 @@ exports.projectService = {
             const search = `%${filters.search.toLowerCase()}%`;
             query.andWhere("(LOWER(project.name) LIKE :search OR LOWER(project.description) LIKE :search)", { search });
         }
+        if (filters.adminOnly) {
+            query.andWhere("currentUserRoleRelation.name = :adminRoleName", {
+                adminRoleName: ProjectMember_entity_1.ProjectRoleName.ADMIN,
+            });
+        }
         query
             .select([
             "project.id",
@@ -56,6 +61,8 @@ exports.projectService = {
             .createQueryBuilder("project")
             .leftJoin("project.owner", "owner")
             .leftJoin("project.projectMembers", "member")
+            .leftJoin("project.projectMembers", "currentUserMember", "currentUserMember.userId = :requestingUserId", { requestingUserId: filters.userId || "" })
+            .leftJoin("currentUserMember.role", "currentUserRoleRelation")
             .where("project.deletedAt IS NULL")
             .andWhere("owner.id IS NOT NULL");
         if (filters.userId) {
@@ -71,6 +78,11 @@ exports.projectService = {
         if (filters.search) {
             const search = `%${filters.search.toLowerCase()}%`;
             countQuery.andWhere("(LOWER(project.name) LIKE :search OR LOWER(project.description) LIKE :search)", { search });
+        }
+        if (filters.adminOnly) {
+            countQuery.andWhere("currentUserRoleRelation.name = :adminRoleName", {
+                adminRoleName: ProjectMember_entity_1.ProjectRoleName.ADMIN,
+            });
         }
         // Use DISTINCT count to avoid duplicates from joins
         const totalRaw = await countQuery

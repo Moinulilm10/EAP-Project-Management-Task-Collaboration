@@ -16,6 +16,7 @@ export interface ProjectQueryOptions {
   page?: number;
   limit?: number;
   userId?: string;
+  adminOnly?: boolean;
 }
 
 export interface ProjectSummary {
@@ -78,6 +79,12 @@ export const projectService = {
       );
     }
 
+    if (filters.adminOnly) {
+      query.andWhere("currentUserRoleRelation.name = :adminRoleName", {
+        adminRoleName: ProjectRoleName.ADMIN,
+      });
+    }
+
     query
       .select([
         "project.id",
@@ -104,6 +111,13 @@ export const projectService = {
       .createQueryBuilder("project")
       .leftJoin("project.owner", "owner")
       .leftJoin("project.projectMembers", "member")
+      .leftJoin(
+        "project.projectMembers",
+        "currentUserMember",
+        "currentUserMember.userId = :requestingUserId",
+        { requestingUserId: filters.userId || "" }
+      )
+      .leftJoin("currentUserMember.role", "currentUserRoleRelation")
       .where("project.deletedAt IS NULL")
       .andWhere("owner.id IS NOT NULL");
 
@@ -125,6 +139,12 @@ export const projectService = {
         "(LOWER(project.name) LIKE :search OR LOWER(project.description) LIKE :search)",
         { search },
       );
+    }
+
+    if (filters.adminOnly) {
+      countQuery.andWhere("currentUserRoleRelation.name = :adminRoleName", {
+        adminRoleName: ProjectRoleName.ADMIN,
+      });
     }
 
     // Use DISTINCT count to avoid duplicates from joins

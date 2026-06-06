@@ -61,8 +61,10 @@ export default function ProjectsPage() {
     limit,
     statusFilter,
     searchQuery,
+    adminOnlyFilter,
     setStatusFilter,
     setSearchQuery,
+    setAdminOnlyFilter,
     setPage,
     fetchProjects,
     createProject,
@@ -89,7 +91,7 @@ export default function ProjectsPage() {
 
   useEffect(() => {
     fetchProjects();
-  }, [fetchProjects, statusFilter, searchQuery, page]);
+  }, [fetchProjects, statusFilter, adminOnlyFilter, searchQuery, page]);
 
   const uiProjects = useMemo(
     () =>
@@ -129,7 +131,7 @@ export default function ProjectsPage() {
           </p>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-[1fr_auto_auto] items-center w-full max-w-screen-sm">
+        <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] items-center w-full max-w-screen-sm">
           <div className="relative w-full">
             <MdFilterList className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg" />
             <select
@@ -150,6 +152,20 @@ export default function ProjectsPage() {
                   {t(option.label)}
                 </option>
               ))}
+            </select>
+          </div>
+
+          <div className="relative w-full">
+            <MdFilterList className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg" />
+            <select
+              value={adminOnlyFilter ? "admin" : "all"}
+              onChange={(event) =>
+                setAdminOnlyFilter(event.target.value === "admin")
+              }
+              className="w-full pl-11 pr-4 py-3 bg-surface-container-lowest border border-outline-variant/50 rounded-xl text-body-md focus:ring-2 focus:ring-primary"
+            >
+              <option value="all">{t("All Projects")}</option>
+              <option value="admin">{t("Admin Only")}</option>
             </select>
           </div>
 

@@ -16,8 +16,10 @@ export interface ProjectStoreState {
   total: number;
   statusFilter: "all" | "active" | "completed" | "on_hold";
   searchQuery: string;
+  adminOnlyFilter: boolean;
   setStatusFilter: (status: ProjectStoreState["statusFilter"]) => void;
   setSearchQuery: (query: string) => void;
+  setAdminOnlyFilter: (adminOnly: boolean) => void;
   setPage: (page: number) => void;
   fetchProjects: () => Promise<void>;
   createProject: (payload: ProjectCreateDTO) => Promise<Project>;
@@ -34,20 +36,23 @@ export const useProjectStore = create<ProjectStoreState>((set, get) => ({
   total: 0,
   statusFilter: "all",
   searchQuery: "",
+  adminOnlyFilter: false,
 
   setStatusFilter: (status) => set({ statusFilter: status, page: 1 }),
   setSearchQuery: (query) => set({ searchQuery: query, page: 1 }),
+  setAdminOnlyFilter: (adminOnly) => set({ adminOnlyFilter: adminOnly, page: 1 }),
   setPage: (page) => set({ page }),
 
   fetchProjects: async () => {
     set({ loading: true, error: null });
     try {
-      const { statusFilter, searchQuery, page, limit } = get();
+      const { statusFilter, searchQuery, adminOnlyFilter, page, limit } = get();
       const response = await projectService.getAll({
         status: statusFilter === "all" ? undefined : statusFilter,
         search: searchQuery.trim() || undefined,
         page,
         limit,
+        adminOnly: adminOnlyFilter || undefined,
       });
 
       set({
