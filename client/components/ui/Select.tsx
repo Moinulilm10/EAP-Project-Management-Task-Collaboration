@@ -7,6 +7,7 @@ interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>
   containerClassName?: string;
   onChange?: (event: React.ChangeEvent<HTMLSelectElement>) => void;
   placeholder?: string;
+  direction?: "up" | "down";
 }
 
 export function Select({
@@ -17,6 +18,7 @@ export function Select({
   containerClassName = "",
   disabled,
   placeholder,
+  direction = "down",
   ...props
 }: SelectProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -80,12 +82,14 @@ export function Select({
       <AnimatePresence>
         {isOpen && !disabled && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.96, y: -4 }}
+            initial={{ opacity: 0, scale: 0.96, y: direction === "up" ? 4 : -4 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: -4 }}
+            exit={{ opacity: 0, scale: 0.96, y: direction === "up" ? 4 : -4 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            style={{ originY: 0 }}
-            className="absolute z-50 w-full mt-2 bg-surface-bright/95 dark:bg-surface-container-lowest/95 backdrop-blur-md border border-outline-variant/60 rounded-2xl shadow-xl overflow-hidden max-h-60 overflow-y-auto"
+            style={{ originY: direction === "up" ? 1 : 0 }}
+            className={`absolute z-50 w-full bg-surface-bright/95 dark:bg-surface-container-lowest/95 backdrop-blur-md border border-outline-variant/60 rounded-2xl shadow-xl overflow-hidden max-h-60 overflow-y-auto ${
+              direction === "up" ? "bottom-full mb-2" : "top-full mt-2"
+            }`}
           >
             <div className="py-1.5">
               {options.map((opt) => {

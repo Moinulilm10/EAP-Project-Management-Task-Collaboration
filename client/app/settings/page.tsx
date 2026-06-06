@@ -8,6 +8,10 @@ import { SettingsSidebar } from "@/components/settings/SettingsSidebar";
 import { SettingsSectionWrapper } from "@/components/settings/SettingsSectionWrapper";
 import { ProfileSettingsForm } from "@/components/settings/ProfileSettingsForm";
 import { WorkspacePreferences } from "@/components/settings/WorkspacePreferences";
+import { NotificationSettings } from "@/components/settings/NotificationSettings";
+import { AppearanceSettings } from "@/components/settings/AppearanceSettings";
+import { SecuritySettings } from "@/components/settings/SecuritySettings";
+import { IntegrationSettings } from "@/components/settings/IntegrationSettings";
 import { useTranslation } from "react-i18next";
 
 export default function SettingsPage() {
@@ -34,26 +38,65 @@ export default function SettingsPage() {
           <SettingsSidebar activeSection={activeSection} onSectionChange={setActiveSection} />
           
           <div className="flex-1 max-w-3xl flex flex-col gap-xl pb-xl">
-            {/* We just show all sections and let the user scroll or navigate,
-                or we can render them conditionally based on `activeSection`.
-                The original HTML seemed to just show them stacked.
-                I'll keep them stacked and use IDs for navigation as per HTML design. */}
-                
-            <SettingsSectionWrapper
-              id="profile"
-              title={t("Profile Settings")}
-              description={t("Update your personal information and how others see you on the platform.")}
-            >
-              <ProfileSettingsForm />
-            </SettingsSectionWrapper>
+            {activeSection === "profile" && (
+              <SettingsSectionWrapper
+                id="profile"
+                title={t("Profile Settings")}
+                description={t("Update your personal information and how others see you on the platform.")}
+              >
+                <ProfileSettingsForm />
+              </SettingsSectionWrapper>
+            )}
 
-            <SettingsSectionWrapper
-              id="workspace"
-              title={t("Workspace Preferences")}
-              description={t("Manage organizational settings and defaults.")}
-            >
-              <WorkspacePreferences />
-            </SettingsSectionWrapper>
+            {activeSection === "workspace" && (
+              <SettingsSectionWrapper
+                id="workspace"
+                title={t("Workspace Preferences")}
+                description={t("Manage organizational settings and defaults.")}
+              >
+                <WorkspacePreferences />
+              </SettingsSectionWrapper>
+            )}
+
+            {activeSection === "notifications" && (
+              <SettingsSectionWrapper
+                id="notifications"
+                title={t("Notification Settings")}
+                description={t("Control how and when you want to be notified.")}
+              >
+                <NotificationSettings />
+              </SettingsSectionWrapper>
+            )}
+
+            {activeSection === "appearance" && (
+              <SettingsSectionWrapper
+                id="appearance"
+                title={t("Appearance")}
+                description={t("Customize the look and feel of your workspace.")}
+              >
+                <AppearanceSettings />
+              </SettingsSectionWrapper>
+            )}
+
+            {activeSection === "security" && (
+              <SettingsSectionWrapper
+                id="security"
+                title={t("Security & Privacy")}
+                description={t("Manage your password and secure your account.")}
+              >
+                <SecuritySettings />
+              </SettingsSectionWrapper>
+            )}
+
+            {activeSection === "integrations" && (
+              <SettingsSectionWrapper
+                id="integrations"
+                title={t("Integrations")}
+                description={t("Connect your workspace with the tools you use every day.")}
+              >
+                <IntegrationSettings />
+              </SettingsSectionWrapper>
+            )}
           </div>
         </div>
       </PageWrapper>

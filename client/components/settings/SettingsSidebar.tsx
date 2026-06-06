@@ -15,6 +15,8 @@ export function SettingsSidebar({ activeSection, onSectionChange }: SettingsSide
     { id: "workspace", label: t("Workspace Preferences") },
     { id: "notifications", label: t("Notification Settings") },
     { id: "appearance", label: t("Appearance") },
+    { id: "security", label: t("Security & Privacy") },
+    { id: "integrations", label: t("Integrations") },
   ];
 
   return (
