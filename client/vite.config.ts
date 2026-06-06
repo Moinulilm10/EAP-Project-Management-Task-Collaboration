@@ -7,8 +7,15 @@ const createNextConfig = nextJest({
 });
 
 
+import path from 'path';
+
 const config = defineConfig({
     plugins: [react()],
+    resolve: {
+        alias: {
+            '@': path.resolve(__dirname, './'),
+        },
+    },
     test: {
         globals: true,
         environment: 'jsdom',
