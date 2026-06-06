@@ -279,4 +279,18 @@ export const authService = {
     }
     return toProfile(user);
   },
+
+  /**
+   * Update user profile name.
+   */
+  async updateProfile(userId: string, data: { name: string }): Promise<UserProfile> {
+    const userRepo = AppDataSource.getRepository(User);
+    const user = await userRepo.findOne({ where: { id: userId } });
+    if (!user) {
+      throw { status: 404, message: "User not found." };
+    }
+    user.name = data.name;
+    await userRepo.save(user);
+    return toProfile(user);
+  },
 };

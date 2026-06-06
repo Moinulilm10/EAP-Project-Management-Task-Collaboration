@@ -14,7 +14,7 @@ export function Input({ icon, className = "", containerClassName = "", ...props 
         </div>
       )}
       <input
-        className={`w-full bg-surface-container-lowest border border-outline-variant/50 rounded-full py-xs text-body-md font-body-md focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow placeholder:text-on-surface-variant/60 shadow-sm ${
+        className={`w-full bg-surface-container-lowest border border-outline-variant/50 rounded-full py-sm text-body-md font-body-md focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow placeholder:text-on-surface-variant/60 shadow-sm ${
           icon ? "pl-xl pr-md" : "px-md"
         } ${className}`}
         {...props}

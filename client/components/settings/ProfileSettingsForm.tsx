@@ -1,11 +1,28 @@
 import React from "react";
 import { Input } from "../ui/Input";
 import { Avatar } from "../ui/Avatar";
-import { IconButton } from "../ui/IconButton";
 import { useTranslation } from "react-i18next";
 import { MdEdit, MdMail } from "react-icons/md";
 
-export function ProfileSettingsForm() {
+interface ProfileSettingsFormProps {
+  firstName: string;
+  setFirstName: (val: string) => void;
+  lastName: string;
+  setLastName: (val: string) => void;
+  email: string;
+  bio: string;
+  setBio: (val: string) => void;
+}
+
+export function ProfileSettingsForm({
+  firstName,
+  setFirstName,
+  lastName,
+  setLastName,
+  email,
+  bio,
+  setBio,
+}: ProfileSettingsFormProps) {
   const { t } = useTranslation();
 
   return (
@@ -36,24 +53,39 @@ export function ProfileSettingsForm() {
           <label className="font-label-md text-label-md text-on-surface-variant">
             {t("First Name")}
           </label>
-          <Input defaultValue="Alex" />
+          <Input 
+            value={firstName} 
+            onChange={(e) => setFirstName(e.target.value)} 
+            placeholder={t("First Name") as string}
+          />
         </div>
         <div className="flex flex-col gap-xs">
           <label className="font-label-md text-label-md text-on-surface-variant">
             {t("Last Name")}
           </label>
-          <Input defaultValue="Morgan" />
+          <Input 
+            value={lastName} 
+            onChange={(e) => setLastName(e.target.value)} 
+            placeholder={t("Last Name") as string}
+          />
         </div>
       </div>
 
       <div className="flex flex-col gap-xs">
-        <label className="font-label-md text-label-md text-on-surface-variant">
-          {t("Email Address")}
-        </label>
+        <div className="flex justify-between items-center">
+          <label className="font-label-md text-label-md text-on-surface-variant">
+            {t("Email Address")}
+          </label>
+          <span className="text-label-sm font-label-sm text-secondary">
+            {t("Email cannot be changed")}
+          </span>
+        </div>
         <Input
           icon={<MdMail className="w-5 h-5 text-on-surface-variant/60" />}
           type="email"
-          defaultValue="alex.morgan@example.com"
+          value={email}
+          disabled
+          className="bg-surface-container-high/20 opacity-70 text-secondary cursor-not-allowed"
         />
       </div>
 
@@ -65,6 +97,8 @@ export function ProfileSettingsForm() {
           className="w-full bg-surface-bright border border-outline-variant/50 rounded-lg px-md py-sm text-body-md font-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary resize-none"
           placeholder={t("Write a few sentences about yourself...") as string}
           rows={3}
+          value={bio}
+          onChange={(e) => setBio(e.target.value)}
         ></textarea>
       </div>
     </>

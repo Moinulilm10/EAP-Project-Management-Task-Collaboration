@@ -17,6 +17,7 @@
   "type": "commonjs",
   "dependencies": {
     "@sentry/node": "^10.56.0",
+    "@supabase/supabase-js": "^2.107.0",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
@@ -25,6 +26,7 @@
     "express-rate-limit": "^8.5.2",
     "helmet": "^8.2.0",
     "jsonwebtoken": "^9.0.3",
+    "multer": "^2.1.1",
     "pg": "^8.21.0",
     "reflect-metadata": "^0.2.2",
     "typeorm": "^1.0.0",
@@ -40,6 +42,7 @@
     "@types/express": "^5.0.6",
     "@types/helmet": "^0.0.48",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.1.0",
     "@types/node": "^25.9.1",
     "@types/pg": "^8.20.0",
     "@types/supertest": "^7.2.0",
