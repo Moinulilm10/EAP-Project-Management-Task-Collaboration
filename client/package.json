@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@sentry/nextjs": "^10.56.0",
+    "@supabase/ssr": "^0.10.3",
+    "@supabase/supabase-js": "^2.107.0",
     "chart.js": "^4.5.1",
     "framer-motion": "^12.40.0",
     "i18next": "^26.3.0",

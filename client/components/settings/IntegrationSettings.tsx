@@ -60,7 +60,7 @@ export function IntegrationSettings() {
                
                <div>
                   {app.connected ? (
-                     <Button variant="outline" className="w-full text-error border-error/50 hover:bg-error/10">{t("Disconnect")}</Button>
+                     <Button variant="secondary" className="w-full text-error border-error/50 hover:bg-error/10">{t("Disconnect")}</Button>
                   ) : (
                      <Button variant="secondary" className="w-full">{t("Connect")}</Button>
                   )}
