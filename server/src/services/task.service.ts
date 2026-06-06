@@ -1,6 +1,6 @@
 import { AppDataSource } from '../utils/data-source';
 import { Task, TaskStatus, TaskPriority } from '../entities/Task.entity';
-import { ProjectMemberRole } from '../entities/ProjectMember.entity';
+import { ProjectRoleName } from '../entities/ProjectMember.entity';
 
 const repo = () => AppDataSource.getRepository(Task);
 
@@ -12,11 +12,12 @@ export const taskService = {
       .leftJoinAndSelect('task.createdBy', 'createdBy')
       .innerJoinAndSelect('task.project', 'project')
       .innerJoin('project.projectMembers', 'pm', 'pm.userId = :userId', { userId })
+      .innerJoin('pm.role', 'role')
       .where(
-        '(pm.role IN (:...allAccessRoles) OR task.assigneeId = :userId)',
+        '(role.name IN (:...allAccessRoles) OR task.assigneeId = :userId)',
         {
           userId,
-          allAccessRoles: [ProjectMemberRole.ADMIN, ProjectMemberRole.PROJECT_MANAGER],
+          allAccessRoles: [ProjectRoleName.ADMIN, ProjectRoleName.PROJECT_MANAGER],
         }
       )
       .orderBy('task.createdAt', 'DESC')

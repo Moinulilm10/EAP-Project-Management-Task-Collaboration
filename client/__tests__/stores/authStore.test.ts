@@ -15,7 +15,7 @@ describe('authStore', () => {
   });
 
   it('should set user and update authentication status', () => {
-    const user = { id: '1', email: 'test@test.com', name: 'Test', role: 'admin' as const };
+    const user = { id: '1', email: 'test@test.com', name: 'Test' };
     useAuthStore.getState().setUser(user);
     
     const state = useAuthStore.getState();
@@ -25,7 +25,7 @@ describe('authStore', () => {
   });
 
   it('should clear auth state', () => {
-    const user = { id: '1', email: 'test@test.com', name: 'Test', role: 'admin' as const };
+    const user = { id: '1', email: 'test@test.com', name: 'Test' };
     useAuthStore.getState().setUser(user);
     useAuthStore.getState().clearAuth();
     
@@ -36,7 +36,7 @@ describe('authStore', () => {
 
   it('should hydrate from session', () => {
     const session = {
-      user: { id: '2', email: 'hydrate@test.com', name: 'Hydrate', role: 'team_member' }
+      user: { id: '2', email: 'hydrate@test.com', name: 'Hydrate' }
     };
     useAuthStore.getState().hydrateFromSession(session);
     

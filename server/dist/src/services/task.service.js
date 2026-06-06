@@ -3,21 +3,23 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.taskService = void 0;
 const data_source_1 = require("../utils/data-source");
 const Task_entity_1 = require("../entities/Task.entity");
-const User_entity_1 = require("../entities/User.entity");
+const ProjectMember_entity_1 = require("../entities/ProjectMember.entity");
 const repo = () => data_source_1.AppDataSource.getRepository(Task_entity_1.Task);
 exports.taskService = {
-    async findAll(userId, userRole) {
-        const qb = repo()
+    async findAll(userId) {
+        return repo()
             .createQueryBuilder('task')
             .leftJoinAndSelect('task.assignee', 'assignee')
             .leftJoinAndSelect('task.createdBy', 'createdBy')
-            .leftJoinAndSelect('task.project', 'project')
-            .orderBy('task.createdAt', 'DESC');
-        // Team members only see tasks assigned to them
-        if (userRole === User_entity_1.UserRole.TEAM_MEMBER) {
-            qb.where('task.assigneeId = :userId', { userId });
-        }
-        return qb.getMany();
+            .innerJoinAndSelect('task.project', 'project')
+            .innerJoin('project.projectMembers', 'pm', 'pm.userId = :userId', { userId })
+            .innerJoin('pm.role', 'role')
+            .where('(role.name IN (:...allAccessRoles) OR task.assigneeId = :userId)', {
+            userId,
+            allAccessRoles: [ProjectMember_entity_1.ProjectRoleName.ADMIN, ProjectMember_entity_1.ProjectRoleName.PROJECT_MANAGER],
+        })
+            .orderBy('task.createdAt', 'DESC')
+            .getMany();
     },
     async findById(id) {
         const task = await repo().findOne({

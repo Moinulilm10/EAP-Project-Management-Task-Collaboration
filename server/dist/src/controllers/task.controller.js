@@ -2,11 +2,17 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.taskController = void 0;
 const task_service_1 = require("../services/task.service");
-const User_entity_1 = require("../entities/User.entity");
+const ProjectMember_entity_1 = require("../entities/ProjectMember.entity");
+const data_source_1 = require("../utils/data-source");
+const memberRepo = () => data_source_1.AppDataSource.getRepository(ProjectMember_entity_1.ProjectMember);
 exports.taskController = {
     async getAll(req, res) {
         try {
-            const tasks = await task_service_1.taskService.findAll(req.user.id, req.user.role);
+            if (!req.user) {
+                res.status(401).json({ error: 'Authentication required.' });
+                return;
+            }
+            const tasks = await task_service_1.taskService.findAll(req.user.id);
             res.status(200).json({ tasks });
         }
         catch (error) {
@@ -15,7 +21,19 @@ exports.taskController = {
     },
     async getById(req, res) {
         try {
+            if (!req.user) {
+                res.status(401).json({ error: 'Authentication required.' });
+                return;
+            }
             const task = await task_service_1.taskService.findById(req.params.id);
+            // Check if user is a member of the project
+            const isMember = await memberRepo().count({
+                where: { projectId: task.projectId, userId: req.user.id }
+            });
+            if (!isMember) {
+                res.status(403).json({ error: 'Forbidden', message: 'You are not a member of this project.' });
+                return;
+            }
             res.status(200).json({ task });
         }
         catch (error) {
@@ -24,6 +42,26 @@ exports.taskController = {
     },
     async create(req, res) {
         try {
+            if (!req.user) {
+                res.status(401).json({ error: 'Authentication required.' });
+                return;
+            }
+            const { projectId } = req.body;
+            if (!projectId) {
+                res.status(400).json({ error: 'Project ID is required.' });
+                return;
+            }
+            const membership = await memberRepo().findOne({
+                where: { projectId, userId: req.user.id },
+                relations: { role: true },
+            });
+            if (!membership || !membership.role || (membership.role.name !== ProjectMember_entity_1.ProjectRoleName.ADMIN && membership.role.name !== ProjectMember_entity_1.ProjectRoleName.PROJECT_MANAGER)) {
+                res.status(403).json({
+                    error: 'Forbidden',
+                    message: 'Only project admins and project managers can create tasks.',
+                });
+                return;
+            }
             const task = await task_service_1.taskService.create({
                 ...req.body,
                 createdById: req.user.id,
@@ -34,23 +72,32 @@ exports.taskController = {
             res.status(error.status || 500).json({ error: error.message || 'Failed to create task.' });
         }
     },
-    /**
-     * Update endpoint with role-aware logic:
-     * - Admin/PM: Full field update
-     * - Team Member: Status-only update (enforced at service layer)
-     */
     async update(req, res) {
         try {
-            let task;
-            if (req.user.role === User_entity_1.UserRole.TEAM_MEMBER) {
+            if (!req.user) {
+                res.status(401).json({ error: 'Authentication required.' });
+                return;
+            }
+            const taskId = req.params.id;
+            const task = await task_service_1.taskService.findById(taskId);
+            const membership = await memberRepo().findOne({
+                where: { projectId: task.projectId, userId: req.user.id },
+                relations: { role: true },
+            });
+            if (!membership) {
+                res.status(403).json({ error: 'Forbidden', message: 'You are not a member of this project.' });
+                return;
+            }
+            let updatedTask;
+            if (membership.role && membership.role.name === ProjectMember_entity_1.ProjectRoleName.TEAM_MEMBER) {
                 // Team member: status-only update with ownership verification
-                task = await task_service_1.taskService.updateStatus(req.params.id, req.body.status, req.user.id);
+                updatedTask = await task_service_1.taskService.updateStatus(taskId, req.body.status, req.user.id);
             }
             else {
                 // Admin/PM: full update
-                task = await task_service_1.taskService.update(req.params.id, req.body);
+                updatedTask = await task_service_1.taskService.update(taskId, req.body);
             }
-            res.status(200).json({ task });
+            res.status(200).json({ task: updatedTask });
         }
         catch (error) {
             res.status(error.status || 500).json({ error: error.message || 'Failed to update task.' });
@@ -58,7 +105,24 @@ exports.taskController = {
     },
     async delete(req, res) {
         try {
-            await task_service_1.taskService.delete(req.params.id);
+            if (!req.user) {
+                res.status(401).json({ error: 'Authentication required.' });
+                return;
+            }
+            const taskId = req.params.id;
+            const task = await task_service_1.taskService.findById(taskId);
+            const membership = await memberRepo().findOne({
+                where: { projectId: task.projectId, userId: req.user.id },
+                relations: { role: true },
+            });
+            if (!membership || !membership.role || (membership.role.name !== ProjectMember_entity_1.ProjectRoleName.ADMIN && membership.role.name !== ProjectMember_entity_1.ProjectRoleName.PROJECT_MANAGER)) {
+                res.status(403).json({
+                    error: 'Forbidden',
+                    message: 'Only project admins and project managers can delete tasks.',
+                });
+                return;
+            }
+            await task_service_1.taskService.delete(taskId);
             res.status(200).json({ message: 'Task deleted successfully.' });
         }
         catch (error) {

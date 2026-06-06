@@ -2,8 +2,8 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import app from '../../app';
 import { AppDataSource } from '../../utils/data-source';
-import { User, UserRole, AuthProvider } from '../../entities/User.entity';
-import { authService } from '../../services/auth.service';
+import { Role } from '../../entities/Role.entity';
+import { ProjectRoleName } from '../../entities/ProjectMember.entity';
 
 describe('Idempotency Integration', () => {
   let accessToken: string;
@@ -14,21 +14,20 @@ describe('Idempotency Integration', () => {
     }
     await AppDataSource.synchronize(true);
 
+    // Seed roles
+    const roleRepo = AppDataSource.getRepository(Role);
+    for (const name of Object.values(ProjectRoleName)) {
+      await roleRepo.save(roleRepo.create({ name }));
+    }
+
+    // Any registered user can create a project (no global role needed)
     const res = await request(app).post('/api/v1/auth/register').send({
-        email: 'admin2@example.com',
-        password: 'StrongPassword123!',
-        name: 'Admin2'
+      email: 'idempotency-user@example.com',
+      password: 'StrongPassword123!',
+      name: 'Idempotency User',
     });
     accessToken = res.body.accessToken;
-    // Upgrade to admin manually
-    await AppDataSource.getRepository(User).update({ email: 'admin2@example.com' }, { role: UserRole.ADMIN });
-    // Re-login to get admin token
-    const loginRes = await request(app).post('/api/v1/auth/login').send({
-        email: 'admin2@example.com',
-        password: 'StrongPassword123!',
-    });
-    accessToken = loginRes.body.accessToken;
-  });
+  }, 30000);
 
   afterAll(async () => {
     if (AppDataSource.isInitialized) await AppDataSource.destroy();

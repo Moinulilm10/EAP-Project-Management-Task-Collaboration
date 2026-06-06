@@ -34,11 +34,39 @@ app.use('/api/v1', apiRoutes);
 // Sentry error handler must be registered after all routes
 Sentry.setupExpressErrorHandler(app);
 
+import { Role } from './entities/Role.entity';
+import { ProjectRoleName } from './entities/ProjectMember.entity';
+
+async function seedRoles(): Promise<void> {
+  try {
+    const roleRepo = AppDataSource.getRepository(Role);
+    const rolesToSeed = [
+      ProjectRoleName.ADMIN,
+      ProjectRoleName.PROJECT_MANAGER,
+      ProjectRoleName.TEAM_MEMBER,
+    ];
+
+    for (const roleName of rolesToSeed) {
+      const exists = await roleRepo.findOne({ where: { name: roleName } });
+      if (!exists) {
+        const newRole = roleRepo.create({ name: roleName });
+        await roleRepo.save(newRole);
+        console.log(`Seeded role: ${roleName}`);
+      }
+    }
+  } catch (error) {
+    console.error('Error seeding roles:', error);
+  }
+}
+
 // Initialize Database Connection first, then start Express
 if (process.env.NODE_ENV !== 'test') {
   AppDataSource.initialize()
-    .then(() => {
+    .then(async () => {
       console.log('Successfully connected to Neon PostgreSQL DB!');
+      
+      // Ensure fixed roles are seeded in database
+      await seedRoles();
 
       // Start server only after database is ready
       app.listen(PORT, () => {
@@ -50,5 +78,6 @@ if (process.env.NODE_ENV !== 'test') {
       process.exit(1); // Stop the server if database connection fails
     });
 }
+
 
 export default app;

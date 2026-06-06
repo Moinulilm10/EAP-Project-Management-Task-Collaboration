@@ -4,7 +4,6 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  role: 'admin' | 'project_manager' | 'team_member';
   image?: string | null;
 }
 
@@ -33,10 +32,9 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (session?.user) {
       set({
         user: {
-          id: session.user.id || '', // NextAuth might not have ID by default unless added
+          id: session.user.id || '',
           email: session.user.email,
           name: session.user.name,
-          role: session.user.role,
           image: session.user.image || null,
         },
         isAuthenticated: true,

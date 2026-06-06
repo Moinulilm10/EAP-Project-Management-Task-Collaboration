@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import { AuthenticatedRequest } from '../middleware/auth';
 import { taskService } from '../services/task.service';
-import { ProjectMember, ProjectMemberRole } from '../entities/ProjectMember.entity';
+import { ProjectMember, ProjectRoleName } from '../entities/ProjectMember.entity';
 import { AppDataSource } from '../utils/data-source';
 
 const memberRepo = () => AppDataSource.getRepository(ProjectMember);
@@ -58,10 +58,11 @@ export const taskController = {
       }
 
       const membership = await memberRepo().findOne({
-        where: { projectId, userId: req.user.id }
+        where: { projectId, userId: req.user.id },
+        relations: { role: true },
       });
 
-      if (!membership || (membership.role !== ProjectMemberRole.ADMIN && membership.role !== ProjectMemberRole.PROJECT_MANAGER)) {
+      if (!membership || !membership.role || (membership.role.name !== ProjectRoleName.ADMIN && membership.role.name !== ProjectRoleName.PROJECT_MANAGER)) {
         res.status(403).json({
           error: 'Forbidden',
           message: 'Only project admins and project managers can create tasks.',
@@ -90,7 +91,8 @@ export const taskController = {
       const task = await taskService.findById(taskId);
 
       const membership = await memberRepo().findOne({
-        where: { projectId: task.projectId, userId: req.user.id }
+        where: { projectId: task.projectId, userId: req.user.id },
+        relations: { role: true },
       });
 
       if (!membership) {
@@ -99,7 +101,7 @@ export const taskController = {
       }
 
       let updatedTask;
-      if (membership.role === ProjectMemberRole.TEAM_MEMBER) {
+      if (membership.role && membership.role.name === ProjectRoleName.TEAM_MEMBER) {
         // Team member: status-only update with ownership verification
         updatedTask = await taskService.updateStatus(
           taskId,
@@ -128,10 +130,11 @@ export const taskController = {
       const task = await taskService.findById(taskId);
 
       const membership = await memberRepo().findOne({
-        where: { projectId: task.projectId, userId: req.user.id }
+        where: { projectId: task.projectId, userId: req.user.id },
+        relations: { role: true },
       });
 
-      if (!membership || (membership.role !== ProjectMemberRole.ADMIN && membership.role !== ProjectMemberRole.PROJECT_MANAGER)) {
+      if (!membership || !membership.role || (membership.role.name !== ProjectRoleName.ADMIN && membership.role.name !== ProjectRoleName.PROJECT_MANAGER)) {
         res.status(403).json({
           error: 'Forbidden',
           message: 'Only project admins and project managers can delete tasks.',

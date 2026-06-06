@@ -172,7 +172,7 @@ export function ProjectModal({
                     <select
                       value={status}
                       onChange={(e) =>
-                        setStatus(e.target.value as ProjectCreateDTO["status"])
+                        setStatus(e.target.value as "active" | "completed" | "on_hold")
                       }
                       className="w-full rounded-2xl border border-outline-variant/50 bg-surface-container-lowest px-4 py-3 text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"
                     >

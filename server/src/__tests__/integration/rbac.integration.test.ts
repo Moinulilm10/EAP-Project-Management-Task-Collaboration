@@ -2,75 +2,99 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import app from '../../app';
 import { AppDataSource } from '../../utils/data-source';
-import { User, UserRole } from '../../entities/User.entity';
-import { Project } from '../../entities/Project.entity';
 import { v4 as uuidv4 } from 'uuid';
+import { Role } from '../../entities/Role.entity';
+import { ProjectRoleName } from '../../entities/ProjectMember.entity';
 
-describe('RBAC Integration', () => {
-  let adminToken: string;
-  let teamMemberToken: string;
+describe('RBAC Integration (Project-Based)', () => {
+  let creatorToken: string;
+  let outsiderToken: string;
   let testProjectId: string;
 
   beforeAll(async () => {
     if (!AppDataSource.isInitialized) await AppDataSource.initialize();
     await AppDataSource.synchronize(true);
 
-    // Register Team Member
-    const resTm = await request(app).post('/api/v1/auth/register').send({
-      email: 'team@example.com', password: 'Password123!', name: 'Team Member'
-    });
-    teamMemberToken = resTm.body.accessToken;
+    // Seed roles
+    const roleRepo = AppDataSource.getRepository(Role);
+    for (const name of Object.values(ProjectRoleName)) {
+      await roleRepo.save(roleRepo.create({ name }));
+    }
 
-    // Register Admin
-    const resAd = await request(app).post('/api/v1/auth/register').send({
-      email: 'admin@example.com', password: 'Password123!', name: 'Admin'
+    // Register the project creator — they will be auto-assigned admin for any project they create
+    const resCreator = await request(app).post('/api/v1/auth/register').send({
+      email: 'creator@example.com',
+      password: 'Password123!',
+      name: 'Project Creator',
     });
-    await AppDataSource.getRepository(User).update({ email: 'admin@example.com' }, { role: UserRole.ADMIN });
-    
-    const loginAd = await request(app).post('/api/v1/auth/login').send({
-      email: 'admin@example.com', password: 'Password123!'
-    });
-    adminToken = loginAd.body.accessToken;
+    creatorToken = resCreator.body.accessToken;
 
-    // Create a project as Admin
+    // Register an outsider who is NOT a member of any project
+    const resOutsider = await request(app).post('/api/v1/auth/register').send({
+      email: 'outsider@example.com',
+      password: 'Password123!',
+      name: 'Outsider',
+    });
+    outsiderToken = resOutsider.body.accessToken;
+
+    // Creator creates a project → becomes admin of that project
     const projRes = await request(app)
       .post('/api/v1/projects')
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Authorization', `Bearer ${creatorToken}`)
       .set('X-Idempotency-Key', uuidv4())
-      .send({ name: 'Admin Project' });
-    
+      .send({ name: 'Creator Project' });
+
     testProjectId = projRes.body.project.id;
-  });
+  }, 30000);
 
   afterAll(async () => {
     if (AppDataSource.isInitialized) await AppDataSource.destroy();
   });
 
-  it('Admin can create a project', async () => {
+  it('Any authenticated user can create a project', async () => {
     const res = await request(app)
       .post('/api/v1/projects')
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Authorization', `Bearer ${outsiderToken}`)
       .set('X-Idempotency-Key', uuidv4())
-      .send({ name: 'Another Admin Project' });
+      .send({ name: 'Outsider Project' });
 
     expect(res.status).toBe(201);
   });
 
-  it('Team Member gets 403 when trying to create a project', async () => {
+  it('Project admin (creator) can update their project', async () => {
     const res = await request(app)
-      .post('/api/v1/projects')
-      .set('Authorization', `Bearer ${teamMemberToken}`)
+      .put(`/api/v1/projects/${testProjectId}`)
+      .set('Authorization', `Bearer ${creatorToken}`)
       .set('X-Idempotency-Key', uuidv4())
-      .send({ name: 'Team Member Project' });
+      .send({ name: 'Updated Creator Project' });
 
-    expect(res.status).toBe(403);
-    expect(res.body.error).toBe('Forbidden');
+    expect(res.status).toBe(200);
+    expect(res.body.project.name).toBe('Updated Creator Project');
   });
 
-  it('Admin can delete a project', async () => {
+  it('Non-member cannot update a project they do not belong to', async () => {
+    const res = await request(app)
+      .put(`/api/v1/projects/${testProjectId}`)
+      .set('Authorization', `Bearer ${outsiderToken}`)
+      .set('X-Idempotency-Key', uuidv4())
+      .send({ name: 'Hacked Name' });
+
+    expect(res.status).toBe(403);
+  });
+
+  it('Non-member cannot delete a project they do not belong to', async () => {
     const res = await request(app)
       .delete(`/api/v1/projects/${testProjectId}`)
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Authorization', `Bearer ${outsiderToken}`)
+      .set('X-Idempotency-Key', uuidv4());
+
+    expect(res.status).toBe(403);
+  });
+
+  it('Project admin (creator) can delete their project', async () => {
+    const res = await request(app)
+      .delete(`/api/v1/projects/${testProjectId}`)
+      .set('Authorization', `Bearer ${creatorToken}`)
       .set('X-Idempotency-Key', uuidv4());
 
     expect(res.status).toBe(200);

@@ -61,9 +61,8 @@ export const authOptions: NextAuthOptions = {
           });
           const data = await res.json();
           if (res.ok) {
-            // Store the backend access token and role on the user object temporarily
+            // Store the backend access token on the user object temporarily
             (user as any).accessToken = data.accessToken;
-            (user as any).role = data.user.role;
             return true;
           }
           return false;
@@ -77,7 +76,6 @@ export const authOptions: NextAuthOptions = {
       // Initial sign in
       if (user) {
         token.accessToken = (user as any).accessToken;
-        token.role = (user as any).role;
         // Assume access token expires in 15 minutes
         token.accessTokenExpires = Date.now() + 15 * 60 * 1000;
       }
@@ -96,9 +94,6 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      if (session.user) {
-        (session.user as any).role = token.role as string;
-      }
       (session as any).accessToken = token.accessToken as string;
       return session;
     },

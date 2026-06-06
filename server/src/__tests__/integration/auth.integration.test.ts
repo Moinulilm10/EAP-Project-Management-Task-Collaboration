@@ -2,18 +2,16 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import app from '../../app';
 import { AppDataSource } from '../../utils/data-source';
-import { User, UserRole, AuthProvider } from '../../entities/User.entity';
+import { User, AuthProvider } from '../../entities/User.entity';
 import bcrypt from 'bcryptjs';
 
 describe('Auth Integration', () => {
   beforeAll(async () => {
-    // Setup in-memory SQLite for testing if needed, or rely on a test DB config
-    // For this demonstration, we'll assume AppDataSource is configured for tests
     if (!AppDataSource.isInitialized) {
       await AppDataSource.initialize();
     }
-    await AppDataSource.synchronize(true); // Drop and recreate schema
-  });
+    await AppDataSource.synchronize(true);
+  }, 30000);
 
   afterAll(async () => {
     if (AppDataSource.isInitialized) {
@@ -42,7 +40,6 @@ describe('Auth Integration', () => {
         email: 'loginuser@example.com',
         passwordHash: await bcrypt.hash('StrongPassword123!', 10),
         name: 'Login User',
-        role: UserRole.TEAM_MEMBER,
         provider: AuthProvider.CREDENTIALS,
       })
     );

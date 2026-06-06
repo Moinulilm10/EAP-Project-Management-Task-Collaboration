@@ -19,7 +19,11 @@ export interface Project {
   updatedAt: string;
 }
 
-export interface ProjectSummary extends Project {}
+export type ProjectMemberRole = 'Admin' | 'Project Manager' | 'Team Member';
+
+export interface ProjectSummary extends Project {
+  currentUserRole?: ProjectMemberRole;
+}
 
 export interface ProjectCreateDTO {
   name: string;
@@ -46,7 +50,6 @@ export interface ProjectQueryParams {
   search?: string;
   page?: number;
   limit?: number;
-  admin?: boolean;
 }
 
 const buildQueryString = (params: ProjectQueryParams) => {
@@ -56,7 +59,6 @@ const buildQueryString = (params: ProjectQueryParams) => {
   if (params.search) query.set("search", params.search);
   if (params.page != null) query.set("page", String(params.page));
   if (params.limit != null) query.set("limit", String(params.limit));
-  if (params.admin != null) query.set("admin", String(params.admin));
 
   return query.toString() ? `?${query.toString()}` : "";
 };

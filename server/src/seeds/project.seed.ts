@@ -2,9 +2,10 @@ import { faker } from "@faker-js/faker";
 import { Project, ProjectStatus } from "../entities/Project.entity";
 import {
   ProjectMember,
-  ProjectMemberRole,
+  ProjectRoleName,
 } from "../entities/ProjectMember.entity";
-import { AuthProvider, User, UserRole } from "../entities/User.entity";
+import { AuthProvider, User } from "../entities/User.entity";
+import { Role } from "../entities/Role.entity";
 import { AppDataSource } from "../utils/data-source";
 
 const STATUSES = [
@@ -17,12 +18,6 @@ const createUserPayload = (index: number): Partial<User> => ({
   name: faker.person.fullName(),
   email: `seed.user.${index}@example.com`,
   passwordHash: null,
-  role:
-    index === 0
-      ? UserRole.ADMIN
-      : index === 1
-        ? UserRole.PROJECT_MANAGER
-        : UserRole.TEAM_MEMBER,
   provider: AuthProvider.CREDENTIALS,
   googleId: null,
   isActive: true,
@@ -76,10 +71,22 @@ async function seedUsers(): Promise<User[]> {
   return saved;
 }
 
-async function seedProjects(users: User[]): Promise<void> {
-  const projectRepo = AppDataSource.getRepository(Project);
-  const membershipRepo = AppDataSource.getRepository(ProjectMember);
+async function ensureRoles(manager: any): Promise<Record<ProjectRoleName, Role>> {
+  const roleRepo = manager.getRepository(Role);
+  const rolesMap = {} as Record<ProjectRoleName, Role>;
+  
+  for (const roleName of Object.values(ProjectRoleName)) {
+    let role = await roleRepo.findOne({ where: { name: roleName } });
+    if (!role) {
+      role = roleRepo.create({ name: roleName });
+      role = await roleRepo.save(role);
+    }
+    rolesMap[roleName] = role;
+  }
+  return rolesMap;
+}
 
+async function seedProjects(users: User[]): Promise<void> {
   const projects = Array.from({ length: 16 }, () => {
     const owner = faker.helpers.arrayElement(users);
     return { owner };
@@ -90,6 +97,8 @@ async function seedProjects(users: User[]): Promise<void> {
       const seed = makeProjectSeed(entry.owner.id);
       const project = manager.create(Project, seed);
       const savedProject = await manager.save(project);
+
+      const rolesMap = await ensureRoles(manager);
 
       const members = [
         entry.owner,
@@ -102,16 +111,18 @@ async function seedProjects(users: User[]): Promise<void> {
         new Map(members.map((user) => [user.id, user])).values(),
       );
 
-      const projectMembers = uniqueMembers.map((member) =>
-        manager.create(ProjectMember, {
+      const projectMembers = uniqueMembers.map((member) => {
+        const assignedRoleName =
+          member.id === entry.owner.id
+            ? ProjectRoleName.ADMIN
+            : faker.helpers.arrayElement([ProjectRoleName.PROJECT_MANAGER, ProjectRoleName.TEAM_MEMBER]);
+
+        return manager.create(ProjectMember, {
           project: savedProject,
           userId: member.id,
-          role:
-            member.id === entry.owner.id
-              ? ProjectMemberRole.ADMIN
-              : ProjectMemberRole.MEMBER,
-        }),
-      );
+          roleId: rolesMap[assignedRoleName].id,
+        });
+      });
 
       await manager.save(projectMembers);
       console.log(

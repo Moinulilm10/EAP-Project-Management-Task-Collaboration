@@ -11,13 +11,11 @@ const User_entity_1 = require("../../entities/User.entity");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 (0, vitest_1.describe)('Auth Integration', () => {
     (0, vitest_1.beforeAll)(async () => {
-        // Setup in-memory SQLite for testing if needed, or rely on a test DB config
-        // For this demonstration, we'll assume AppDataSource is configured for tests
         if (!data_source_1.AppDataSource.isInitialized) {
             await data_source_1.AppDataSource.initialize();
         }
-        await data_source_1.AppDataSource.synchronize(true); // Drop and recreate schema
-    });
+        await data_source_1.AppDataSource.synchronize(true);
+    }, 30000);
     (0, vitest_1.afterAll)(async () => {
         if (data_source_1.AppDataSource.isInitialized) {
             await data_source_1.AppDataSource.destroy();
@@ -41,7 +39,6 @@ const bcryptjs_1 = __importDefault(require("bcryptjs"));
             email: 'loginuser@example.com',
             passwordHash: await bcryptjs_1.default.hash('StrongPassword123!', 10),
             name: 'Login User',
-            role: User_entity_1.UserRole.TEAM_MEMBER,
             provider: User_entity_1.AuthProvider.CREDENTIALS,
         }));
         const res = await (0, supertest_1.default)(app_1.default).post('/api/v1/auth/login').send({

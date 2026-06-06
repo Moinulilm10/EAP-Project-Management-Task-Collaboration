@@ -16,7 +16,7 @@ import {
   ProjectCreateDTO,
   ProjectUpdateDTO,
 } from "../../services/project.service";
-import { useAuthStore } from "../../stores/authStore";
+
 import { useProjectStore } from "../../stores/projectStore";
 import { notification } from "../../utils/notification";
 
@@ -48,7 +48,7 @@ type ProjectView = {
   ownerId: string;
   ownerName: string;
   ownerEmail: string;
-  isAdmin: boolean;
+  canManage: boolean;
 };
 
 export default function ProjectsPage() {
@@ -60,10 +60,8 @@ export default function ProjectsPage() {
     page,
     limit,
     statusFilter,
-    adminFilter,
     searchQuery,
     setStatusFilter,
-    setAdminFilter,
     setSearchQuery,
     setPage,
     fetchProjects,
@@ -71,7 +69,7 @@ export default function ProjectsPage() {
     updateProject,
     deleteProject,
   } = useProjectStore();
-  const user = useAuthStore((state) => state.user);
+
 
   const [localSearch, setLocalSearch] = useState(searchQuery || "");
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
@@ -91,28 +89,32 @@ export default function ProjectsPage() {
 
   useEffect(() => {
     fetchProjects();
-  }, [fetchProjects, statusFilter, adminFilter, searchQuery, page]);
+  }, [fetchProjects, statusFilter, searchQuery, page]);
 
   const uiProjects = useMemo(
     () =>
-      projects.map((project) => ({
-        id: project.id,
-        title: project.name,
-        description: project.description || "No description provided.",
-        status: project.status,
-        dueDate: formatDueDate(project.deadline),
-        progress: project.progress,
-        memberCount: project.memberCount,
-        isWarning:
-          project.deadline !== null &&
-          new Date(project.deadline) < new Date() &&
-          project.status !== "completed",
-        ownerId: project.owner.id,
-        ownerName: project.owner.name,
-        ownerEmail: project.owner.email,
-        isAdmin: user?.id === project.owner.id,
-      })),
-    [projects, user?.id],
+      projects.map((project) => {
+        const role = project.currentUserRole;
+        const canManage = role === 'Admin' || role === 'Project Manager';
+        return {
+          id: project.id,
+          title: project.name,
+          description: project.description || "No description provided.",
+          status: project.status,
+          dueDate: formatDueDate(project.deadline),
+          progress: project.progress,
+          memberCount: project.memberCount,
+          isWarning:
+            project.deadline !== null &&
+            new Date(project.deadline) < new Date() &&
+            project.status !== "completed",
+          ownerId: project.owner.id,
+          ownerName: project.owner.name,
+          ownerEmail: project.owner.email,
+          canManage,
+        };
+      }),
+    [projects],
   );
 
   return (
@@ -151,18 +153,7 @@ export default function ProjectsPage() {
             </select>
           </div>
 
-          <div className="relative w-full sm:w-auto">
-            <select
-              value={adminFilter}
-              onChange={(event) =>
-                setAdminFilter(event.target.value as "all" | "admin")
-              }
-              className="w-full pl-4 pr-4 py-3 bg-surface-container-lowest border border-outline-variant/50 rounded-xl text-body-md focus:ring-2 focus:ring-primary"
-            >
-              <option value="all">{t("All projects")}</option>
-              <option value="admin">{t("Admin only")}</option>
-            </select>
-          </div>
+
 
           <Button
             variant="primary"
@@ -218,13 +209,13 @@ export default function ProjectsPage() {
                   <ProjectCard
                     key={project.id}
                     project={project}
-                    isAdmin={project.isAdmin}
+                    isAdmin={project.canManage}
                     onOpenDetails={() => {
                       setSelectedProject(project);
                       setIsDetailsOpen(true);
                     }}
                     onEdit={
-                      project.isAdmin
+                      project.canManage
                         ? (id) => {
                             const match = uiProjects.find(
                               (item) => item.id === id,
@@ -237,7 +228,7 @@ export default function ProjectsPage() {
                         : undefined
                     }
                     onDelete={
-                      project.isAdmin
+                      project.canManage
                         ? async (id) => {
                             const selected = uiProjects.find(
                               (item) => item.id === id,

@@ -18,7 +18,7 @@ import {
   MdPerson,
   MdSearch,
   MdSettings,
-  MdShield,
+
 } from "react-icons/md";
 import "../../i18n";
 import { Avatar } from "../ui/Avatar";
@@ -79,31 +79,6 @@ export function TopNavBar({ onMenuClick }: TopNavBarProps) {
     router.push("/login");
   };
 
-  // Helper to format role names
-  const getRoleLabel = (role?: string) => {
-    switch (role) {
-      case "admin":
-        return "Administrator";
-      case "project_manager":
-        return "Project Manager";
-      case "team_member":
-        return "Team Member";
-      default:
-        return "User";
-    }
-  };
-
-  // Helper to get role colors for badge
-  const getRoleBadgeClass = (role?: string) => {
-    switch (role) {
-      case "admin":
-        return "bg-error-container/20 text-error border border-error/30";
-      case "project_manager":
-        return "bg-primary-container/20 text-primary border border-primary/30";
-      default:
-        return "bg-secondary-container/20 text-secondary border border-secondary/30";
-    }
-  };
 
   return (
     <header className="fixed top-0 right-0 w-full md:w-[calc(100%-280px)] z-40 bg-surface/80 backdrop-blur-md border-b border-outline-variant/20 flex justify-between items-center h-16 px-margin-mobile md:px-margin-desktop ml-auto">
@@ -204,13 +179,7 @@ export function TopNavBar({ onMenuClick }: TopNavBarProps) {
                     {user?.email || "no-email@projectflow.com"}
                   </p>
 
-                  {/* Role Badge */}
-                  <span
-                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-label-sm font-medium ${getRoleBadgeClass(user?.role)}`}
-                  >
-                    <MdShield className="w-3.5 h-3.5 mr-1" />
-                    {getRoleLabel(user?.role)}
-                  </span>
+
                 </div>
 
                 {/* Dropdown Menu Links */}

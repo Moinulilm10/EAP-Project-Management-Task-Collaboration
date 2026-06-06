@@ -9,11 +9,12 @@ import {
 } from "typeorm";
 import { Project } from "./Project.entity";
 import { User } from "./User.entity";
+import { Role } from "./Role.entity";
 
-export enum ProjectMemberRole {
-  ADMIN = "admin",
-  PROJECT_MANAGER = "project_manager",
-  TEAM_MEMBER = "team_member",
+export enum ProjectRoleName {
+  ADMIN = "Admin",
+  PROJECT_MANAGER = "Project Manager",
+  TEAM_MEMBER = "Team Member",
 }
 
 @Entity("project_members")
@@ -30,12 +31,12 @@ export class ProjectMember {
   @Column({ type: "uuid" })
   userId!: string;
 
-  @Column({
-    type: "enum",
-    enum: ProjectMemberRole,
-    default: ProjectMemberRole.TEAM_MEMBER,
-  })
-  role!: ProjectMemberRole;
+  @Column({ type: "uuid", nullable: true })
+  roleId!: string | null;
+
+  @ManyToOne(() => Role, { eager: true, onDelete: "SET NULL", nullable: true })
+  @JoinColumn({ name: "roleId" })
+  role!: Role | null;
 
   @ManyToOne(() => Project, (project) => project.projectMembers, {
     onDelete: "CASCADE",
@@ -54,8 +55,8 @@ export class ProjectMember {
  * Role hierarchy for project members.
  * Higher values = more permissions.
  */
-export const ProjectMemberRoleHierarchy: Record<ProjectMemberRole, number> = {
-  [ProjectMemberRole.ADMIN]: 3,
-  [ProjectMemberRole.PROJECT_MANAGER]: 2,
-  [ProjectMemberRole.TEAM_MEMBER]: 1,
+export const ProjectMemberRoleHierarchy: Record<ProjectRoleName, number> = {
+  [ProjectRoleName.ADMIN]: 3,
+  [ProjectRoleName.PROJECT_MANAGER]: 2,
+  [ProjectRoleName.TEAM_MEMBER]: 1,
 };

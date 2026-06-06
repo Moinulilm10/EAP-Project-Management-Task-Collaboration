@@ -5,25 +5,25 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.authService = void 0;
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const crypto_1 = __importDefault(require("crypto"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const uuid_1 = require("uuid");
-const data_source_1 = require("../utils/data-source");
-const User_entity_1 = require("../entities/User.entity");
 const RefreshToken_entity_1 = require("../entities/RefreshToken.entity");
+const User_entity_1 = require("../entities/User.entity");
+const data_source_1 = require("../utils/data-source");
 const logger_1 = require("../utils/logger");
 const BCRYPT_ROUNDS = 12;
-const ACCESS_TOKEN_EXPIRY = '15m';
+const ACCESS_TOKEN_EXPIRY = "15m";
 const REFRESH_TOKEN_EXPIRY_DAYS = 7;
 // ─── Helpers ────────────────────────────────────────────────────────────────
 function hashToken(token) {
-    return crypto_1.default.createHash('sha256').update(token).digest('hex');
+    return crypto_1.default.createHash("sha256").update(token).digest("hex");
 }
 function generateAccessToken(user) {
-    return jsonwebtoken_1.default.sign({ id: user.id, email: user.email, role: user.role }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
+    return jsonwebtoken_1.default.sign({ id: user.id, email: user.email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
 }
 async function generateRefreshToken(userId, family) {
-    const rawToken = (0, uuid_1.v4)() + '.' + crypto_1.default.randomBytes(32).toString('hex');
+    const rawToken = (0, uuid_1.v4)() + "." + crypto_1.default.randomBytes(32).toString("hex");
     const tokenHash = hashToken(rawToken);
     const tokenFamily = family || (0, uuid_1.v4)();
     const repo = data_source_1.AppDataSource.getRepository(RefreshToken_entity_1.RefreshToken);
@@ -47,7 +47,6 @@ function toProfile(user) {
         id: user.id,
         email: user.email,
         name: user.name,
-        role: user.role,
         provider: user.provider,
     };
 }
@@ -58,16 +57,17 @@ exports.authService = {
      */
     async register(data) {
         const userRepo = data_source_1.AppDataSource.getRepository(User_entity_1.User);
-        const existingUser = await userRepo.findOne({ where: { email: data.email } });
+        const existingUser = await userRepo.findOne({
+            where: { email: data.email },
+        });
         if (existingUser) {
-            throw { status: 409, message: 'A user with this email already exists.' };
+            throw { status: 409, message: "A user with this email already exists." };
         }
         const passwordHash = await bcryptjs_1.default.hash(data.password, BCRYPT_ROUNDS);
         const user = userRepo.create({
             email: data.email,
             passwordHash,
             name: data.name,
-            role: User_entity_1.UserRole.TEAM_MEMBER,
             provider: User_entity_1.AuthProvider.CREDENTIALS,
         });
         await userRepo.save(user);
@@ -86,14 +86,14 @@ exports.authService = {
         const userRepo = data_source_1.AppDataSource.getRepository(User_entity_1.User);
         const user = await userRepo.findOne({ where: { email } });
         if (!user || !user.passwordHash) {
-            throw { status: 401, message: 'Invalid email or password.' };
+            throw { status: 401, message: "Invalid email or password." };
         }
         if (!user.isActive) {
-            throw { status: 403, message: 'Account is deactivated.' };
+            throw { status: 403, message: "Account is deactivated." };
         }
         const isValid = await bcryptjs_1.default.compare(password, user.passwordHash);
         if (!isValid) {
-            throw { status: 401, message: 'Invalid email or password.' };
+            throw { status: 401, message: "Invalid email or password." };
         }
         const accessToken = generateAccessToken(user);
         const { rawToken: refreshToken } = await generateRefreshToken(user.id);
@@ -115,28 +115,28 @@ exports.authService = {
         const tokenHash = hashToken(rawRefreshToken);
         const storedToken = await repo.findOne({ where: { tokenHash } });
         if (!storedToken) {
-            throw { status: 401, message: 'Invalid refresh token.' };
+            throw { status: 401, message: "Invalid refresh token." };
         }
         // Reuse detection: if token is already revoked, someone stole the old token
         if (storedToken.isRevoked) {
             await revokeTokenFamily(storedToken.family);
             throw {
                 status: 401,
-                message: 'Refresh token reuse detected. All sessions revoked for security.',
+                message: "Refresh token reuse detected. All sessions revoked for security.",
             };
         }
         // Check expiry
         if (new Date() > storedToken.expiresAt) {
             storedToken.isRevoked = true;
             await repo.save(storedToken);
-            throw { status: 401, message: 'Refresh token expired.' };
+            throw { status: 401, message: "Refresh token expired." };
         }
         // Revoke current token
         storedToken.isRevoked = true;
         const user = await userRepo.findOne({ where: { id: storedToken.userId } });
         if (!user || !user.isActive) {
             await revokeTokenFamily(storedToken.family);
-            throw { status: 401, message: 'User account not found or deactivated.' };
+            throw { status: 401, message: "User account not found or deactivated." };
         }
         // Generate new pair in the same family
         const accessToken = generateAccessToken(user);
@@ -157,7 +157,7 @@ exports.authService = {
         if (storedToken) {
             await revokeTokenFamily(storedToken.family);
         }
-        logger_1.logger.info('User logged out, token family revoked');
+        logger_1.logger.info("User logged out, token family revoked");
     },
     /**
      * Sync Google OAuth user into the local user table.
@@ -166,7 +166,9 @@ exports.authService = {
     async syncGoogleUser(profile) {
         const userRepo = data_source_1.AppDataSource.getRepository(User_entity_1.User);
         // Try to find by googleId first
-        let user = await userRepo.findOne({ where: { googleId: profile.googleId } });
+        let user = await userRepo.findOne({
+            where: { googleId: profile.googleId },
+        });
         if (!user) {
             // Try to find by email (link accounts)
             user = await userRepo.findOne({ where: { email: profile.email } });
@@ -182,14 +184,13 @@ exports.authService = {
                     name: profile.name,
                     googleId: profile.googleId,
                     provider: User_entity_1.AuthProvider.GOOGLE,
-                    role: User_entity_1.UserRole.TEAM_MEMBER,
                     passwordHash: null,
                 });
                 await userRepo.save(user);
             }
         }
         if (!user.isActive) {
-            throw { status: 403, message: 'Account is deactivated.' };
+            throw { status: 403, message: "Account is deactivated." };
         }
         const accessToken = generateAccessToken(user);
         const { rawToken: refreshToken } = await generateRefreshToken(user.id);
@@ -206,7 +207,7 @@ exports.authService = {
         const userRepo = data_source_1.AppDataSource.getRepository(User_entity_1.User);
         const user = await userRepo.findOne({ where: { id: userId } });
         if (!user) {
-            throw { status: 404, message: 'User not found.' };
+            throw { status: 404, message: "User not found." };
         }
         return toProfile(user);
     },

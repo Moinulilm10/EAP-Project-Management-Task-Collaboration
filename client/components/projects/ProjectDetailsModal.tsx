@@ -24,7 +24,7 @@ interface ProjectDetailsModalProps {
     memberCount?: number;
     ownerName: string;
     ownerEmail: string;
-    isAdmin: boolean;
+    canManage: boolean;
   };
 }
 
@@ -102,7 +102,7 @@ export function ProjectDetailsModal({
                   <div className="rounded-3xl bg-surface-container-highest p-5 border border-outline-variant/20">
                     <div className="flex flex-wrap items-center gap-2 mb-4">
                       <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
-                        {project.isAdmin ? t("Admin") : t("Member")}
+                        {project.canManage ? t("Admin") : t("Member")}
                       </span>
                       <span className="inline-flex items-center gap-2 rounded-full bg-surface-container-low px-3 py-1 text-xs text-secondary">
                         <MdFolder className="w-4 h-4" />
@@ -154,7 +154,7 @@ export function ProjectDetailsModal({
                         </p>
                       </div>
                       <div className="text-primary text-2xl font-bold">
-                        {project.isAdmin ? (
+                        {project.canManage ? (
                           <MdCheckCircle className="inline" />
                         ) : (
                           <MdPeople className="inline" />
@@ -178,7 +178,7 @@ export function ProjectDetailsModal({
                           {t("Invite members")}
                         </p>
                         <p className="text-body-sm text-secondary mt-1">
-                          {project.isAdmin
+                          {project.canManage
                             ? t(
                                 "Only admins can invite members to this project.",
                               )
@@ -198,7 +198,7 @@ export function ProjectDetailsModal({
                           value={inviteEmail}
                           onChange={(e) => setInviteEmail(e.target.value)}
                           placeholder={t("Enter team member email") || ""}
-                          disabled={!project.isAdmin}
+                          disabled={!project.canManage}
                           className="w-full rounded-2xl border border-outline-variant/50 bg-surface-container-lowest px-4 py-3 text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
                         />
                       </div>
@@ -209,7 +209,7 @@ export function ProjectDetailsModal({
                         <select
                           value={inviteRole}
                           onChange={(e) => setInviteRole(e.target.value)}
-                          disabled={!project.isAdmin}
+                          disabled={!project.canManage}
                           className="w-full rounded-2xl border border-outline-variant/50 bg-surface-container-lowest px-4 py-3 text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           {ROLE_OPTIONS.map((role) => (
@@ -221,7 +221,7 @@ export function ProjectDetailsModal({
                       </div>
                       <button
                         type="button"
-                        disabled={!project.isAdmin || !inviteEmail.trim()}
+                        disabled={!project.canManage || !inviteEmail.trim()}
                         className="w-full rounded-2xl bg-primary px-4 py-3 text-body-md font-semibold text-on-primary transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {t("Invite member")}

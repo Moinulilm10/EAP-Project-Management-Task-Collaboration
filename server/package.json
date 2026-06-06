@@ -8,8 +8,8 @@
     "start": "node dist/app.js",
     "dev": "nodemon src/app.ts",
     "seed": "ts-node src/seeds/project.seed.ts",
-    "test": "vitest run --fileParallelism=false",
-    "test:watch": "vitest --fileParallelism=false"
+    "test": "vitest run src --fileParallelism=false",
+    "test:watch": "vitest src --fileParallelism=false"
   },
   "keywords": [],
   "author": "",

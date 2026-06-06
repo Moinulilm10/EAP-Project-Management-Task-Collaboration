@@ -59,7 +59,6 @@ vitest_1.vi.mock('bcryptjs', () => ({
                 id: 'user-1',
                 email: data.email,
                 name: data.name,
-                role: User_entity_1.UserRole.TEAM_MEMBER,
                 provider: User_entity_1.AuthProvider.CREDENTIALS,
             });
         });
