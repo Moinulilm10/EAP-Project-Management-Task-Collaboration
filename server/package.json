@@ -7,7 +7,7 @@
     "build": "tsc",
     "start": "node dist/app.js",
     "dev": "nodemon src/app.ts",
-    "seed": "ts-node src/seeds/project.seed.ts",
+    "seed:project": "ts-node src/seeds/project.seed.ts",
     "test": "vitest run src --fileParallelism=false",
     "test:watch": "vitest src --fileParallelism=false"
   },
