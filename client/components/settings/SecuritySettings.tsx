@@ -13,7 +13,7 @@ export function SecuritySettings() {
         <p className="font-body-sm text-body-sm text-secondary mb-xs">
           {t("Ensure your account is using a long, random password to stay secure.")}
         </p>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
           <div className="flex flex-col gap-xs">
             <label className="font-label-md text-label-md text-on-surface-variant">
@@ -46,13 +46,13 @@ export function SecuritySettings() {
         <p className="font-body-sm text-body-sm text-secondary mb-xs">
           {t("Add an extra layer of security to your account.")}
         </p>
-        
+
         <div className="flex items-center justify-between py-md border border-outline-variant/30 rounded-lg px-md bg-surface-container-lowest">
           <div>
             <div className="font-label-lg text-label-lg text-on-surface">{t("Authenticator App")}</div>
-            <div className="font-body-sm text-body-sm text-secondary mt-1">{t("Use an app like Google Authenticator or 1Password.")}</div>
+            <div className="font-body-sm text-body-sm text-secondary mt-1">{t("Use an app like Google Authenticator.")}</div>
           </div>
-          <Button variant="outline">{t("Enable")}</Button>
+          <Button variant="primary">{t("Enable")}</Button>
         </div>
       </div>
 
@@ -61,26 +61,26 @@ export function SecuritySettings() {
         <p className="font-body-sm text-body-sm text-secondary mb-xs">
           {t("Manage devices that are currently logged into your account.")}
         </p>
-        
+
         <div className="flex flex-col gap-0 border border-outline-variant/30 rounded-lg overflow-hidden bg-surface-container-lowest">
           <div className="flex items-center justify-between p-md border-b border-outline-variant/10">
-             <div className="flex items-center gap-md">
-                <div className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface">💻</div>
-                <div>
-                   <div className="font-label-md text-label-md text-on-surface">Mac OS • Chrome</div>
-                   <div className="font-body-sm text-body-sm text-success mt-1">{t("Active now")} • San Francisco, US</div>
-                </div>
-             </div>
+            <div className="flex items-center gap-md">
+              <div className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface">💻</div>
+              <div>
+                <div className="font-label-md text-label-md text-on-surface">Mac OS • Chrome</div>
+                <div className="font-body-sm text-body-sm text-success mt-1">{t("Active now")} • San Francisco, US</div>
+              </div>
+            </div>
           </div>
           <div className="flex items-center justify-between p-md">
-             <div className="flex items-center gap-md">
-                <div className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface">📱</div>
-                <div>
-                   <div className="font-label-md text-label-md text-on-surface">iOS • Safari</div>
-                   <div className="font-body-sm text-body-sm text-secondary mt-1">{t("Last active 2 hours ago")} • San Francisco, US</div>
-                </div>
-             </div>
-             <button className="text-error font-label-sm hover:underline">{t("Revoke")}</button>
+            <div className="flex items-center gap-md">
+              <div className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface">📱</div>
+              <div>
+                <div className="font-label-md text-label-md text-on-surface">iOS • Safari</div>
+                <div className="font-body-sm text-body-sm text-secondary mt-1">{t("Last active 2 hours ago")} • San Francisco, US</div>
+              </div>
+            </div>
+            <button className="text-error font-label-sm hover:underline">{t("Revoke")}</button>
           </div>
         </div>
       </div>
