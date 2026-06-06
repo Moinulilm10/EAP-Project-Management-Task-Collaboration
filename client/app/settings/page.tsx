@@ -15,6 +15,7 @@ import { IntegrationSettings } from "@/components/settings/IntegrationSettings";
 import { useTranslation } from "react-i18next";
 import { useAuthStore } from "@/stores/authStore";
 import { authService } from "@/services/auth.service";
+import { useSession } from "next-auth/react";
 
 export default function SettingsPage() {
   const { t } = useTranslation();
@@ -22,10 +23,12 @@ export default function SettingsPage() {
   const [activeSection, setActiveSection] = useState("profile");
 
   const { user, setUser } = useAuthStore();
+  const { update } = useSession();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [bio, setBio] = useState("");
+  const [picture, setPicture] = useState<string | null>(null);
 
   // Initialize values when user is loaded
   useEffect(() => {
@@ -34,6 +37,11 @@ export default function SettingsPage() {
       setFirstName(parts[0] || "");
       setLastName(parts.slice(1).join(" ") || "");
       setEmail(user.email || "");
+      if ('picture' in user) {
+        setPicture((user as any).picture || null);
+      } else if (user.image) {
+        setPicture(user.image);
+      }
     }
   }, [user]);
 
@@ -44,12 +52,17 @@ export default function SettingsPage() {
         alert(t("Name cannot be empty"));
         return;
       }
-      const response = await authService.updateProfile({ name: fullName });
+      const response = await authService.updateProfile({ name: fullName, picture: picture || undefined });
       if (response && user) {
         setUser({
           ...user,
           name: fullName,
+          image: response.user?.picture || picture,
         });
+        
+        // Update NextAuth session to keep it in sync
+        await update({ user: { name: fullName, image: response.user.picture || picture } });
+        
         alert(t("Profile updated successfully!"));
       }
     } catch (err: any) {
@@ -65,6 +78,11 @@ export default function SettingsPage() {
       setLastName(parts.slice(1).join(" ") || "");
       setEmail(user.email || "");
       setBio("");
+      if ('picture' in user) {
+        setPicture((user as any).picture || null);
+      } else if (user.image) {
+        setPicture(user.image);
+      }
     }
   };
 
@@ -103,6 +121,8 @@ export default function SettingsPage() {
                   email={email}
                   bio={bio}
                   setBio={setBio}
+                  picture={picture}
+                  setPicture={setPicture}
                 />
               </SettingsSectionWrapper>
             )}

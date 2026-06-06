@@ -27,6 +27,7 @@ exports.AppDataSource = new typeorm_1.DataSource({
         connectionTimeoutMillis: 30000,
     },
     synchronize: true,
+    schema: process.env.NODE_ENV === 'test' ? 'test' : 'public',
     logging: false,
     entities: [
         User_entity_1.User,

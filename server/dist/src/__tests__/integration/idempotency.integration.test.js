@@ -9,9 +9,11 @@ const app_1 = __importDefault(require("../../app"));
 const data_source_1 = require("../../utils/data-source");
 const Role_entity_1 = require("../../entities/Role.entity");
 const ProjectMember_entity_1 = require("../../entities/ProjectMember.entity");
+const test_setup_1 = require("../../utils/test-setup");
 (0, vitest_1.describe)('Idempotency Integration', () => {
     let accessToken;
     (0, vitest_1.beforeAll)(async () => {
+        await (0, test_setup_1.ensureTestSchema)();
         if (!data_source_1.AppDataSource.isInitialized) {
             await data_source_1.AppDataSource.initialize();
         }

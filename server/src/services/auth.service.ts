@@ -21,6 +21,7 @@ interface UserProfile {
   email: string;
   name: string;
   provider: AuthProvider;
+  picture: string | null;
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -72,6 +73,7 @@ function toProfile(user: User): UserProfile {
     email: user.email,
     name: user.name,
     provider: user.provider,
+    picture: user.picture || null,
   };
 }
 
@@ -281,15 +283,16 @@ export const authService = {
   },
 
   /**
-   * Update user profile name.
+   * Update user profile name and/or picture.
    */
-  async updateProfile(userId: string, data: { name: string }): Promise<UserProfile> {
+  async updateProfile(userId: string, data: { name?: string; picture?: string }): Promise<UserProfile> {
     const userRepo = AppDataSource.getRepository(User);
     const user = await userRepo.findOne({ where: { id: userId } });
     if (!user) {
       throw { status: 404, message: "User not found." };
     }
-    user.name = data.name;
+    if (data.name !== undefined) user.name = data.name;
+    if (data.picture !== undefined) user.picture = data.picture;
     await userRepo.save(user);
     return toProfile(user);
   },

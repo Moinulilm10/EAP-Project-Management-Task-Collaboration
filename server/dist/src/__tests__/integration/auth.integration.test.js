@@ -9,8 +9,10 @@ const app_1 = __importDefault(require("../../app"));
 const data_source_1 = require("../../utils/data-source");
 const User_entity_1 = require("../../entities/User.entity");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
+const test_setup_1 = require("../../utils/test-setup");
 (0, vitest_1.describe)('Auth Integration', () => {
     (0, vitest_1.beforeAll)(async () => {
+        await (0, test_setup_1.ensureTestSchema)();
         if (!data_source_1.AppDataSource.isInitialized) {
             await data_source_1.AppDataSource.initialize();
         }

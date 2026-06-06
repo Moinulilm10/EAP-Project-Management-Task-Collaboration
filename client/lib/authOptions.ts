@@ -30,6 +30,7 @@ export const authOptions: NextAuthOptions = {
             // Include tokens in the returned user object
             return {
               ...data.user,
+              image: data.user.picture,
               accessToken: data.accessToken,
               // Note: Refresh token is handled via HttpOnly cookie set by backend
             };
@@ -57,12 +58,14 @@ export const authOptions: NextAuthOptions = {
               googleId: account.providerAccountId,
               email: user.email,
               name: user.name,
+              picture: user.image,
             }),
           });
           const data = await res.json();
           if (res.ok) {
             // Store the backend access token on the user object temporarily
             (user as any).accessToken = data.accessToken;
+            (user as any).picture = data.user?.picture || user.image;
             return true;
           }
           return false;
@@ -72,12 +75,20 @@ export const authOptions: NextAuthOptions = {
       }
       return true;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       // Initial sign in
       if (user) {
         token.accessToken = (user as any).accessToken;
         // Assume access token expires in 15 minutes
         token.accessTokenExpires = Date.now() + 15 * 60 * 1000;
+        token.picture = (user as any).picture || user.image;
+      }
+      
+      // Handle session updates (e.g. name or picture change)
+      if (trigger === "update" && session?.user) {
+        if (session.user.name) token.name = session.user.name;
+        if (session.user.image) token.picture = session.user.image;
+        if (session.user.picture) token.picture = session.user.picture;
       }
 
       // Check if access token is expired
@@ -95,6 +106,9 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       (session as any).accessToken = token.accessToken as string;
+      if (session.user) {
+        session.user.image = (token as any).picture || (token as any).image || null;
+      }
       return session;
     },
   },

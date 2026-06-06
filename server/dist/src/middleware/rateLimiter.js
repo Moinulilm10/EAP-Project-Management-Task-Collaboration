@@ -5,11 +5,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generalRateLimiter = exports.authRateLimiter = void 0;
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
+const bypassMiddleware = (req, res, next) => next();
 /**
  * Aggressive rate limiter for auth endpoints: 10 requests per 15 minutes per IP.
  * Targets brute-force login/registration attacks.
  */
-exports.authRateLimiter = (0, express_rate_limit_1.default)({
+exports.authRateLimiter = process.env.NODE_ENV === 'test' ? bypassMiddleware : (0, express_rate_limit_1.default)({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 10,
     standardHeaders: true, // Return rate limit info in `RateLimit-*` headers
@@ -28,7 +29,7 @@ exports.authRateLimiter = (0, express_rate_limit_1.default)({
 /**
  * General rate limiter for all API endpoints: 100 requests per 15 minutes per IP.
  */
-exports.generalRateLimiter = (0, express_rate_limit_1.default)({
+exports.generalRateLimiter = process.env.NODE_ENV === 'test' ? bypassMiddleware : (0, express_rate_limit_1.default)({
     windowMs: 15 * 60 * 1000,
     max: 100,
     standardHeaders: true,

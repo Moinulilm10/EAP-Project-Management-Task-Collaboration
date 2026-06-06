@@ -100,4 +100,18 @@ exports.authController = {
             res.status(error.status || 500).json({ error: error.message || 'Google sync failed.' });
         }
     },
+    async updateProfile(req, res) {
+        try {
+            if (!req.user) {
+                res.status(401).json({ error: 'Not authenticated.' });
+                return;
+            }
+            const { name, picture } = req.body;
+            const profile = await auth_service_1.authService.updateProfile(req.user.id, { name, picture });
+            res.status(200).json({ user: profile });
+        }
+        catch (error) {
+            res.status(error.status || 500).json({ error: error.message || 'Failed to update profile.' });
+        }
+    },
 };

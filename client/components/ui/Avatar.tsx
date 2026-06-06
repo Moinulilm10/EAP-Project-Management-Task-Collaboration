@@ -64,13 +64,19 @@ export function Avatar({
   return (
     <div className={`relative inline-block ${sizeClasses[size]} ${className}`}>
       {src ? (
-        <div className="w-full h-full rounded-full overflow-hidden border border-outline-variant/30">
+        <div className="w-full h-full rounded-full overflow-hidden border border-outline-variant/30 bg-surface-container-high animate-pulse">
           <Image
             src={src}
             alt={alt}
             width={80}
             height={80}
             className="w-full h-full object-cover"
+            loading="lazy"
+            unoptimized
+            onLoad={(e) => {
+              const target = e.target as HTMLElement;
+              target.parentElement?.classList.remove("animate-pulse");
+            }}
           />
         </div>
       ) : (

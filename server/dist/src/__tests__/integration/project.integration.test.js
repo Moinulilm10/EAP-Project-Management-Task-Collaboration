@@ -10,11 +10,13 @@ const data_source_1 = require("../../utils/data-source");
 const uuid_1 = require("uuid");
 const Role_entity_1 = require("../../entities/Role.entity");
 const ProjectMember_entity_1 = require("../../entities/ProjectMember.entity");
+const test_setup_1 = require("../../utils/test-setup");
 (0, vitest_1.describe)('Project Module Integration', () => {
     let userToken;
     let outsiderToken;
     let createdProjectId;
     (0, vitest_1.beforeAll)(async () => {
+        await (0, test_setup_1.ensureTestSchema)();
         if (!data_source_1.AppDataSource.isInitialized)
             await data_source_1.AppDataSource.initialize();
         await data_source_1.AppDataSource.synchronize(true);

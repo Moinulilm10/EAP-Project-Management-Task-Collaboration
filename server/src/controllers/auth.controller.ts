@@ -115,12 +115,8 @@ export const authController = {
         res.status(401).json({ error: 'Not authenticated.' });
         return;
       }
-      const { name } = req.body;
-      if (!name) {
-        res.status(400).json({ error: 'Name is required.' });
-        return;
-      }
-      const profile = await authService.updateProfile(req.user.id, { name });
+      const { name, picture } = req.body;
+      const profile = await authService.updateProfile(req.user.id, { name, picture });
       res.status(200).json({ user: profile });
     } catch (error: any) {
       res.status(error.status || 500).json({ error: error.message || 'Failed to update profile.' });

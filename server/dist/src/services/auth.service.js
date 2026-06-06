@@ -48,6 +48,7 @@ function toProfile(user) {
         email: user.email,
         name: user.name,
         provider: user.provider,
+        picture: user.picture || null,
     };
 }
 // ─── Auth Service ───────────────────────────────────────────────────────────
@@ -86,14 +87,14 @@ exports.authService = {
         const userRepo = data_source_1.AppDataSource.getRepository(User_entity_1.User);
         const user = await userRepo.findOne({ where: { email } });
         if (!user || !user.passwordHash) {
-            throw { status: 401, message: "Invalid email or password." };
+            throw { status: 404, message: "This email is not registered in our system." };
         }
         if (!user.isActive) {
             throw { status: 403, message: "Account is deactivated." };
         }
         const isValid = await bcryptjs_1.default.compare(password, user.passwordHash);
         if (!isValid) {
-            throw { status: 401, message: "Invalid email or password." };
+            throw { status: 401, message: "Incorrect password. Please try again." };
         }
         const accessToken = generateAccessToken(user);
         const { rawToken: refreshToken } = await generateRefreshToken(user.id);
@@ -209,6 +210,22 @@ exports.authService = {
         if (!user) {
             throw { status: 404, message: "User not found." };
         }
+        return toProfile(user);
+    },
+    /**
+     * Update user profile name and/or picture.
+     */
+    async updateProfile(userId, data) {
+        const userRepo = data_source_1.AppDataSource.getRepository(User_entity_1.User);
+        const user = await userRepo.findOne({ where: { id: userId } });
+        if (!user) {
+            throw { status: 404, message: "User not found." };
+        }
+        if (data.name !== undefined)
+            user.name = data.name;
+        if (data.picture !== undefined)
+            user.picture = data.picture;
+        await userRepo.save(user);
         return toProfile(user);
     },
 };

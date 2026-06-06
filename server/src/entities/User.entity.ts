@@ -40,6 +40,9 @@ export class User {
   @Column({ type: "varchar", length: 255, nullable: true })
   googleId!: string | null;
 
+  @Column({ type: "varchar", length: 1000, nullable: true })
+  picture!: string | null;
+
   @Column({ type: "boolean", default: true })
   isActive!: boolean;
 

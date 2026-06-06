@@ -25,6 +25,7 @@ let User = class User {
     name;
     provider;
     googleId;
+    picture;
     isActive;
     createdAt;
     updatedAt;
@@ -61,6 +62,10 @@ __decorate([
     (0, typeorm_1.Column)({ type: "varchar", length: 255, nullable: true }),
     __metadata("design:type", Object)
 ], User.prototype, "googleId", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar", length: 1000, nullable: true }),
+    __metadata("design:type", Object)
+], User.prototype, "picture", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: "boolean", default: true }),
     __metadata("design:type", Boolean)

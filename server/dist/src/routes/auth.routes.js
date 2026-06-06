@@ -13,6 +13,7 @@ router.post('/login', rateLimiter_1.authRateLimiter, (0, validate_1.validate)(va
 router.post('/refresh', rateLimiter_1.authRateLimiter, auth_controller_1.authController.refresh);
 router.post('/logout', auth_1.requireAuth, auth_controller_1.authController.logout);
 router.get('/me', auth_1.requireAuth, auth_controller_1.authController.me);
+router.put('/me', auth_1.requireAuth, auth_controller_1.authController.updateProfile);
 // Google OAuth sync endpoint (called by NextAuth backend)
 router.post('/google-sync', rateLimiter_1.authRateLimiter, auth_controller_1.authController.googleSync);
 exports.default = router;

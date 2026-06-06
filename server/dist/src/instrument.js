@@ -34,10 +34,12 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 const Sentry = __importStar(require("@sentry/node"));
-Sentry.init({
-    dsn: process.env.SENTRY_DSN,
-    sendDefaultPii: true,
-    tracesSampleRate: process.env.NODE_ENV === "development" ? 1.0 : 0.1,
-    includeLocalVariables: true,
-    enableLogs: true,
-});
+if (process.env.NODE_ENV !== "test") {
+    Sentry.init({
+        dsn: process.env.SENTRY_DSN,
+        sendDefaultPii: true,
+        tracesSampleRate: process.env.NODE_ENV === "development" ? 1.0 : 0.1,
+        includeLocalVariables: true,
+        enableLogs: true,
+    });
+}
