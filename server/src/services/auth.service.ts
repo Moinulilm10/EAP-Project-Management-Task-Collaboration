@@ -299,4 +299,30 @@ export const authService = {
     await userRepo.save(user);
     return toProfile(user);
   },
+
+  /**
+   * Update user password. Checks if user is a Google OAuth user and blocks it.
+   * Compares current password, then hashes and saves the new password.
+   */
+  async updatePassword(userId: string, currentPasswordRaw: string, newPasswordRaw: string): Promise<void> {
+    const userRepo = AppDataSource.getRepository(User);
+    const user = await userRepo.findOne({ where: { id: userId } });
+    if (!user) {
+      throw { status: 404, message: "User not found." };
+    }
+
+    if (user.provider === AuthProvider.GOOGLE || !user.passwordHash) {
+      throw { status: 400, message: "Password updates are not applicable for Google OAuth accounts." };
+    }
+
+    const isValid = await bcrypt.compare(currentPasswordRaw, user.passwordHash);
+    if (!isValid) {
+      throw { status: 401, message: "Incorrect current password." };
+    }
+
+    const saltRounds = 12;
+    user.passwordHash = await bcrypt.hash(newPasswordRaw, saltRounds);
+    await userRepo.save(user);
+    logger.info(`Password updated for user: ${user.email}`);
+  },
 };

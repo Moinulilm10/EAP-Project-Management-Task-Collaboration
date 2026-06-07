@@ -122,4 +122,21 @@ export const authController = {
       res.status(error.status || 500).json({ error: error.message || 'Failed to update profile.' });
     }
   },
+
+  async updatePassword(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        res.status(401).json({ error: 'Unauthorized.' });
+        return;
+      }
+
+      const { currentPassword, newPassword } = req.body;
+      await authService.updatePassword(userId, currentPassword, newPassword);
+
+      res.status(200).json({ message: 'Password updated successfully' });
+    } catch (error: any) {
+      res.status(error.status || 500).json({ error: error.message || 'Failed to update password.' });
+    }
+  },
 };

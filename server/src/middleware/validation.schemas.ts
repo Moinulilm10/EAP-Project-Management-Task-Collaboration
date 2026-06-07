@@ -45,6 +45,18 @@ export const updateProfileSchema = z.object({
   bio: sanitizedString(0, 1000).optional().nullable(),
 });
 
+export const updatePasswordSchema = z.object({
+  currentPassword: z.string().min(1, 'Current password is required'),
+  newPassword: z
+    .string()
+    .min(8, 'New password must be at least 8 characters')
+    .max(128, 'New password must be at most 128 characters')
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+={}[\]|:;"'<>,.?/~`])/,
+      'New password must contain uppercase, lowercase, number, and special character'
+    ),
+});
+
 // ─── Project Schemas ────────────────────────────────────────────────────────
 
 export const createProjectSchema = z.object({

@@ -1,10 +1,55 @@
-import React from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Input } from "../ui/Input";
 import { Button } from "../ui/Button";
+import { authService } from "@/services/auth.service";
+import Swal from "sweetalert2";
 
 export function SecuritySettings() {
   const { t } = useTranslation();
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const handlePasswordUpdate = async () => {
+    if (!currentPassword) {
+      alert(t("Please enter your current password"));
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      alert(t("New password and confirm password do not match"));
+      return;
+    }
+    if (newPassword.length < 8) {
+      alert(t("New password must be at least 8 characters"));
+      return;
+    }
+
+    try {
+      setIsUpdating(true);
+      await authService.updatePassword({ currentPassword, newPassword });
+      Swal.fire({
+        title: t("Success!"),
+        text: t("Password updated successfully!"),
+        icon: "success",
+        confirmButtonColor: "var(--color-primary, #0066FF)",
+      });
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error: any) {
+      const errorMsg = error.response?.data?.error || error.message;
+      Swal.fire({
+        title: t("Error"),
+        text: t("Failed to update password: ") + errorMsg,
+        icon: "error",
+        confirmButtonColor: "var(--color-primary, #0066FF)",
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-lg">
@@ -19,7 +64,12 @@ export function SecuritySettings() {
             <label className="font-label-md text-label-md text-on-surface-variant">
               {t("Current Password")}
             </label>
-            <Input type="password" placeholder="••••••••" />
+            <Input 
+              type="password" 
+              placeholder="••••••••" 
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+            />
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-md mt-xs">
@@ -27,17 +77,34 @@ export function SecuritySettings() {
             <label className="font-label-md text-label-md text-on-surface-variant">
               {t("New Password")}
             </label>
-            <Input type="password" placeholder="••••••••" />
+            <Input 
+              type="password" 
+              placeholder="••••••••" 
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+            />
           </div>
           <div className="flex flex-col gap-xs">
             <label className="font-label-md text-label-md text-on-surface-variant">
               {t("Confirm New Password")}
             </label>
-            <Input type="password" placeholder="••••••••" />
+            <Input 
+              type="password" 
+              placeholder="••••••••" 
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
           </div>
         </div>
         <div>
-          <Button variant="primary" className="mt-sm">{t("Update Password")}</Button>
+          <Button 
+            variant="primary" 
+            className="mt-sm" 
+            onClick={handlePasswordUpdate}
+            disabled={isUpdating}
+          >
+            {isUpdating ? t("Updating...") : t("Update Password")}
+          </Button>
         </div>
       </div>
 

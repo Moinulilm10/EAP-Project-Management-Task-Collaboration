@@ -104,4 +104,95 @@ describe('Auth Integration', () => {
       expect(res.status).toBe(400);
     });
   });
+
+  describe('Password Update /password', () => {
+    let accessToken = '';
+
+    beforeAll(async () => {
+      const res = await request(app).post('/api/v1/auth/register').send({
+        email: 'passwordtest@example.com',
+        password: 'OldPassword123!',
+        name: 'Password Test User',
+      });
+      accessToken = res.body.accessToken;
+    });
+
+    it('should fail to update password with incorrect current password', async () => {
+      const res = await request(app)
+        .put('/api/v1/auth/password')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({
+          currentPassword: 'WrongPassword123!',
+          newPassword: 'NewPassword123!',
+        });
+
+      expect(res.status).toBe(401);
+      expect(res.body.error).toBe('Incorrect current password.');
+    });
+
+    it('should fail to update password with weak new password', async () => {
+      const res = await request(app)
+        .put('/api/v1/auth/password')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({
+          currentPassword: 'OldPassword123!',
+          newPassword: 'weak',
+        });
+
+      expect(res.status).toBe(400);
+    });
+
+    it('should successfully update password', async () => {
+      const res = await request(app)
+        .put('/api/v1/auth/password')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({
+          currentPassword: 'OldPassword123!',
+          newPassword: 'NewPassword123!',
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.message).toBe('Password updated successfully');
+    });
+
+    it('should fail to update password for Google OAuth users', async () => {
+      // Seed Google user
+      const repo = AppDataSource.getRepository(User);
+      const googleUser = await repo.save(
+        repo.create({
+          email: 'googletest@example.com',
+          name: 'Google User',
+          provider: AuthProvider.GOOGLE,
+          googleId: '123456789',
+        })
+      );
+
+      // Generate access token for google user directly to test the endpoint
+      // To simulate, we register and manually change provider in DB since we can't easily fake Google Auth endpoint
+      const resRegister = await request(app).post('/api/v1/auth/register').send({
+        email: 'oauthpass@example.com',
+        password: 'Password123!',
+        name: 'OAuth User',
+      });
+      const oauthAccessToken = resRegister.body.accessToken;
+
+      // Make user a google user in DB
+      const user = await repo.findOne({ where: { email: 'oauthpass@example.com' } });
+      if (user) {
+        user.provider = AuthProvider.GOOGLE;
+        await repo.save(user);
+      }
+
+      const res = await request(app)
+        .put('/api/v1/auth/password')
+        .set('Authorization', `Bearer ${oauthAccessToken}`)
+        .send({
+          currentPassword: 'Password123!',
+          newPassword: 'NewPassword123!',
+        });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toBe('Password updates are not applicable for Google OAuth accounts.');
+    });
+  });
 });

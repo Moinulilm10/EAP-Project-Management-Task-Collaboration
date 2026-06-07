@@ -7,5 +7,6 @@ export const authService = {
   logout: () => apiClient.post('/auth/logout'),
   getMe: () => apiClient.get('/auth/me'),
   updateProfile: (data: { name?: string; picture?: string; bio?: string }) => apiClient.put<{ user: any }>('/auth/me', data),
+  updatePassword: (data: any) => apiClient.put('/auth/password', data),
   refresh: () => apiClient.post('/auth/refresh'),
 };
