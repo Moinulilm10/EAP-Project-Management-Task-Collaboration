@@ -27,7 +27,35 @@ ChartJS.register(
 
 export function ProgressLineChart() {
   const chartRef = useRef<ChartJS<"line">>(null);
-  const [chartData, setChartData] = useState<any>(null);
+  const [chartData, setChartData] = useState<any>({
+    labels: ["Week 1", "Week 2", "Week 3", "Week 4", "Week 5", "Week 6", "Week 7"],
+    datasets: [
+      {
+        label: "Actual Progress",
+        data: [12, 19, 35, 42, 58, 70, 85],
+        borderColor: "#3525cd",
+        backgroundColor: "rgba(53, 37, 205, 0.1)",
+        borderWidth: 3,
+        tension: 0.4,
+        fill: true,
+        pointBackgroundColor: "#ffffff",
+        pointBorderColor: "#3525cd",
+        pointBorderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+      },
+      {
+        label: "Target",
+        data: [15, 30, 45, 60, 75, 90, 100],
+        borderColor: "#c7c4d8",
+        borderWidth: 2,
+        borderDash: [5, 5],
+        tension: 0.4,
+        fill: false,
+        pointRadius: 0,
+      },
+    ],
+  });
 
   useEffect(() => {
     const chart = chartRef.current;
@@ -38,35 +66,12 @@ export function ProgressLineChart() {
     gradientBlue.addColorStop(0, "rgba(53, 37, 205, 0.2)");
     gradientBlue.addColorStop(1, "rgba(53, 37, 205, 0)");
 
-    setChartData({
-      labels: ["Week 1", "Week 2", "Week 3", "Week 4", "Week 5", "Week 6", "Week 7"],
-      datasets: [
-        {
-          label: "Actual Progress",
-          data: [12, 19, 35, 42, 58, 70, 85],
-          borderColor: "#3525cd",
-          backgroundColor: gradientBlue,
-          borderWidth: 3,
-          tension: 0.4,
-          fill: true,
-          pointBackgroundColor: "#ffffff",
-          pointBorderColor: "#3525cd",
-          pointBorderWidth: 2,
-          pointRadius: 4,
-          pointHoverRadius: 6,
-        },
-        {
-          label: "Target",
-          data: [15, 30, 45, 60, 75, 90, 100],
-          borderColor: "#c7c4d8",
-          borderWidth: 2,
-          borderDash: [5, 5],
-          tension: 0.4,
-          fill: false,
-          pointRadius: 0,
-        },
-      ],
-    });
+    setChartData((prev: any) => ({
+      ...prev,
+      datasets: prev.datasets.map((dataset: any, index: number) =>
+        index === 0 ? { ...dataset, backgroundColor: gradientBlue } : dataset
+      ),
+    }));
   }, []);
 
   const options = {

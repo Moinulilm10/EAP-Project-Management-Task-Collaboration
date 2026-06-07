@@ -81,6 +81,7 @@ export default function AnalyticsPage() {
             title={t("Project Progress Trend")}
             description={t("Completion rate vs target over time")}
             className="xl:col-span-2"
+            heightClass="h-[590px]"
             actionMenu
           >
             <ProgressLineChart />
@@ -99,7 +100,7 @@ export default function AnalyticsPage() {
             title={t("Team Productivity Overview")}
             description={t("Tasks completed by department")}
             className="xl:col-span-3"
-            heightClass="h-[350px]"
+            heightClass="h-[590px]"
             filterOptions={[
               { label: t("This Month"), value: "this-month" },
               { label: t("Last Month"), value: "last-month" },

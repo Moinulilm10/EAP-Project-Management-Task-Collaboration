@@ -39,7 +39,7 @@ export function TeamOverview() {
       </Card>
 
       {/* Pending Tasks */}
-      <Card className="justify-between relative overflow-hidden bg-primary text-on-primary border-none h-full">
+      <Card className="justify-between relative overflow-hidden !bg-primary !text-on-primary !border-none h-full">
         <div className="flex justify-between items-start mb-md z-10">
           <h3 className="font-title-md text-title-md text-on-primary/90">{t("Pending Tasks")}</h3>
           <span className="p-xs bg-on-primary/20 rounded-full text-on-primary flex items-center justify-center">
