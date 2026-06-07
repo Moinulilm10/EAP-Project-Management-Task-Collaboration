@@ -1,4 +1,4 @@
-import api from './api';
+import { apiClient } from '../utils/apiClient';
 
 export interface ProjectSummary {
   id: string;
@@ -55,7 +55,6 @@ export interface DashboardInsights {
 
 export const dashboardService = {
   getInsights: async (): Promise<DashboardInsights> => {
-    const response = await api.get('/dashboard/insights');
-    return response.data;
+    return apiClient.get<DashboardInsights>('/dashboard/insights');
   },
 };
