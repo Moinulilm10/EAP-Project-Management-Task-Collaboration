@@ -6,10 +6,8 @@ import { MdEdit, MdMail } from "react-icons/md";
 import { createClient } from "@/utils/supabase/client";
 
 interface ProfileSettingsFormProps {
-  firstName: string;
-  setFirstName: (val: string) => void;
-  lastName: string;
-  setLastName: (val: string) => void;
+  name: string;
+  setName: (val: string) => void;
   email: string;
   bio: string;
   setBio: (val: string) => void;
@@ -18,16 +16,15 @@ interface ProfileSettingsFormProps {
 }
 
 export function ProfileSettingsForm({
-  firstName,
-  setFirstName,
-  lastName,
-  setLastName,
+  name,
+  setName,
   email,
   bio,
   setBio,
   picture,
   setPicture,
 }: ProfileSettingsFormProps) {
+
   const { t } = useTranslation();
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -40,8 +37,8 @@ export function ProfileSettingsForm({
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
-    if (file.size > 800 * 1024) {
-      alert(t("File exceeds maximum size of 800K"));
+    if (file.size > 1 * 1024 * 1024) {
+      alert(t("File exceeds maximum size of 1 mb"));
       return;
     }
 
@@ -70,7 +67,7 @@ export function ProfileSettingsForm({
     }
   };
 
-  const currentAvatar = picture || "https://lh3.googleusercontent.com/aida-public/AB6AXuBOV6tQEuUe4szmiXKsKnmqPuqR7_rpTnOxJraQZz1OKH10YTQfmEwmbCNGBvgdURKDVqEonDEt_QooGFmoeGC2cG7Z6hLi3y67Qg0i-aWlwZdYVVqzhe3bja4QxE783hzTAqcc6sleyN2JTKxopPxewBBIlx-IHuOVSPpl6RWPOjK6fgIoPYg0m7x4PqUDqulTHnadynTh6xKkX0TxixG0pRD182xEd-Tw75TH8l36S2iQiWfgfXMG5k3zzONEXkHU3rmYoVjqPdY";
+  const currentAvatar = picture || undefined;
 
   return (
     <>
@@ -80,6 +77,7 @@ export function ProfileSettingsForm({
             src={currentAvatar}
             alt="User Avatar"
             size="xl"
+            name={name}
           />
           <button
             onClick={handleAvatarClick}
@@ -110,27 +108,15 @@ export function ProfileSettingsForm({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-md">
-        <div className="flex flex-col gap-xs">
-          <label className="font-label-md text-label-md text-on-surface-variant">
-            {t("First Name")}
-          </label>
-          <Input
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            placeholder={t("First Name") as string}
-          />
-        </div>
-        <div className="flex flex-col gap-xs">
-          <label className="font-label-md text-label-md text-on-surface-variant">
-            {t("Last Name")}
-          </label>
-          <Input
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            placeholder={t("Last Name") as string}
-          />
-        </div>
+      <div className="flex flex-col gap-xs">
+        <label className="font-label-md text-label-md text-on-surface-variant">
+          {t("Full Name")}
+        </label>
+        <Input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder={t("Full Name") as string}
+        />
       </div>
 
       <div className="flex flex-col gap-xs">

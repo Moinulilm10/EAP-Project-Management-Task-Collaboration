@@ -16,6 +16,7 @@ import { useTranslation } from "react-i18next";
 import { useAuthStore } from "@/stores/authStore";
 import { authService } from "@/services/auth.service";
 import { useSession } from "next-auth/react";
+import Swal from "sweetalert2";
 
 export default function SettingsPage() {
   const { t } = useTranslation();
@@ -24,8 +25,7 @@ export default function SettingsPage() {
 
   const { user, setUser } = useAuthStore();
   const { update } = useSession();
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [bio, setBio] = useState("");
   const [picture, setPicture] = useState<string | null>(null);
@@ -33,37 +33,91 @@ export default function SettingsPage() {
   // Initialize values when user is loaded
   useEffect(() => {
     if (user) {
-      const parts = (user.name || "").split(" ");
-      setFirstName(parts[0] || "");
-      setLastName(parts.slice(1).join(" ") || "");
+      setName(user.name || "");
       setEmail(user.email || "");
       if ('picture' in user) {
         setPicture((user as any).picture || null);
       } else if (user.image) {
         setPicture(user.image);
       }
+      setBio((user as any).bio || "");
     }
   }, [user]);
 
+  // Fetch the latest profile from backend on mount to ensure we have the freshest data (e.g. picture)
+  useEffect(() => {
+    let mounted = true;
+    const fetchLatestProfile = async () => {
+      try {
+        const response: any = await authService.getMe();
+        if (mounted && response?.user) {
+          const freshUser = response.user;
+          // Update local state
+          setName(freshUser.name || "");
+          setEmail(freshUser.email || "");
+          setPicture(freshUser.picture || null);
+          setBio(freshUser.bio || "");
+
+          // Sync the global store and NextAuth session only if there's a difference
+          // This prevents an infinite loop where `update` causes RouteGuard to unmount and remount this page
+          if (user) {
+            const currentImage = user.image || null;
+            const freshImage = freshUser.picture || null;
+            const currentBio = (user as any).bio || null;
+            const freshBio = freshUser.bio || null;
+            
+            if (user.name !== freshUser.name || currentImage !== freshImage || currentBio !== freshBio) {
+              setUser({
+                ...user,
+                name: freshUser.name,
+                image: freshImage,
+                bio: freshBio,
+              });
+              await update({ user: { name: freshUser.name, image: freshImage } });
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch fresh profile data:", err);
+      }
+    };
+
+    if (user) {
+      fetchLatestProfile();
+    }
+    return () => { mounted = false; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only once on mount
+
   const handleProfileSave = async () => {
     try {
-      const fullName = `${firstName} ${lastName}`.trim();
+      const fullName = name.trim();
       if (!fullName) {
         alert(t("Name cannot be empty"));
         return;
       }
-      const response = await authService.updateProfile({ name: fullName, picture: picture || undefined });
+      const response = await authService.updateProfile({ 
+        name: fullName, 
+        picture: picture || undefined,
+        bio: bio || "",
+      });
       if (response && user) {
         setUser({
           ...user,
           name: fullName,
           image: response.user?.picture || picture,
+          bio: response.user?.bio || bio || null,
         });
         
         // Update NextAuth session to keep it in sync
         await update({ user: { name: fullName, image: response.user.picture || picture } });
         
-        alert(t("Profile updated successfully!"));
+        Swal.fire({
+          title: t("Success!"),
+          text: t("Profile updated successfully!"),
+          icon: "success",
+          confirmButtonColor: "var(--color-primary, #0066FF)",
+        });
       }
     } catch (err: any) {
       console.error(err);
@@ -73,11 +127,9 @@ export default function SettingsPage() {
 
   const handleProfileCancel = () => {
     if (user) {
-      const parts = (user.name || "").split(" ");
-      setFirstName(parts[0] || "");
-      setLastName(parts.slice(1).join(" ") || "");
+      setName(user.name || "");
       setEmail(user.email || "");
-      setBio("");
+      setBio((user as any).bio || "");
       if ('picture' in user) {
         setPicture((user as any).picture || null);
       } else if (user.image) {
@@ -114,10 +166,8 @@ export default function SettingsPage() {
                 onCancel={handleProfileCancel}
               >
                 <ProfileSettingsForm
-                  firstName={firstName}
-                  setFirstName={setFirstName}
-                  lastName={lastName}
-                  setLastName={setLastName}
+                  name={name}
+                  setName={setName}
                   email={email}
                   bio={bio}
                   setBio={setBio}

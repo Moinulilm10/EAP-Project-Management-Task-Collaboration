@@ -35,9 +35,9 @@ export const authOptions: NextAuthOptions = {
               // Note: Refresh token is handled via HttpOnly cookie set by backend
             };
           }
-          return null;
-        } catch (error) {
-          return null;
+          throw new Error(data.error || "Login failed");
+        } catch (error: any) {
+          throw new Error(error.message || "Login failed");
         }
       },
     }),

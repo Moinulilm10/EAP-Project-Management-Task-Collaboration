@@ -43,6 +43,9 @@ export class User {
   @Column({ type: "varchar", length: 1000, nullable: true })
   picture!: string | null;
 
+  @Column({ type: "text", nullable: true })
+  bio!: string | null;
+
   @Column({ type: "boolean", default: true })
   isActive!: boolean;
 

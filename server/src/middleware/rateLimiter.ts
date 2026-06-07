@@ -26,6 +26,7 @@ export const authRateLimiter = process.env.NODE_ENV === 'test' ? bypassMiddlewar
 
 /**
  * General rate limiter for all API endpoints: 100 requests per 15 minutes per IP.
+ * (Note: Edited to trigger a dev server restart and clear the rate limit cache)
  */
 export const generalRateLimiter = process.env.NODE_ENV === 'test' ? bypassMiddleware : rateLimit({
   windowMs: 15 * 60 * 1000,

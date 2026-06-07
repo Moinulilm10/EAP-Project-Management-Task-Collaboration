@@ -5,6 +5,7 @@ export interface User {
   email: string;
   name: string;
   image?: string | null;
+  bio?: string | null;
 }
 
 interface AuthState {
@@ -30,16 +31,17 @@ export const useAuthStore = create<AuthState>((set) => ({
   setError: (error) => set({ error }),
   hydrateFromSession: (session) => {
     if (session?.user) {
-      set({
+      set((state) => ({
         user: {
           id: session.user.id || '',
           email: session.user.email,
           name: session.user.name,
           image: session.user.image || null,
+          bio: state.user?.bio || null,
         },
         isAuthenticated: true,
         isLoading: false,
-      });
+      }));
     } else {
       set({ user: null, isAuthenticated: false, isLoading: false });
     }

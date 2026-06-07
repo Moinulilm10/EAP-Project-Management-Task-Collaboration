@@ -22,6 +22,7 @@ interface UserProfile {
   name: string;
   provider: AuthProvider;
   picture: string | null;
+  bio: string | null;
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -74,6 +75,7 @@ function toProfile(user: User): UserProfile {
     name: user.name,
     provider: user.provider,
     picture: user.picture || null,
+    bio: user.bio || null,
   };
 }
 
@@ -283,9 +285,9 @@ export const authService = {
   },
 
   /**
-   * Update user profile name and/or picture.
+   * Update user profile name, picture, and/or bio.
    */
-  async updateProfile(userId: string, data: { name?: string; picture?: string }): Promise<UserProfile> {
+  async updateProfile(userId: string, data: { name?: string; picture?: string; bio?: string | null }): Promise<UserProfile> {
     const userRepo = AppDataSource.getRepository(User);
     const user = await userRepo.findOne({ where: { id: userId } });
     if (!user) {
@@ -293,6 +295,7 @@ export const authService = {
     }
     if (data.name !== undefined) user.name = data.name;
     if (data.picture !== undefined) user.picture = data.picture;
+    if (data.bio !== undefined) user.bio = data.bio;
     await userRepo.save(user);
     return toProfile(user);
   },

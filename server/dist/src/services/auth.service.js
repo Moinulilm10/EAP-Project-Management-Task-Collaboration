@@ -49,6 +49,7 @@ function toProfile(user) {
         name: user.name,
         provider: user.provider,
         picture: user.picture || null,
+        bio: user.bio || null,
     };
 }
 // ─── Auth Service ───────────────────────────────────────────────────────────
@@ -213,7 +214,7 @@ exports.authService = {
         return toProfile(user);
     },
     /**
-     * Update user profile name and/or picture.
+     * Update user profile name, picture, and/or bio.
      */
     async updateProfile(userId, data) {
         const userRepo = data_source_1.AppDataSource.getRepository(User_entity_1.User);
@@ -225,6 +226,8 @@ exports.authService = {
             user.name = data.name;
         if (data.picture !== undefined)
             user.picture = data.picture;
+        if (data.bio !== undefined)
+            user.bio = data.bio;
         await userRepo.save(user);
         return toProfile(user);
     },
