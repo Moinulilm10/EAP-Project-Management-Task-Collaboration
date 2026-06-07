@@ -14,13 +14,16 @@ export const taskController = {
         return;
       }
       
-      const { search, status, priority, page, limit } = req.query;
+      const { search, status, priority, page, limit, sortBy, deadlineStatus, assigneeId } = req.query;
       const options = {
         search: search as string,
         status: status as any,
         priority: priority as any,
         page: page ? parseInt(page as string, 10) : 1,
         limit: limit ? parseInt(limit as string, 10) : 10,
+        sortBy: sortBy as string,
+        deadlineStatus: deadlineStatus as any,
+        assigneeId: assigneeId as string,
       };
 
       const { tasks, total } = await taskService.findAll(req.user.id, options);

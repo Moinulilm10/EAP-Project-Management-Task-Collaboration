@@ -17,6 +17,8 @@ export interface ProjectQueryOptions {
   limit?: number;
   userId?: string;
   adminOnly?: boolean;
+  sortBy?: string;
+  deadlineStatus?: 'upcoming' | 'overdue' | 'all';
 }
 
 export interface ProjectSummary {
@@ -85,6 +87,16 @@ export const projectService = {
       });
     }
 
+    if (filters.deadlineStatus && filters.deadlineStatus !== 'all') {
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      if (filters.deadlineStatus === 'overdue') {
+        query.andWhere('project.deadline < :today AND project.status != :completed', { today, completed: ProjectStatus.COMPLETED });
+      } else if (filters.deadlineStatus === 'upcoming') {
+        query.andWhere('project.deadline >= :today AND project.status != :completed', { today, completed: ProjectStatus.COMPLETED });
+      }
+    }
+
     query
       .select([
         "project.id",
@@ -103,8 +115,25 @@ export const projectService = {
       .addSelect("COUNT(member.id)", "memberCount")
       .groupBy("project.id")
       .addGroupBy("owner.id")
-      .addGroupBy("currentUserRoleRelation.name")
-      .orderBy("project.createdAt", "DESC");
+      .addGroupBy("currentUserRoleRelation.name");
+
+    if (filters.sortBy) {
+      switch (filters.sortBy) {
+        case 'dueDate_asc':
+          query.orderBy("project.deadline IS NULL", "ASC");
+          query.addOrderBy("project.deadline", "ASC");
+          break;
+        case 'updatedAt_desc':
+          query.orderBy("project.updatedAt", "DESC");
+          break;
+        case 'createdAt_desc':
+        default:
+          query.orderBy("project.createdAt", "DESC");
+          break;
+      }
+    } else {
+      query.orderBy("project.createdAt", "DESC");
+    }
 
     // Optimized total count (distinct projects matching filters)
     const countQuery = projectRepo()
@@ -145,6 +174,16 @@ export const projectService = {
       countQuery.andWhere("currentUserRoleRelation.name = :adminRoleName", {
         adminRoleName: ProjectRoleName.ADMIN,
       });
+    }
+
+    if (filters.deadlineStatus && filters.deadlineStatus !== 'all') {
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      if (filters.deadlineStatus === 'overdue') {
+        countQuery.andWhere('project.deadline < :today AND project.status != :completed', { today, completed: ProjectStatus.COMPLETED });
+      } else if (filters.deadlineStatus === 'upcoming') {
+        countQuery.andWhere('project.deadline >= :today AND project.status != :completed', { today, completed: ProjectStatus.COMPLETED });
+      }
     }
 
     // Use DISTINCT count to avoid duplicates from joins

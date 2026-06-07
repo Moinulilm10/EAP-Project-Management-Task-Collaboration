@@ -14,6 +14,7 @@ import { Task, TaskStatus, TaskPriority } from "./taskTypes";
 import { Select } from "../ui/Select";
 import { useProjectStore } from "../../stores/projectStore";
 import { useTeamStore } from "../../stores/teamStore";
+import { useProjectMemberStore } from "../../stores/projectMemberStore";
 
 interface TaskModalProps {
   isOpen: boolean;
@@ -30,6 +31,7 @@ const ASSIGNEES = [
 export function TaskModal({ isOpen, onClose, onSave, initial }: TaskModalProps) {
   const { projects, fetchProjects } = useProjectStore();
   const { teams, fetchTeams } = useTeamStore();
+  const { members, fetchMembers } = useProjectMemberStore();
 
   const [form, setForm] = React.useState<any>({});
   const [tagInput, setTagInput] = React.useState("");
@@ -38,7 +40,8 @@ export function TaskModal({ isOpen, onClose, onSave, initial }: TaskModalProps) 
   useEffect(() => {
     fetchProjects();
     fetchTeams();
-  }, [fetchProjects, fetchTeams]);
+    fetchMembers();
+  }, [fetchProjects, fetchTeams, fetchMembers]);
 
   useEffect(() => {
     if (isOpen) {
@@ -58,7 +61,7 @@ export function TaskModal({ isOpen, onClose, onSave, initial }: TaskModalProps) 
         setForm({
           title: "",
           description: "",
-          projectId: projects.length > 0 ? projects[0].id : "",
+          projectId: "",
           status: "todo",
           priority: "medium",
           dueDate: "",
@@ -243,6 +246,7 @@ export function TaskModal({ isOpen, onClose, onSave, initial }: TaskModalProps) 
                       value={form.projectId}
                       onChange={(e) => handleChange("projectId", e.target.value)}
                       options={projectOptions}
+                      placeholder="Select a project"
                       emptyMessage="No project available"
                     />
                   </div>
@@ -253,6 +257,29 @@ export function TaskModal({ isOpen, onClose, onSave, initial }: TaskModalProps) 
                       value={form.teamId || ""}
                       onChange={(e) => handleChange("teamId", e.target.value)}
                       options={teamOptions}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className={`${labelCls} flex items-center gap-xs`}>
+                      <MdPerson className="w-4 h-4" />
+                      Assignee (Optional)
+                    </label>
+                    <Select
+                      value={form.assignee?.id || ""}
+                      onChange={(e) => {
+                        const selectedMember = members.find(m => m.user.id === e.target.value);
+                        handleChange("assignee", selectedMember ? { 
+                          id: selectedMember.user.id, 
+                          name: selectedMember.user.name,
+                          initials: selectedMember.user.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase(),
+                          bg: 'bg-primary text-on-primary'
+                        } : null);
+                      }}
+                      options={[{ label: "Unassigned", value: "" }, ...members.map(m => ({ label: m.user.name, value: m.user.id }))]}
+                      placeholder="Select assignee"
                     />
                   </div>
                 </div>
@@ -290,11 +317,12 @@ export function TaskModal({ isOpen, onClose, onSave, initial }: TaskModalProps) 
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className={`${labelCls} flex items-center gap-xs`}>
+                    <label htmlFor="due-date-input" className={`${labelCls} flex items-center gap-xs`}>
                       <MdCalendarToday className="w-4 h-4" />
                       Due Date
                     </label>
                     <input
+                      id="due-date-input"
                       type="date"
                       value={form.dueDate || ""}
                       onChange={(e) => handleChange("dueDate", e.target.value)}

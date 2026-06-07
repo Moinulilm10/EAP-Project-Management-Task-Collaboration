@@ -164,6 +164,44 @@ describe('Task Module Integration', () => {
       expect(res.body.tasks[0].status).toBe('done');
     });
 
+    it('should support pagination', async () => {
+      const res = await request(app)
+        .get('/api/v1/tasks?page=1&limit=1')
+        .set('Authorization', `Bearer ${userToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.tasks).toBeInstanceOf(Array);
+      expect(res.body.tasks.length).toBeLessThanOrEqual(1);
+      expect(res.body).toHaveProperty('total');
+    });
+
+    it('should support sorting by priority_desc', async () => {
+      const res = await request(app)
+        .get('/api/v1/tasks?sortBy=priority_desc')
+        .set('Authorization', `Bearer ${userToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.tasks).toBeInstanceOf(Array);
+    });
+
+    it('should support filtering by deadlineStatus', async () => {
+      const res = await request(app)
+        .get('/api/v1/tasks?deadlineStatus=upcoming')
+        .set('Authorization', `Bearer ${userToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.tasks).toBeInstanceOf(Array);
+    });
+
+    it('should support filtering by assigneeId', async () => {
+      const res = await request(app)
+        .get(`/api/v1/tasks?assigneeId=${userId}`)
+        .set('Authorization', `Bearer ${userToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.tasks).toBeInstanceOf(Array);
+    });
+
     it('should not return tasks from unauthorized projects', async () => {
       const res = await request(app)
         .get('/api/v1/tasks')

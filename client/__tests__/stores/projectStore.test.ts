@@ -68,6 +68,8 @@ describe('projectStore', () => {
       page: 1,
       limit: 12,
       adminOnly: undefined,
+      sortBy: "createdAt_desc",
+      deadlineStatus: undefined,
     });
     expect(state.projects).toEqual(mockResponse.projects);
     expect(state.total).toBe(1);

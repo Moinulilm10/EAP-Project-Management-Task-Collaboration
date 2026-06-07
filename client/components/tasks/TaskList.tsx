@@ -31,6 +31,8 @@ interface TaskListProps {
   onEdit: (task: Task) => void;
   onDelete: (id: string) => void;
   onStatusChange: (id: string, status: TaskStatus) => void;
+  sortBy?: string;
+  onSortChange?: (sortBy: string) => void;
 }
 
 const rowVariants: Variants = {
@@ -39,7 +41,7 @@ const rowVariants: Variants = {
   exit: { opacity: 0, x: 8, transition: { duration: 0.15 } },
 };
 
-export function TaskList({ tasks, onEdit, onDelete, onStatusChange }: TaskListProps) {
+export function TaskList({ tasks, onEdit, onDelete, onStatusChange, sortBy, onSortChange }: TaskListProps) {
   if (tasks.length === 0) {
     return (
       <motion.div
@@ -58,11 +60,31 @@ export function TaskList({ tasks, onEdit, onDelete, onStatusChange }: TaskListPr
     <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/20 shadow-sm overflow-hidden">
       {/* Table header */}
       <div className="hidden md:grid grid-cols-[1fr_140px_100px_100px_100px_80px] gap-sm items-center px-md py-xs border-b border-outline-variant/20 bg-surface-container-low/50">
-        <span className="font-label-sm text-label-sm text-secondary uppercase tracking-wide">Task</span>
+        <button 
+          onClick={() => onSortChange?.(sortBy === "createdAt_desc" ? "updatedAt_desc" : "createdAt_desc")}
+          className="font-label-sm text-label-sm text-secondary uppercase tracking-wide text-left hover:text-primary transition-colors cursor-pointer flex items-center gap-0.5 focus:outline-none"
+        >
+          Task {sortBy === "createdAt_desc" ? "↓" : sortBy === "updatedAt_desc" ? "↑" : ""}
+        </button>
         <span className="font-label-sm text-label-sm text-secondary uppercase tracking-wide">Project</span>
-        <span className="font-label-sm text-label-sm text-secondary uppercase tracking-wide">Status</span>
-        <span className="font-label-sm text-label-sm text-secondary uppercase tracking-wide">Priority</span>
-        <span className="font-label-sm text-label-sm text-secondary uppercase tracking-wide">Due</span>
+        <button 
+          onClick={() => onSortChange?.("priority_desc")}
+          className="font-label-sm text-label-sm text-secondary uppercase tracking-wide text-left hover:text-primary transition-colors cursor-pointer focus:outline-none"
+        >
+          Status
+        </button>
+        <button 
+          onClick={() => onSortChange?.(sortBy === "priority_desc" ? "createdAt_desc" : "priority_desc")}
+          className="font-label-sm text-label-sm text-secondary uppercase tracking-wide text-left hover:text-primary transition-colors cursor-pointer flex items-center gap-0.5 focus:outline-none"
+        >
+          Priority {sortBy === "priority_desc" ? "↓" : ""}
+        </button>
+        <button 
+          onClick={() => onSortChange?.(sortBy === "dueDate_asc" ? "createdAt_desc" : "dueDate_asc")}
+          className="font-label-sm text-label-sm text-secondary uppercase tracking-wide text-left hover:text-primary transition-colors cursor-pointer flex items-center gap-0.5 focus:outline-none"
+        >
+          Due {sortBy === "dueDate_asc" ? "↑" : ""}
+        </button>
         <span className="font-label-sm text-label-sm text-secondary uppercase tracking-wide">Actions</span>
       </div>
 
@@ -104,6 +126,30 @@ export function TaskList({ tasks, onEdit, onDelete, onStatusChange }: TaskListPr
                   >
                     {task.title}
                   </p>
+                  
+                  {/* Task progress indicator */}
+                  <div className="mt-1 flex items-center gap-2">
+                    <div className="w-20 bg-outline-variant/35 h-1 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full rounded-full transition-all duration-300 ${
+                          task.status === 'done' ? 'bg-tertiary' :
+                          task.status === 'review' ? 'bg-primary' :
+                          task.status === 'in-progress' ? 'bg-primary-container' : 'bg-outline'
+                        }`} 
+                        style={{ width: `${
+                          task.status === 'done' ? 100 :
+                          task.status === 'review' ? 80 :
+                          task.status === 'in-progress' ? 50 : 10
+                        }%` }}
+                      />
+                    </div>
+                    <span className="text-[10px] text-secondary">
+                      {task.status === 'done' ? '100%' :
+                       task.status === 'review' ? '80%' :
+                       task.status === 'in-progress' ? '50%' : '10%'}
+                    </span>
+                  </div>
+
                   <div className="flex items-center gap-xs mt-[2px] md:hidden flex-wrap">
                     <span className="font-label-sm text-label-sm text-secondary">{task.project}</span>
                   </div>
@@ -121,13 +167,18 @@ export function TaskList({ tasks, onEdit, onDelete, onStatusChange }: TaskListPr
                 <span className="font-label-sm text-label-sm text-secondary truncate block">{task.project}</span>
               </div>
 
-              {/* Status badge */}
+              {/* Status badge - Quick selector dropdown */}
               <div>
-                <span
-                  className={`inline-flex items-center px-xs py-0.5 rounded-full text-[10px] font-semibold border whitespace-nowrap ${statusCfg.cls}`}
+                <select
+                  value={task.status}
+                  onChange={(e) => onStatusChange(task.id, e.target.value as TaskStatus)}
+                  className={`px-xs py-0.5 rounded-full text-[10px] font-semibold border bg-transparent cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all ${statusCfg.cls}`}
                 >
-                  {statusCfg.label}
-                </span>
+                  <option value="todo">To Do</option>
+                  <option value="in-progress">In Progress</option>
+                  <option value="review">In Review</option>
+                  <option value="done">Done</option>
+                </select>
               </div>
 
               {/* Priority badge */}

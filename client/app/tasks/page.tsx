@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { TaskKanban } from "@/components/tasks/TaskKanban";
@@ -10,8 +10,9 @@ import { Task, TaskStatus, TaskPriority } from "@/components/tasks/taskTypes";
 import { Button } from "@/components/ui/Button";
 import { useTranslation } from "react-i18next";
 import { useTaskStore } from "@/stores/taskStore";
-import { useEffect } from "react";
 import { notification } from "@/utils/notification";
+import { useDebounce } from "@/hooks/useDebounce";
+import Pagination from "@/components/ui/Pagination";
 import {
   MdAdd,
   MdViewKanban,
@@ -41,29 +42,28 @@ export default function TasksPage() {
   const { t } = useTranslation();
 
   // ── Store ──────────────────────────────────────────────────────────────────
-  const { tasks, fetchTasks, createTask, updateTask, updateTaskStatus, deleteTask } = useTaskStore();
+  const { 
+    tasks, total, page, limit, fetchTasks, createTask, updateTask, updateTaskStatus, deleteTask,
+    searchQuery, statusFilter, priorityFilter, sortBy, deadlineStatus, assigneeId,
+    setSearchQuery, setStatusFilter, setPriorityFilter, setSortBy, setDeadlineStatus, setAssigneeId, setPage
+  } = useTaskStore();
+
+  const [localSearch, setLocalSearch] = useState(searchQuery || "");
+  const debouncedSearch = useDebounce(localSearch, 400);
+
+  useEffect(() => {
+    setSearchQuery(debouncedSearch);
+  }, [debouncedSearch, setSearchQuery]);
 
   useEffect(() => {
     fetchTasks();
-  }, [fetchTasks]);
+  }, [fetchTasks, searchQuery, statusFilter, priorityFilter, sortBy, deadlineStatus, assigneeId, page]);
 
   // ── State ──────────────────────────────────────────────────────────────────
   const [view, setView] = useState<ViewMode>("list");
-  const [searchInput, setSearchInput] = useState("");
-  const [search, setSearch] = useState("");
-  const [filterPriority, setFilterPriority] = useState<TaskPriority | "all">("all");
-  const [filterStatus, setFilterStatus] = useState<TaskStatus | "all">("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-
-  // ── Debounce Search ────────────────────────────────────────────────────────
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setSearch(searchInput);
-    }, 300);
-    return () => clearTimeout(handler);
-  }, [searchInput]);
 
   // ── Derived ────────────────────────────────────────────────────────────────
   const stats = useMemo(() => {
@@ -77,23 +77,13 @@ export default function TasksPage() {
     return counts;
   }, [tasks]);
 
-  const filteredTasks = useMemo(() => {
-    return tasks.filter((task: any) => {
-      const matchSearch =
-        !search ||
-        task.title.toLowerCase().includes(search.toLowerCase()) ||
-        task.project.toLowerCase().includes(search.toLowerCase()) ||
-        task.assignee?.name.toLowerCase().includes(search.toLowerCase());
-      const matchPriority = filterPriority === "all" || task.priority === filterPriority;
-      const matchStatus = filterStatus === "all" || task.status === filterStatus;
-      return matchSearch && matchPriority && matchStatus;
-    });
-  }, [tasks, search, filterPriority, filterStatus]);
-
   const activeFiltersCount = [
-    filterPriority !== "all",
-    filterStatus !== "all",
-    !!search,
+    priorityFilter !== "all",
+    statusFilter !== "all",
+    deadlineStatus !== "all",
+    assigneeId !== "all",
+    sortBy !== "createdAt_desc",
+    !!searchQuery,
   ].filter(Boolean).length;
 
   // ── Handlers ───────────────────────────────────────────────────────────────
@@ -134,10 +124,13 @@ export default function TasksPage() {
   };
 
   const clearFilters = () => {
-    setSearchInput("");
-    setSearch("");
-    setFilterPriority("all");
-    setFilterStatus("all");
+    setLocalSearch("");
+    setSearchQuery("");
+    setPriorityFilter("all");
+    setStatusFilter("all");
+    setDeadlineStatus("all");
+    setAssigneeId("all");
+    setSortBy("createdAt_desc");
   };
 
   return (
@@ -177,12 +170,12 @@ export default function TasksPage() {
             whileTap={{ scale: 0.98 }}
             onClick={() =>
               key === "all"
-                ? setFilterStatus("all")
-                : setFilterStatus(key as TaskStatus)
+                ? setStatusFilter("all")
+                : setStatusFilter(key as TaskStatus)
             }
             className={`flex items-center gap-sm p-sm rounded-xl border cursor-pointer transition-all ${
-              (key === "all" && filterStatus === "all") ||
-              filterStatus === key
+              (key === "all" && statusFilter === "all") ||
+              statusFilter === key
                 ? `border-primary/40 ${bg} shadow-sm`
                 : "border-outline-variant/20 bg-surface-container-lowest hover:border-primary/30"
             }`}
@@ -213,13 +206,13 @@ export default function TasksPage() {
           <input
             type="text"
             placeholder={t("Search tasks, projects, assignees...")}
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
+            value={localSearch}
+            onChange={(e) => setLocalSearch(e.target.value)}
             className="w-full pl-[36px] pr-10 py-xs bg-surface-container-lowest border border-outline-variant/40 rounded-lg font-body-md text-body-md text-on-surface placeholder:text-secondary/60 focus:outline-none focus:ring-2 focus:ring-primary transition-all"
           />
-          {searchInput && (
+          {localSearch && (
             <button
-              onClick={() => setSearchInput("")}
+              onClick={() => setLocalSearch("")}
               className="absolute right-xs top-1/2 -translate-y-1/2 text-secondary hover:text-primary cursor-pointer transition-colors"
             >
               <MdClose className="w-4 h-4" />
@@ -285,9 +278,9 @@ export default function TasksPage() {
                 {(["all", "high", "medium", "low"] as const).map((p) => (
                   <button
                     key={p}
-                    onClick={() => setFilterPriority(p)}
+                    onClick={() => setPriorityFilter(p)}
                     className={`px-3 py-1 rounded-full text-xs font-semibold border transition-all cursor-pointer capitalize ${
-                      filterPriority === p
+                      priorityFilter === p
                         ? "bg-primary text-on-primary border-primary"
                         : "border-outline-variant/40 text-secondary hover:border-primary hover:text-primary"
                     }`}
@@ -305,9 +298,9 @@ export default function TasksPage() {
                 {(["all", "todo", "in-progress", "review", "done"] as const).map((s) => (
                   <button
                     key={s}
-                    onClick={() => setFilterStatus(s)}
+                    onClick={() => setStatusFilter(s)}
                     className={`px-3 py-1 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
-                      filterStatus === s
+                      statusFilter === s
                         ? "bg-primary text-on-primary border-primary"
                         : "border-outline-variant/40 text-secondary hover:border-primary hover:text-primary"
                     }`}
@@ -315,6 +308,43 @@ export default function TasksPage() {
                     {s === "all" ? "All" : s === "in-progress" ? "In Progress" : s === "todo" ? "To Do" : s === "review" ? "In Review" : "Done"}
                   </button>
                 ))}
+              </div>
+              
+              <div className="h-4 w-px bg-outline-variant/30 hidden sm:block" />
+
+              {/* Deadline Status filter */}
+              <div className="flex items-center gap-3 flex-wrap">
+                <span className="font-label-sm text-label-sm text-secondary">Deadline:</span>
+                {(["all", "upcoming", "overdue"] as const).map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setDeadlineStatus(s)}
+                    className={`px-3 py-1 rounded-full text-xs font-semibold border transition-all cursor-pointer capitalize ${
+                      deadlineStatus === s
+                        ? "bg-primary text-on-primary border-primary"
+                        : "border-outline-variant/40 text-secondary hover:border-primary hover:text-primary"
+                    }`}
+                  >
+                    {s === "all" ? "All" : s}
+                  </button>
+                ))}
+              </div>
+
+              <div className="h-4 w-px bg-outline-variant/30 hidden sm:block" />
+
+              {/* Sort By */}
+              <div className="flex items-center gap-3 flex-wrap">
+                <span className="font-label-sm text-label-sm text-secondary">Sort:</span>
+                <select 
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="px-3 py-1 rounded-full text-xs font-semibold border border-outline-variant/40 bg-surface-container-lowest text-on-surface focus:outline-none focus:border-primary cursor-pointer"
+                >
+                  <option value="createdAt_desc">Latest Created</option>
+                  <option value="dueDate_asc">Nearest Deadline</option>
+                  <option value="priority_desc">Highest Priority</option>
+                  <option value="updatedAt_desc">Recently Updated</option>
+                </select>
               </div>
 
               {activeFiltersCount > 0 && (
@@ -334,9 +364,18 @@ export default function TasksPage() {
       {/* ── Results summary ─────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between mb-sm">
         <p className="font-label-sm text-label-sm text-secondary">
-          {filteredTasks.length} {filteredTasks.length === 1 ? "task" : "tasks"}
+          {total} {total === 1 ? "task" : "tasks"}
           {activeFiltersCount > 0 && " (filtered)"}
         </p>
+        
+        {/* Pagination Controls */}
+        {total > limit && (
+          <Pagination
+            currentPage={page}
+            totalPages={Math.ceil(total / limit)}
+            onPageChange={setPage}
+          />
+        )}
       </div>
 
       {/* ── Content ─────────────────────────────────────────────────────────── */}
@@ -350,14 +389,16 @@ export default function TasksPage() {
         >
           {view === "list" ? (
             <TaskList
-              tasks={filteredTasks}
+              tasks={tasks}
               onEdit={handleEdit}
               onDelete={handleDelete}
               onStatusChange={handleStatusChange}
+              sortBy={sortBy}
+              onSortChange={setSortBy}
             />
           ) : (
             <TaskKanban
-              tasks={filteredTasks}
+              tasks={tasks}
               onEdit={handleEdit}
               onDelete={handleDelete}
               onStatusChange={handleStatusChange}

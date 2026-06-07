@@ -20,6 +20,8 @@ export const projectController = {
           limit: req.query.limit ? Number(req.query.limit) : undefined,
           adminOnly: req.query.adminOnly === "true",
           userId: req.user?.id,
+          sortBy: req.query.sortBy as string | undefined,
+          deadlineStatus: req.query.deadlineStatus as 'upcoming' | 'overdue' | 'all' | undefined,
         };
 
       const result = await projectService.findAll(filters);

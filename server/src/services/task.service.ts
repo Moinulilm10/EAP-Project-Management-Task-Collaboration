@@ -10,10 +10,13 @@ export const taskService = {
     userId: string,
     options?: {
       search?: string;
-      status?: TaskStatus;
-      priority?: TaskPriority;
+      status?: TaskStatus | 'all';
+      priority?: TaskPriority | 'all';
       page?: number;
       limit?: number;
+      sortBy?: string;
+      deadlineStatus?: 'upcoming' | 'overdue' | 'all';
+      assigneeId?: string | 'all';
     }
   ): Promise<{ tasks: Task[]; total: number }> {
     const page = options?.page || 1;
@@ -39,20 +42,72 @@ export const taskService = {
 
     if (options?.search) {
       query.andWhere(
-        '(task.title ILIKE :search OR task.description ILIKE :search)',
+        '(task.title ILIKE :search OR task.description ILIKE :search OR assignee.name ILIKE :search)',
         { search: `%${options.search}%` }
       );
     }
-    if (options?.status && options.status !== ('all' as any)) {
+    if (options?.status && options.status !== 'all') {
       query.andWhere('task.status = :status', { status: options.status });
     }
-    if (options?.priority && options.priority !== ('all' as any)) {
+    if (options?.priority && options.priority !== 'all') {
       query.andWhere('task.priority = :priority', { priority: options.priority });
     }
+    if (options?.assigneeId && options.assigneeId !== 'all') {
+      query.andWhere('task.assigneeId = :assigneeId', { assigneeId: options.assigneeId });
+    }
 
-    query.orderBy('task.createdAt', 'DESC')
-         .skip(skip)
-         .take(limit);
+    if (options?.deadlineStatus && options.deadlineStatus !== 'all') {
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      if (options.deadlineStatus === 'overdue') {
+        query.andWhere('task.dueDate < :today AND task.status != :doneStatus', { today, doneStatus: TaskStatus.DONE });
+      } else if (options.deadlineStatus === 'upcoming') {
+        query.andWhere('task.dueDate >= :today AND task.status != :doneStatus', { today, doneStatus: TaskStatus.DONE });
+      }
+    }
+
+    // Default sort
+    let sortColumn = 'task.createdAt';
+    let sortDirection: 'ASC' | 'DESC' = 'DESC';
+
+    if (options?.sortBy) {
+      switch (options.sortBy) {
+        case 'dueDate_asc':
+          sortColumn = 'task.dueDate';
+          sortDirection = 'ASC';
+          // Move nulls to the end if possible, or just standard sort
+          // TypeORM doesn't natively do NULLS LAST elegantly across all dialects without specific syntax,
+          // but for postgres we can do:
+          query.orderBy(`${sortColumn} IS NULL`, 'ASC'); // Put nulls last
+          break;
+        case 'priority_desc':
+          // enum 'CRITICAL', 'HIGH', 'MEDIUM', 'LOW'
+          // Since it's a string enum, alphabetical sort doesn't work perfectly.
+          // In Postgres, we'd need a CASE WHEN.
+          query.addSelect(`CASE task.priority WHEN 'CRITICAL' THEN 4 WHEN 'HIGH' THEN 3 WHEN 'MEDIUM' THEN 2 WHEN 'LOW' THEN 1 ELSE 0 END`, 'priority_weight');
+          query.orderBy('priority_weight', 'DESC');
+          break;
+        case 'updatedAt_desc':
+          sortColumn = 'task.updatedAt';
+          sortDirection = 'DESC';
+          break;
+        case 'createdAt_desc':
+        default:
+          sortColumn = 'task.createdAt';
+          sortDirection = 'DESC';
+          break;
+      }
+    }
+
+    if (options?.sortBy === 'dueDate_asc') {
+      query.addOrderBy(sortColumn, sortDirection);
+    } else if (options?.sortBy !== 'priority_desc') {
+      query.orderBy(sortColumn, sortDirection);
+    } else {
+      query.addOrderBy('task.createdAt', 'DESC');
+    }
+
+    query.skip(skip).take(limit);
 
     const [tasks, total] = await query.getManyAndCount();
     return { tasks, total };

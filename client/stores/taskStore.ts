@@ -8,6 +8,9 @@ export interface TaskFilterOptions {
   priority?: TaskPriority | 'all';
   page?: number;
   limit?: number;
+  sortBy?: string;
+  deadlineStatus?: 'upcoming' | 'overdue' | 'all';
+  assigneeId?: string | 'all';
 }
 
 interface TaskState {
@@ -15,11 +18,25 @@ interface TaskState {
   total: number;
   page: number;
   limit: number;
+  searchQuery: string;
+  statusFilter: TaskStatus | 'all';
+  priorityFilter: TaskPriority | 'all';
+  sortBy: string;
+  deadlineStatus: 'upcoming' | 'overdue' | 'all';
+  assigneeId: string | 'all';
   isLoading: boolean;
   error: string | null;
 
   // Actions
-  fetchTasks: (options?: TaskFilterOptions) => Promise<void>;
+  setPage: (page: number) => void;
+  setSearchQuery: (query: string) => void;
+  setStatusFilter: (status: TaskStatus | 'all') => void;
+  setPriorityFilter: (priority: TaskPriority | 'all') => void;
+  setSortBy: (sort: string) => void;
+  setDeadlineStatus: (status: 'upcoming' | 'overdue' | 'all') => void;
+  setAssigneeId: (assigneeId: string | 'all') => void;
+
+  fetchTasks: () => Promise<void>;
   createTask: (data: any) => Promise<Task>;
   updateTask: (id: string, data: any) => Promise<Task>;
   deleteTask: (id: string) => Promise<void>;
@@ -31,12 +48,30 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   total: 0,
   page: 1,
   limit: 10,
+  searchQuery: '',
+  statusFilter: 'all',
+  priorityFilter: 'all',
+  sortBy: 'createdAt_desc',
+  deadlineStatus: 'all',
+  assigneeId: 'all',
   isLoading: false,
   error: null,
 
-  fetchTasks: async (options?: TaskFilterOptions) => {
+  setPage: (page) => set({ page }),
+  setSearchQuery: (searchQuery) => set({ searchQuery, page: 1 }),
+  setStatusFilter: (statusFilter) => set({ statusFilter, page: 1 }),
+  setPriorityFilter: (priorityFilter) => set({ priorityFilter, page: 1 }),
+  setSortBy: (sortBy) => set({ sortBy, page: 1 }),
+  setDeadlineStatus: (deadlineStatus) => set({ deadlineStatus, page: 1 }),
+  setAssigneeId: (assigneeId) => set({ assigneeId, page: 1 }),
+
+  fetchTasks: async () => {
     set({ isLoading: true, error: null });
     try {
+      const { page, limit, searchQuery, statusFilter, priorityFilter, sortBy, deadlineStatus, assigneeId } = get();
+      const options: TaskFilterOptions = {
+        page, limit, search: searchQuery, status: statusFilter, priority: priorityFilter, sortBy, deadlineStatus, assigneeId
+      };
       const response: any = await taskService.getAll(options);
       // Map backend tasks to the Task format expected by the UI if necessary
       // For now, assuming the API returns tasks matching the shape or we map them in the UI.

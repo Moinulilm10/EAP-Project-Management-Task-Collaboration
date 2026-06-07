@@ -59,7 +59,7 @@ describe('TaskModal', () => {
   it('displays error if required fields are missing', async () => {
     render(<TaskModal isOpen={true} onClose={onCloseMock} onSave={onSaveMock} />);
     
-    const saveButton = screen.getByRole('button', { name: /save/i });
+    const saveButton = screen.getByRole('button', { name: /Create|Save/i });
     fireEvent.click(saveButton);
     
     // It should block if title or projectId is missing
@@ -69,7 +69,7 @@ describe('TaskModal', () => {
   it('displays inline error if deadline is in the past', async () => {
     render(<TaskModal isOpen={true} onClose={onCloseMock} onSave={onSaveMock} />);
     
-    const titleInput = screen.getByPlaceholderText('Enter task title');
+    const titleInput = screen.getByPlaceholderText('What needs to be done?');
     await userEvent.type(titleInput, 'Future Task');
     
     // Select project
@@ -82,7 +82,7 @@ describe('TaskModal', () => {
     const dateInput = screen.getByLabelText(/due date/i) as HTMLInputElement;
     fireEvent.change(dateInput, { target: { value: '2024-01-01' } });
 
-    const saveButton = screen.getByRole('button', { name: /save/i });
+    const saveButton = screen.getByRole('button', { name: /Create|Save/i });
     fireEvent.click(saveButton);
 
     await waitFor(() => {

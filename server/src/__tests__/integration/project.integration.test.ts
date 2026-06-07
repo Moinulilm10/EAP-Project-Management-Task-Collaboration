@@ -102,6 +102,44 @@ describe('Project Module Integration', () => {
         .set('Authorization', `Bearer ${outsiderToken}`);
       expect(resOutsider.body.projects.length).toBe(0);
     });
+
+    it('should support pagination', async () => {
+      const res = await request(app)
+        .get('/api/v1/projects?page=1&limit=1')
+        .set('Authorization', `Bearer ${userToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.projects).toBeInstanceOf(Array);
+      expect(res.body.projects.length).toBeLessThanOrEqual(1);
+      expect(res.body).toHaveProperty('total');
+    });
+
+    it('should support sorting by dueDate_asc', async () => {
+      const res = await request(app)
+        .get('/api/v1/projects?sortBy=dueDate_asc')
+        .set('Authorization', `Bearer ${userToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.projects).toBeInstanceOf(Array);
+    });
+
+    it('should support sorting by updatedAt_desc', async () => {
+      const res = await request(app)
+        .get('/api/v1/projects?sortBy=updatedAt_desc')
+        .set('Authorization', `Bearer ${userToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.projects).toBeInstanceOf(Array);
+    });
+
+    it('should filter by deadlineStatus', async () => {
+      const res = await request(app)
+        .get('/api/v1/projects?deadlineStatus=upcoming')
+        .set('Authorization', `Bearer ${userToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.projects).toBeInstanceOf(Array);
+    });
   });
 
   describe('GET /api/v1/projects/:id', () => {

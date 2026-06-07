@@ -17,9 +17,13 @@ export interface ProjectStoreState {
   statusFilter: "all" | "active" | "completed" | "on_hold";
   searchQuery: string;
   adminOnlyFilter: boolean;
+  sortBy: string;
+  deadlineStatus: 'upcoming' | 'overdue' | 'all';
   setStatusFilter: (status: ProjectStoreState["statusFilter"]) => void;
   setSearchQuery: (query: string) => void;
   setAdminOnlyFilter: (adminOnly: boolean) => void;
+  setSortBy: (sortBy: string) => void;
+  setDeadlineStatus: (deadlineStatus: 'upcoming' | 'overdue' | 'all') => void;
   setPage: (page: number) => void;
   fetchProjects: () => Promise<void>;
   createProject: (payload: ProjectCreateDTO) => Promise<Project>;
@@ -37,22 +41,28 @@ export const useProjectStore = create<ProjectStoreState>((set, get) => ({
   statusFilter: "all",
   searchQuery: "",
   adminOnlyFilter: false,
+  sortBy: "createdAt_desc",
+  deadlineStatus: "all",
 
   setStatusFilter: (status) => set({ statusFilter: status, page: 1 }),
   setSearchQuery: (query) => set({ searchQuery: query, page: 1 }),
   setAdminOnlyFilter: (adminOnly) => set({ adminOnlyFilter: adminOnly, page: 1 }),
+  setSortBy: (sortBy) => set({ sortBy, page: 1 }),
+  setDeadlineStatus: (deadlineStatus) => set({ deadlineStatus, page: 1 }),
   setPage: (page) => set({ page }),
 
   fetchProjects: async () => {
     set({ loading: true, error: null });
     try {
-      const { statusFilter, searchQuery, adminOnlyFilter, page, limit } = get();
+      const { statusFilter, searchQuery, adminOnlyFilter, page, limit, sortBy, deadlineStatus } = get();
       const response = await projectService.getAll({
         status: statusFilter === "all" ? undefined : statusFilter,
         search: searchQuery.trim() || undefined,
         page,
         limit,
         adminOnly: adminOnlyFilter || undefined,
+        sortBy: sortBy,
+        deadlineStatus: deadlineStatus === "all" ? undefined : deadlineStatus,
       });
 
       set({

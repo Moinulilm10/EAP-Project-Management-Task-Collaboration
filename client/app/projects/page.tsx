@@ -64,9 +64,13 @@ export default function ProjectsPage() {
     statusFilter,
     searchQuery,
     adminOnlyFilter,
+    sortBy,
+    deadlineStatus,
     setStatusFilter,
     setSearchQuery,
     setAdminOnlyFilter,
+    setSortBy,
+    setDeadlineStatus,
     setPage,
     fetchProjects,
     createProject,
@@ -93,7 +97,7 @@ export default function ProjectsPage() {
 
   useEffect(() => {
     fetchProjects();
-  }, [fetchProjects, statusFilter, adminOnlyFilter, searchQuery, page]);
+  }, [fetchProjects, statusFilter, adminOnlyFilter, searchQuery, page, sortBy, deadlineStatus]);
 
   const uiProjects = useMemo(
     () =>
@@ -134,7 +138,7 @@ export default function ProjectsPage() {
           </p>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] items-center w-full max-w-screen-sm">
+        <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_auto] items-center w-full max-w-screen-lg">
           <div className="relative w-full">
             <MdFilterList className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg z-10" />
             <Select
@@ -168,11 +172,41 @@ export default function ProjectsPage() {
             />
           </div>
 
+          <div className="relative w-full">
+            <MdFilterList className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg z-10" />
+            <Select
+              value={deadlineStatus}
+              onChange={(event) =>
+                setDeadlineStatus(
+                  event.target.value as "all" | "upcoming" | "overdue"
+                )
+              }
+              options={[
+                { label: t("All Deadlines"), value: "all" },
+                { label: t("Upcoming"), value: "upcoming" },
+                { label: t("Overdue"), value: "overdue" },
+              ]}
+              className="pl-11"
+            />
+          </div>
 
+          <div className="relative w-full">
+            <MdFilterList className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg z-10" />
+            <Select
+              value={sortBy}
+              onChange={(event) => setSortBy(event.target.value)}
+              options={[
+                { label: t("Latest Created"), value: "createdAt_desc" },
+                { label: t("Nearest Deadline"), value: "dueDate_asc" },
+                { label: t("Recently Updated"), value: "updatedAt_desc" },
+              ]}
+              className="pl-11"
+            />
+          </div>
 
           <Button
             variant="primary"
-            className="min-w-45 justify-center"
+            className="min-w-45 justify-center w-full sm:w-auto"
             onClick={() => {
               setEditingProject(null);
               setIsProjectModalOpen(true);
