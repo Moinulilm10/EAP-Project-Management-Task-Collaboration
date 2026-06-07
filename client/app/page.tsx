@@ -14,6 +14,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MdCalendarMonth, MdDownload, MdCheck } from "react-icons/md";
 import "../i18n";
 import * as Sentry from "@sentry/nextjs";
+import { dashboardService, DashboardInsights } from "../services/dashboard.service";
 
 const DATE_RANGES = ["Last 7 Days", "Last 30 Days", "Last 90 Days", "This Year"];
 
@@ -23,9 +24,11 @@ export default function DashboardHome() {
   const [isRangeOpen, setIsRangeOpen] = useState(false);
   const [exportDone, setExportDone] = useState(false);
   const [taskModalOpen, setTaskModalOpen] = useState(false);
+  const [insights, setInsights] = useState<DashboardInsights | null>(null);
 
   useEffect(() => {
     Sentry.logger.info('User triggered test log', { log_source: 'sentry_test' });
+    dashboardService.getInsights().then(setInsights).catch(console.error);
   }, []);
 
   const handleExport = () => {
@@ -36,6 +39,7 @@ export default function DashboardHome() {
   const handleSaveTask = (_task: Omit<Task, "id" | "subtasks">) => {
     // In a real app, this would dispatch to state/API
     // For demo, we just close the modal
+    dashboardService.getInsights().then(setInsights).catch(console.error);
   };
 
   return (
@@ -130,11 +134,11 @@ export default function DashboardHome() {
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-md mb-lg animate-fade-in"
         style={{ animationDelay: "0.2s" }}
       >
-        <KPICard title="Total Projects" value="12" />
-        <KPICard title="Total Tasks" value="48" />
-        <KPICard title="Completed" value="32" subValue="/48" variant="primary-highlight" />
-        <KPICard title="Pending" value="16" />
-        <KPICard title="Overdue" value="3" variant="error-highlight" />
+        <KPICard title="Total Projects" value={insights ? insights.totalProjects.toString() : "-"} />
+        <KPICard title="Total Tasks" value={insights ? insights.totalTasks.toString() : "-"} />
+        <KPICard title="Completed" value={insights ? insights.completedTasks.toString() : "-"} subValue={insights ? `/${insights.totalTasks}` : ""} variant="primary-highlight" />
+        <KPICard title="Pending" value={insights ? insights.pendingTasks.toString() : "-"} />
+        <KPICard title="Overdue" value={insights ? insights.overdueTasks.toString() : "-"} variant="error-highlight" />
       </div>
 
       {/* Main Content Layout Grid */}
@@ -145,7 +149,7 @@ export default function DashboardHome() {
         {/* Left Side: Charts and Project Progress (8 columns) */}
         <div className="xl:col-span-8 flex flex-col gap-gutter">
           <TaskChart />
-          <ProjectProgressList />
+          <ProjectProgressList projects={insights ? insights.projectSummaries : []} />
         </div>
 
         {/* Right Side: Priority Tasks and Activity Log (4 columns) */}
