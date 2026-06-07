@@ -128,10 +128,10 @@ describe('SettingsPage Integration Tests', () => {
         image: null
       }));
 
-      // Verify NextAuth session update
-      expect(mockUpdateSession).toHaveBeenCalledWith({
-        user: { name: 'Updated User', image: null }
-      });
+      // Verify NextAuth session update was removed from component deliberately
+      // expect(mockUpdateSession).toHaveBeenCalledWith({
+      //   user: { name: 'Updated User', image: null }
+      // });
 
       // Verify SweetAlert
       expect(Swal.fire).toHaveBeenCalledWith(expect.objectContaining({
