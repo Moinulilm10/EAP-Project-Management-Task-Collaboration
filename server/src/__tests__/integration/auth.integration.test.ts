@@ -54,4 +54,54 @@ describe('Auth Integration', () => {
     expect(res.status).toBe(200);
     expect(res.body.accessToken).toBeDefined();
   });
+
+  describe('Profile /me', () => {
+    let accessToken = '';
+
+    beforeAll(async () => {
+      const res = await request(app).post('/api/v1/auth/register').send({
+        email: 'profiletest@example.com',
+        password: 'StrongPassword123!',
+        name: 'Profile Test User',
+      });
+      accessToken = res.body.accessToken;
+    });
+
+    it('should get current user profile', async () => {
+      const res = await request(app)
+        .get('/api/v1/auth/me')
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.user.email).toBe('profiletest@example.com');
+      expect(res.body.user.name).toBe('Profile Test User');
+    });
+
+    it('should update current user profile', async () => {
+      const res = await request(app)
+        .put('/api/v1/auth/me')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({
+          name: 'Updated Profile Name',
+          bio: 'This is a new bio',
+          picture: 'http://example.com/picture.jpg',
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.user.name).toBe('Updated Profile Name');
+      expect(res.body.user.bio).toBe('This is a new bio');
+      expect(res.body.user.picture).toBe('http://example.com/picture.jpg');
+    });
+
+    it('should fail to update profile with invalid data', async () => {
+      const res = await request(app)
+        .put('/api/v1/auth/me')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({
+          name: 'A', // too short, min length is 2
+        });
+
+      expect(res.status).toBe(400);
+    });
+  });
 });

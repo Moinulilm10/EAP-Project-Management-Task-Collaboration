@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "../ui/Button";
 
@@ -15,6 +16,11 @@ export function ImageCropperModal({
   onCancel,
   onApply,
 }: ImageCropperModalProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const { t } = useTranslation();
   const [zoom, setZoom] = useState(1);
   const [offsetX, setOffsetX] = useState(0);
@@ -35,7 +41,7 @@ export function ImageCropperModal({
     }
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   // Handle Drag Start
   const handleDragStart = (clientX: number, clientY: number) => {
@@ -134,10 +140,10 @@ export function ImageCropperModal({
     );
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div 
-        className="bg-surface rounded-2xl shadow-xl w-full max-w-md border border-outline-variant/30 flex flex-col gap-5 p-6 animate-in fade-in zoom-in-95 duration-200"
+        className="bg-surface rounded-2xl shadow-xl w-[90vw] max-w-[400px] min-w-[300px] border border-outline-variant/30 flex flex-col gap-5 p-6 animate-in fade-in zoom-in-95 duration-200"
         role="dialog"
         aria-modal="true"
         aria-label={t("Crop & Position Avatar") as string}
@@ -218,7 +224,7 @@ export function ImageCropperModal({
 
         {/* Action Buttons */}
         <div className="flex justify-end gap-3 pt-2">
-          <Button variant="outlined" onClick={onCancel} className="cursor-pointer">
+          <Button variant="secondary" onClick={onCancel} className="cursor-pointer">
             {t("Cancel")}
           </Button>
           <Button onClick={handleCrop} className="cursor-pointer">
@@ -226,6 +232,7 @@ export function ImageCropperModal({
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
