@@ -14,21 +14,29 @@ import { Bar } from "react-chartjs-2";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-export function ProductivityBarChart() {
+interface MemberWorkloadItem {
+  userId: string;
+  userName: string;
+  userInitials: string;
+  taskCount: number;
+}
+
+interface ProductivityBarChartProps {
+  workload?: MemberWorkloadItem[];
+}
+
+export function ProductivityBarChart({ workload }: ProductivityBarChartProps) {
+  const activeWorkload = workload || [];
+  const labels = activeWorkload.length > 0 ? activeWorkload.map(w => w.userName) : ["No active members"];
+  const dataValues = activeWorkload.length > 0 ? activeWorkload.map(w => w.taskCount) : [0];
+
   const data = {
-    labels: ["Engineering", "Design", "Marketing", "Sales", "HR", "Support"],
+    labels,
     datasets: [
       {
-        label: "Tasks Completed",
-        data: [145, 82, 105, 65, 40, 120],
-        backgroundColor: "#4f46e5", // primary-container
-        borderRadius: 4,
-        barPercentage: 0.6,
-      },
-      {
-        label: "Tasks Overdue",
-        data: [12, 4, 8, 3, 1, 15],
-        backgroundColor: "#ffdad6", // error-container
+        label: "Active Assigned Tasks",
+        data: dataValues,
+        backgroundColor: "#4f46e5",
         borderRadius: 4,
         barPercentage: 0.6,
       },

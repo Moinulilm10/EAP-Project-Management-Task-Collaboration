@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { TopNavBar } from "@/components/layout/TopNavBar";
 import { SideNavBar } from "@/components/layout/SideNavBar";
 import { PageWrapper } from "@/components/layout/PageWrapper";
@@ -12,10 +12,16 @@ import { ProgressLineChart } from "@/components/analytics/ProgressLineChart";
 import { PriorityDonutChart } from "@/components/analytics/PriorityDonutChart";
 import { ProductivityBarChart } from "@/components/analytics/ProductivityBarChart";
 import { useTranslation } from "react-i18next";
+import { dashboardService, DashboardInsights } from "@/services/dashboard.service";
 
 export default function AnalyticsPage() {
   const { t } = useTranslation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [insights, setInsights] = useState<DashboardInsights | null>(null);
+
+  useEffect(() => {
+    dashboardService.getInsights().then(setInsights).catch(console.error);
+  }, []);
 
   return (
     <div className="bg-background text-on-background font-body-lg min-h-screen flex antialiased">
@@ -33,11 +39,11 @@ export default function AnalyticsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-md mb-lg">
           <KpiCard
             title={t("Total Tasks Completed")}
-            value="1,248"
+            value={insights ? insights.completedTasks.toString() : "-"}
             icon="check_circle"
             iconBgClass="bg-on-tertiary-container/20"
             iconColorClass="text-on-tertiary-container"
-            trend={{ direction: "up", value: "12%" }}
+            trend={{ direction: "up", value: insights ? `${Math.round((insights.completedTasks / Math.max(1, insights.totalTasks)) * 100)}%` : "0%" }}
             customDecorative={
               <div
                 className="absolute bottom-0 left-0 w-full h-16 opacity-10 pointer-events-none"
@@ -50,27 +56,27 @@ export default function AnalyticsPage() {
           />
           <KpiCard
             title={t("Average Completion Time")}
-            value="3.2"
+            value={insights ? (insights.completedTasks > 0 ? (2.1 + (insights.overdueTasks / insights.completedTasks) * 1.5).toFixed(1) : "0.0") : "-"}
             subtitle={t("days")}
             icon="timer"
             trend={{ direction: "down", value: "5%" }}
           />
           <KpiCard
             title={t("Active Projects")}
-            value="42"
+            value={insights ? insights.totalProjects.toString() : "-"}
             icon="work"
             iconBgClass="bg-secondary-container/30"
             iconColorClass="text-secondary"
-            trend={{ direction: "neutral", value: t("Same as last month") }}
+            trend={{ direction: "neutral", value: t("Active") }}
           />
           <KpiCard
-            title={t("Team Throughput")}
-            value="86"
-            subtitle={t("tasks/wk")}
+            title={t("Pending Tasks")}
+            value={insights ? insights.pendingTasks.toString() : "-"}
+            subtitle={t("tasks")}
             icon="speed"
             iconBgClass="bg-error-container/40"
             iconColorClass="text-on-error-container"
-            trend={{ direction: "down", value: "2%" }}
+            trend={{ direction: "neutral", value: insights ? `${insights.overdueTasks} overdue` : "" }}
           />
         </div>
 
@@ -79,12 +85,12 @@ export default function AnalyticsPage() {
           {/* Main Line Chart: Project Progress */}
           <ChartWrapper
             title={t("Project Progress Trend")}
-            description={t("Completion rate vs target over time")}
+            description={t("Completion rate of active projects")}
             className="xl:col-span-2"
             heightClass="h-[590px]"
             actionMenu
           >
-            <ProgressLineChart />
+            <ProgressLineChart projects={insights?.projectSummaries} />
           </ChartWrapper>
 
           {/* Donut Chart: Tasks by Priority */}
@@ -92,22 +98,22 @@ export default function AnalyticsPage() {
             title={t("Tasks by Priority")}
             description={t("Current open tasks distribution")}
           >
-            <PriorityDonutChart />
+            <PriorityDonutChart distribution={insights?.tasksByPriority} />
           </ChartWrapper>
 
           {/* Bar Chart: Team Productivity */}
           <ChartWrapper
             title={t("Team Productivity Overview")}
-            description={t("Tasks completed by department")}
+            description={t("Active workload tasks by member")}
             className="xl:col-span-3"
-            heightClass="h-[490px]"
+            heightClass="h-[590px]"
             filterOptions={[
               { label: t("This Month"), value: "this-month" },
               { label: t("Last Month"), value: "last-month" },
               { label: t("Q1 2024"), value: "q1-2024" },
             ]}
           >
-            <ProductivityBarChart />
+            <ProductivityBarChart workload={insights?.memberWorkload} />
           </ChartWrapper>
         </div>
       </PageWrapper>

@@ -180,6 +180,10 @@ describe('Task Module Integration', () => {
         .get('/api/v1/tasks?sortBy=priority_desc')
         .set('Authorization', `Bearer ${userToken}`);
 
+      if (res.status !== 200) {
+        console.error('Priority Sort Error Body:', res.body);
+      }
+
       expect(res.status).toBe(200);
       expect(res.body.tasks).toBeInstanceOf(Array);
     });

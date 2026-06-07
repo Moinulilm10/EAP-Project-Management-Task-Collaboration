@@ -81,11 +81,8 @@ export const taskService = {
           query.orderBy(`${sortColumn} IS NULL`, 'ASC'); // Put nulls last
           break;
         case 'priority_desc':
-          // enum 'CRITICAL', 'HIGH', 'MEDIUM', 'LOW'
-          // Since it's a string enum, alphabetical sort doesn't work perfectly.
-          // In Postgres, we'd need a CASE WHEN.
-          query.addSelect(`CASE task.priority WHEN 'CRITICAL' THEN 4 WHEN 'HIGH' THEN 3 WHEN 'MEDIUM' THEN 2 WHEN 'LOW' THEN 1 ELSE 0 END`, 'priority_weight');
-          query.orderBy('priority_weight', 'DESC');
+          sortColumn = 'task.priority';
+          sortDirection = 'DESC';
           break;
         case 'updatedAt_desc':
           sortColumn = 'task.updatedAt';
@@ -101,10 +98,11 @@ export const taskService = {
 
     if (options?.sortBy === 'dueDate_asc') {
       query.addOrderBy(sortColumn, sortDirection);
-    } else if (options?.sortBy !== 'priority_desc') {
+    } else if (options?.sortBy === 'priority_desc') {
       query.orderBy(sortColumn, sortDirection);
-    } else {
       query.addOrderBy('task.createdAt', 'DESC');
+    } else {
+      query.orderBy(sortColumn, sortDirection);
     }
 
     query.skip(skip).take(limit);
