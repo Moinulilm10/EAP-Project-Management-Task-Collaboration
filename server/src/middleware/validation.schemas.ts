@@ -3,14 +3,13 @@ import { z } from 'zod';
 const sanitizedString = (minLen: number, maxLen: number) =>
   z
     .string()
-    .min(minLen)
-    .max(maxLen)
     .transform((val) =>
       val
         .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
         .replace(/<[^>]*>/g, '')
         .trim()
-    );
+    )
+    .pipe(z.string().min(minLen).max(maxLen));
 
 // ─── Auth Schemas ───────────────────────────────────────────────────────────
 
@@ -38,6 +37,12 @@ export const loginSchema = z.object({
     .max(255)
     .transform((v) => v.toLowerCase().trim()),
   password: z.string().min(1, 'Password is required').max(128),
+});
+
+export const updateProfileSchema = z.object({
+  name: sanitizedString(2, 100).optional(),
+  picture: z.string().max(1000).optional().nullable(),
+  bio: sanitizedString(0, 1000).optional().nullable(),
 });
 
 // ─── Project Schemas ────────────────────────────────────────────────────────

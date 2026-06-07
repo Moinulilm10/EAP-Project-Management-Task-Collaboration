@@ -64,6 +64,8 @@ describe('authService', () => {
         email: data.email,
         name: data.name,
         provider: AuthProvider.CREDENTIALS,
+        picture: null,
+        bio: null,
       });
     });
 
@@ -77,6 +79,84 @@ describe('authService', () => {
           name: 'Test User',
         })
       ).rejects.toEqual({ status: 409, message: 'A user with this email already exists.' });
+    });
+  });
+
+  describe('getProfile', () => {
+    it('should return the user profile if user exists', async () => {
+      const mockUser = {
+        id: 'user-123',
+        email: 'profile@example.com',
+        name: 'Profile User',
+        provider: AuthProvider.CREDENTIALS,
+        picture: 'http://pic.jpg',
+        bio: 'Hello bio',
+      };
+      mockUserRepo.findOne.mockResolvedValue(mockUser);
+
+      const result = await authService.getProfile('user-123');
+
+      expect(mockUserRepo.findOne).toHaveBeenCalledWith({ where: { id: 'user-123' } });
+      expect(result).toEqual({
+        id: 'user-123',
+        email: 'profile@example.com',
+        name: 'Profile User',
+        provider: AuthProvider.CREDENTIALS,
+        picture: 'http://pic.jpg',
+        bio: 'Hello bio',
+      });
+    });
+
+    it('should throw 404 if user not found', async () => {
+      mockUserRepo.findOne.mockResolvedValue(null);
+
+      await expect(authService.getProfile('user-unknown')).rejects.toEqual({
+        status: 404,
+        message: 'User not found.',
+      });
+    });
+  });
+
+  describe('updateProfile', () => {
+    it('should successfully update name, picture, and bio', async () => {
+      const mockUser = {
+        id: 'user-123',
+        email: 'profile@example.com',
+        name: 'Old Name',
+        provider: AuthProvider.CREDENTIALS,
+        picture: 'http://old.jpg',
+        bio: 'Old bio',
+      };
+      mockUserRepo.findOne.mockResolvedValue(mockUser);
+
+      const result = await authService.updateProfile('user-123', {
+        name: 'New Name',
+        picture: 'http://new.jpg',
+        bio: 'New bio',
+      });
+
+      expect(mockUserRepo.findOne).toHaveBeenCalledWith({ where: { id: 'user-123' } });
+      expect(mockUserRepo.save).toHaveBeenCalledWith(expect.objectContaining({
+        name: 'New Name',
+        picture: 'http://new.jpg',
+        bio: 'New bio',
+      }));
+      expect(result).toEqual({
+        id: 'user-123',
+        email: 'profile@example.com',
+        name: 'New Name',
+        provider: AuthProvider.CREDENTIALS,
+        picture: 'http://new.jpg',
+        bio: 'New bio',
+      });
+    });
+
+    it('should throw 404 if user to update does not exist', async () => {
+      mockUserRepo.findOne.mockResolvedValue(null);
+
+      await expect(
+        authService.updateProfile('user-unknown', { name: 'New Name' })
+      ).rejects.toEqual({ status: 404, message: 'User not found.' });
     });
   });
 });

@@ -3,7 +3,7 @@ import { authController } from '../controllers/auth.controller';
 import { requireAuth } from '../middleware/auth';
 import { authRateLimiter } from '../middleware/rateLimiter';
 import { validate } from '../middleware/validate';
-import { registerSchema, loginSchema } from '../middleware/validation.schemas';
+import { registerSchema, loginSchema, updateProfileSchema } from '../middleware/validation.schemas';
 
 const router = Router();
 
@@ -13,7 +13,7 @@ router.post('/login', authRateLimiter, validate(loginSchema), authController.log
 router.post('/refresh', authRateLimiter, authController.refresh);
 router.post('/logout', requireAuth, authController.logout);
 router.get('/me', requireAuth, authController.me);
-router.put('/me', requireAuth, authController.updateProfile);
+router.put('/me', requireAuth, validate(updateProfileSchema), authController.updateProfile);
 
 // Google OAuth sync endpoint (called by NextAuth backend)
 router.post('/google-sync', authRateLimiter, authController.googleSync);
