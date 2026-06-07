@@ -4,6 +4,7 @@ import { Avatar } from "../ui/Avatar";
 import { useTranslation } from "react-i18next";
 import { MdEdit, MdMail } from "react-icons/md";
 import { createClient } from "@/utils/supabase/client";
+import { ImageCropperModal } from "./ImageCropperModal";
 
 interface ProfileSettingsFormProps {
   name: string;
@@ -27,6 +28,9 @@ export function ProfileSettingsForm({
 
   const { t } = useTranslation();
   const [isUploading, setIsUploading] = useState(false);
+  const [isCropperOpen, setIsCropperOpen] = useState(false);
+  const [cropperImageSrc, setCropperImageSrc] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const supabase = createClient();
 
@@ -42,15 +46,29 @@ export function ProfileSettingsForm({
       return;
     }
 
+    setSelectedFile(file);
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCropperImageSrc(reader.result as string);
+      setIsCropperOpen(true);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleCropApply = async (croppedBlob: Blob) => {
+    if (!selectedFile) return;
+    setIsCropperOpen(false);
+
     try {
       setIsUploading(true);
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random()}.${fileExt}`;
+      const fileName = `${Math.random()}.jpg`;
       const filePath = `user-avatars/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(filePath, file);
+        .upload(filePath, croppedBlob, {
+          contentType: 'image/jpeg',
+        });
 
       if (uploadError) throw uploadError;
 
@@ -64,6 +82,18 @@ export function ProfileSettingsForm({
       alert(t("Error uploading avatar: ") + error.message);
     } finally {
       setIsUploading(false);
+      setSelectedFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  const handleCropCancel = () => {
+    setIsCropperOpen(false);
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
@@ -149,6 +179,13 @@ export function ProfileSettingsForm({
           onChange={(e) => setBio(e.target.value)}
         ></textarea>
       </div>
+
+      <ImageCropperModal
+        isOpen={isCropperOpen}
+        imageSrc={cropperImageSrc}
+        onCancel={handleCropCancel}
+        onApply={handleCropApply}
+      />
     </>
   );
 }
