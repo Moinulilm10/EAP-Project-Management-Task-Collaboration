@@ -2,6 +2,7 @@ import { AppDataSource } from '../utils/data-source';
 import { Project, ProjectStatus } from '../entities/Project.entity';
 import { Task, TaskStatus, TaskPriority } from '../entities/Task.entity';
 import { User } from '../entities/User.entity';
+import { Activity } from '../entities/Activity.entity';
 import { LessThan, MoreThanOrEqual, Not, In } from 'typeorm';
 
 export interface ProjectSummary {
@@ -107,20 +108,20 @@ export class DashboardService {
       assigneeInitials: t.assignee ? t.assignee.name.substring(0, 2).toUpperCase() : 'U',
     }));
 
-    // 4. Recent Activities (Fake audit log by using recently updated tasks)
-    const recentUpdatedTasks = await this.taskRepo.find({
-      order: { updatedAt: 'DESC' },
-      take: 5,
-      relations: { assignee: true },
+    // 4. Recent Activities from Database
+    const activityRepo = AppDataSource.getRepository(Activity);
+    const dbActivities = await activityRepo.find({
+      order: { createdAt: 'DESC' },
+      take: 10,
     });
 
-    const recentActivities = recentUpdatedTasks.map((t) => ({
-      id: t.id,
-      user: t.assignee ? t.assignee.name : 'Unknown User',
-      action: t.status === TaskStatus.DONE ? 'completed the task' : 'updated the task',
-      target: t.title,
-      time: t.updatedAt.toISOString(),
-      status: t.status,
+    const recentActivities = dbActivities.map((a) => ({
+      id: a.id,
+      user: a.user,
+      action: a.action,
+      target: a.target,
+      time: a.createdAt.toISOString(),
+      status: a.status,
     }));
 
     // 5. Member Workload Summary

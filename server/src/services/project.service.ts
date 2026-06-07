@@ -5,6 +5,7 @@ import {
   ProjectRoleName,
 } from "../entities/ProjectMember.entity";
 import { Role } from "../entities/Role.entity";
+import { Activity } from "../entities/Activity.entity";
 import { AppDataSource } from "../utils/data-source";
 
 const projectRepo = () => AppDataSource.getRepository(Project);
@@ -266,6 +267,15 @@ export const projectService = {
       });
 
       await manager.save(membership);
+
+      const activity = manager.create(Activity, {
+        user: `Project “${savedProject.name}”`,
+        action: "created",
+        target: "",
+        status: "",
+      });
+      await manager.save(activity);
+
       return savedProject;
     });
   },

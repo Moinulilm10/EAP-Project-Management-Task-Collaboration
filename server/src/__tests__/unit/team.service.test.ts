@@ -30,12 +30,18 @@ describe('teamService', () => {
     create: vi.fn(),
     save: vi.fn(),
     findOne: vi.fn(),
+    find: vi.fn().mockResolvedValue([]),
   };
 
   const mockTaskTeamRepo = {
     create: vi.fn(),
     save: vi.fn(),
     findOne: vi.fn(),
+  };
+
+  const mockActivityRepo = {
+    create: vi.fn().mockImplementation((data) => data),
+    save: vi.fn().mockImplementation(async (data) => data),
   };
 
   const mockQueryRunner = {
@@ -57,6 +63,10 @@ describe('teamService', () => {
     (teamService as any).taskTeamRepository = mockTaskTeamRepo;
     
     (AppDataSource.createQueryRunner as any).mockReturnValue(mockQueryRunner);
+    (AppDataSource.getRepository as any).mockImplementation((entity: any) => {
+      if (entity.name === 'Activity') return mockActivityRepo;
+      return {};
+    });
   });
 
   describe('createTeam', () => {
@@ -172,6 +182,64 @@ describe('teamService', () => {
       mockTeamMemberRepo.findOne.mockResolvedValueOnce({ role: TeamRoleName.ADMIN });
       mockTeamRepo.findOne.mockResolvedValueOnce({ id: 'team-1', maxMembers: 1, members: [{ userId: 'user-1' }] });
       await expect(teamService.addMember('team-1', 'user-1', 'user-2')).rejects.toEqual({ status: 400, message: 'Team capacity reached. Increase capacity to add more members.' });
+    });
+
+    it('should log activity for each project assigned to the team when member is added', async () => {
+      mockTeamMemberRepo.findOne.mockResolvedValueOnce({ role: TeamRoleName.ADMIN }); // Admin check
+      mockTeamRepo.findOne.mockResolvedValueOnce({ id: 'team-1', maxMembers: 5, members: [{ userId: 'user-1' }] }); // Team capacity check
+      mockTeamMemberRepo.findOne.mockResolvedValueOnce(null); // Existing member check
+      
+      const newMember = { teamId: 'team-1', userId: 'user-2', role: TeamRoleName.MEMBER };
+      mockTeamMemberRepo.create.mockReturnValue(newMember);
+      mockTeamMemberRepo.save.mockResolvedValue(newMember);
+
+      // Mock one project team relation
+      const mockProject = { id: 'proj-1', name: 'Project A' };
+      mockProjectTeamRepo.find.mockResolvedValueOnce([
+        { teamId: 'team-1', projectId: 'proj-1', project: mockProject }
+      ]);
+
+      await teamService.addMember('team-1', 'user-1', 'user-2');
+
+      expect(mockActivityRepo.create).toHaveBeenCalledWith({
+        user: "Member",
+        action: "added to",
+        target: "“Project A”",
+        status: "",
+      });
+      expect(mockActivityRepo.save).toHaveBeenCalled();
+    });
+  });
+
+  describe('assignProject', () => {
+    it('should assign project and log activity successfully', async () => {
+      mockTeamMemberRepo.findOne.mockResolvedValueOnce({ role: TeamRoleName.ADMIN }); // Admin check
+      mockProjectTeamRepo.findOne.mockResolvedValueOnce(null); // Not already assigned
+
+      const mockProject = { id: 'proj-1', name: 'Project A' };
+      const mockProjectRepo = {
+        findOne: vi.fn().mockResolvedValue(mockProject),
+      };
+      (AppDataSource.getRepository as any).mockImplementation((entity: any) => {
+        if (entity.name === 'Activity') return mockActivityRepo;
+        if (entity.name === 'Project') return mockProjectRepo;
+        return {};
+      });
+
+      const newAssignment = { teamId: 'team-1', projectId: 'proj-1' };
+      mockProjectTeamRepo.create.mockReturnValue(newAssignment);
+      mockProjectTeamRepo.save.mockResolvedValue(newAssignment);
+
+      const result = await teamService.assignProject('team-1', 'user-1', 'proj-1');
+
+      expect(result).toEqual(newAssignment);
+      expect(mockActivityRepo.create).toHaveBeenCalledWith({
+        user: "Member",
+        action: "added to",
+        target: "“Project A”",
+        status: "",
+      });
+      expect(mockActivityRepo.save).toHaveBeenCalled();
     });
   });
 

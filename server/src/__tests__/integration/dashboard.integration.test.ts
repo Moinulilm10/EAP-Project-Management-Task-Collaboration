@@ -6,6 +6,11 @@ import { User } from '../../entities/User.entity';
 import { Project, ProjectStatus } from '../../entities/Project.entity';
 import { Task, TaskPriority, TaskStatus } from '../../entities/Task.entity';
 import { ensureTestSchema } from '../../utils/test-setup';
+import { projectService } from '../../services/project.service';
+import { taskService } from '../../services/task.service';
+
+import { Role } from '../../entities/Role.entity';
+import { ProjectRoleName } from '../../entities/ProjectMember.entity';
 
 describe('Dashboard Insights API Integration Tests', () => {
   let token: string;
@@ -18,6 +23,12 @@ describe('Dashboard Insights API Integration Tests', () => {
     }
     await AppDataSource.synchronize(true);
 
+    // Seed roles
+    const roleRepo = AppDataSource.getRepository(Role);
+    for (const name of Object.values(ProjectRoleName)) {
+      await roleRepo.save(roleRepo.create({ name }));
+    }
+
     const resUser = await request(app).post('/api/v1/auth/register').send({
       email: 'dashboard@test.com',
       password: 'Password123!',
@@ -25,7 +36,7 @@ describe('Dashboard Insights API Integration Tests', () => {
     });
     token = resUser.body.accessToken;
     userId = resUser.body.user.id;
-  });
+  }, 30000);
 
   afterAll(async () => {
     if (AppDataSource.isInitialized) {
@@ -36,6 +47,7 @@ describe('Dashboard Insights API Integration Tests', () => {
   beforeEach(async () => {
     await AppDataSource.query('DELETE FROM tasks');
     await AppDataSource.query('DELETE FROM projects');
+    await AppDataSource.query('DELETE FROM activities');
   });
 
   it('should return correct counts and summaries for an empty database', async () => {
@@ -140,5 +152,54 @@ describe('Dashboard Insights API Integration Tests', () => {
     const website = summaries.find((s: any) => s.id === p1.id);
     expect(website).toBeDefined();
     expect(website.tasksPending).toBe(6); // 5 pending + 1 overdue
+  });
+
+  it('should track recent system activities in Activity Log', async () => {
+    // 1. Create a project
+    const project = await projectService.create({
+      name: 'E-Commerce App',
+      description: 'E-Commerce Description',
+      ownerId: userId,
+    });
+
+    // 2. Create a task and assign it
+    const task = await taskService.create({
+      title: 'Setup API',
+      projectId: project.id,
+      createdById: userId,
+      assigneeId: userId, // assigning to dashboard tester
+    });
+
+    // 3. Mark the task as completed
+    await taskService.update(task.id, {
+      status: TaskStatus.DONE,
+    });
+
+    // 4. Hit insights endpoint
+    const res = await request(app)
+      .get('/api/v1/dashboard/insights')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.recentActivities.length).toBeGreaterThanOrEqual(3);
+
+    // Verify activities are in reverse chronological order
+    const activities = res.body.recentActivities;
+    
+    // Most recent first: Task Setup API marked as Completed
+    expect(activities[0].user).toBe('Task “Setup API”');
+    expect(activities[0].action).toBe('marked as');
+    expect(activities[0].target).toBe('Completed');
+
+    // Next: Task assigned to assignee
+    const dashboardTesterActivity = activities.find((a: any) => a.action === 'assigned to');
+    expect(dashboardTesterActivity).toBeDefined();
+    expect(dashboardTesterActivity.user).toBe('Task “Setup API”');
+    expect(dashboardTesterActivity.target).toBe('Dashboard Tester');
+
+    // Next: Project created
+    const projectCreatedActivity = activities.find((a: any) => a.action === 'created' && a.user.includes('Project'));
+    expect(projectCreatedActivity).toBeDefined();
+    expect(projectCreatedActivity.user).toBe('Project “E-Commerce App”');
   });
 });

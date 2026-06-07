@@ -2,6 +2,8 @@ import { AppDataSource } from '../utils/data-source';
 import { Task, TaskStatus, TaskPriority } from '../entities/Task.entity';
 import { ProjectRoleName } from '../entities/ProjectMember.entity';
 import { TaskTeam } from '../entities/TaskTeam.entity';
+import { Activity } from '../entities/Activity.entity';
+import { User } from '../entities/User.entity';
 
 const repo = () => AppDataSource.getRepository(Task);
 
@@ -174,6 +176,26 @@ export const taskService = {
       });
       const savedTask = await queryRunner.manager.save(task);
 
+      const activity = queryRunner.manager.create(Activity, {
+        user: `Task “${savedTask.title}”`,
+        action: "created",
+        target: "",
+        status: "",
+      });
+      await queryRunner.manager.save(activity);
+
+      if (data.assigneeId) {
+        const assignee = await queryRunner.manager.findOne(User, { where: { id: data.assigneeId } });
+        const assigneeName = assignee ? assignee.name : "Unknown User";
+        const assignActivity = queryRunner.manager.create(Activity, {
+          user: `Task “${savedTask.title}”`,
+          action: "assigned to",
+          target: assigneeName,
+          status: "",
+        });
+        await queryRunner.manager.save(assignActivity);
+      }
+
       if (data.teamId) {
         const taskTeam = queryRunner.manager.create(TaskTeam, {
           taskId: savedTask.id,
@@ -242,6 +264,32 @@ export const taskService = {
         }
       }
 
+      // Track status change to completed
+      if (data.status === TaskStatus.DONE && task.status !== TaskStatus.DONE) {
+        const statusActivity = queryRunner.manager.create(Activity, {
+          user: `Task “${task.title}”`,
+          action: "marked as",
+          target: "Completed",
+          status: "done",
+        });
+        await queryRunner.manager.save(statusActivity);
+      }
+
+      // Track assignment change
+      if (data.assigneeId !== undefined && data.assigneeId !== task.assigneeId) {
+        if (data.assigneeId !== null) {
+          const assignee = await queryRunner.manager.findOne(User, { where: { id: data.assigneeId } });
+          const assigneeName = assignee ? assignee.name : "Unknown User";
+          const assignActivity = queryRunner.manager.create(Activity, {
+            user: `Task “${task.title}”`,
+            action: "assigned to",
+            target: assigneeName,
+            status: "",
+          });
+          await queryRunner.manager.save(assignActivity);
+        }
+      }
+
       if (data.title !== undefined) task.title = data.title;
       if (data.description !== undefined) task.description = data.description;
       if (data.priority !== undefined) task.priority = data.priority;
@@ -295,8 +343,20 @@ export const taskService = {
       };
     }
 
+    const oldStatus = task.status;
     task.status = status;
-    return repo().save(task);
+    const savedTask = await repo().save(task);
+
+    if (status === TaskStatus.DONE && oldStatus !== TaskStatus.DONE) {
+      const activity = repo().manager.create(Activity, {
+        user: `Task “${task.title}”`,
+        action: "marked as",
+        target: "Completed",
+        status: "done",
+      });
+      await repo().manager.save(Activity, activity);
+    }
+    return savedTask;
   },
 
   async delete(id: string): Promise<void> {

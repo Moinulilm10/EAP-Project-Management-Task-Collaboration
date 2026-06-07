@@ -12,6 +12,7 @@ import { Team } from "../entities/Team.entity";
 import { TeamMember } from "../entities/TeamMember.entity";
 import { ProjectTeam } from "../entities/ProjectTeam.entity";
 import { TaskTeam } from "../entities/TaskTeam.entity";
+import { Activity } from "../entities/Activity.entity";
 
 dotenv.config();
 
@@ -42,6 +43,7 @@ export const AppDataSource = new DataSource({
     TeamMember,
     ProjectTeam,
     TaskTeam,
+    Activity,
   ],
   migrations: [],
   subscribers: [],

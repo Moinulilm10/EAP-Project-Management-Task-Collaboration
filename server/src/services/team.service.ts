@@ -6,6 +6,7 @@ import { TaskTeam } from "../entities/TaskTeam.entity";
 import { User } from "../entities/User.entity";
 import { Project } from "../entities/Project.entity";
 import { Task } from "../entities/Task.entity";
+import { Activity } from "../entities/Activity.entity";
 
 export class TeamService {
   private teamRepository = AppDataSource.getRepository(Team);
@@ -130,7 +131,27 @@ export class TeamService {
       role,
     });
 
-    return this.teamMemberRepository.save(newMember);
+    const savedMember = await this.teamMemberRepository.save(newMember);
+
+    // Fetch projects assigned to this team to log "Member added to project"
+    const projectTeams = await this.projectTeamRepository.find({
+      where: { teamId },
+      relations: { project: true },
+    });
+
+    for (const pt of projectTeams) {
+      if (pt.project) {
+        const activity = AppDataSource.getRepository(Activity).create({
+          user: "Member",
+          action: "added to",
+          target: `“${pt.project.name}”`,
+          status: "",
+        });
+        await AppDataSource.getRepository(Activity).save(activity);
+      }
+    }
+
+    return savedMember;
   }
 
   async assignProject(teamId: string, adminId: string, projectId: string) {
@@ -150,8 +171,21 @@ export class TeamService {
       throw { status: 400, message: "Project already assigned to team" };
     }
 
+    const project = await AppDataSource.getRepository(Project).findOne({ where: { id: projectId } });
+    const projectName = project ? project.name : "Unknown Project";
+
     const projectTeam = this.projectTeamRepository.create({ teamId, projectId });
-    return this.projectTeamRepository.save(projectTeam);
+    const saved = await this.projectTeamRepository.save(projectTeam);
+
+    const activity = AppDataSource.getRepository(Activity).create({
+      user: "Member",
+      action: "added to",
+      target: `“${projectName}”`,
+      status: "",
+    });
+    await AppDataSource.getRepository(Activity).save(activity);
+
+    return saved;
   }
 
   async assignTask(teamId: string, adminId: string, taskId: string) {

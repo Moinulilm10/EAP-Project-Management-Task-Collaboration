@@ -12,12 +12,23 @@ vi.mock('../../utils/data-source', () => ({
 }));
 
 describe('taskService', () => {
+  const mockActivityRepo = {
+    create: vi.fn().mockImplementation((data) => data),
+    save: vi.fn().mockImplementation(async (data) => data),
+  };
+
+  const mockEntityManager = {
+    create: vi.fn().mockImplementation((entity, data) => data),
+    save: vi.fn().mockImplementation(async (entity, data) => data),
+  };
+
   const mockTaskRepo = {
     findOne: vi.fn(),
     find: vi.fn(),
     createQueryBuilder: vi.fn(),
     save: vi.fn(),
     remove: vi.fn(),
+    manager: mockEntityManager,
   };
 
   const mockQueryRunner = {
@@ -27,8 +38,8 @@ describe('taskService', () => {
     rollbackTransaction: vi.fn(),
     release: vi.fn(),
     manager: {
-      create: vi.fn(),
-      save: vi.fn(),
+      create: vi.fn().mockImplementation((entity, data) => data),
+      save: vi.fn().mockImplementation(async (data) => data),
       findOne: vi.fn(),
       delete: vi.fn(),
     },
@@ -36,8 +47,31 @@ describe('taskService', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockTaskRepo.findOne.mockReset();
+    mockTaskRepo.find.mockReset();
+    mockTaskRepo.createQueryBuilder.mockReset();
+    mockTaskRepo.save.mockReset();
+    mockTaskRepo.remove.mockReset();
+    
+    mockQueryRunner.manager.create.mockReset();
+    mockQueryRunner.manager.create.mockImplementation((entity, data) => data);
+    
+    mockQueryRunner.manager.save.mockReset();
+    mockQueryRunner.manager.save.mockImplementation(async (data) => data);
+    
+    mockQueryRunner.manager.findOne.mockReset();
+    mockQueryRunner.manager.delete.mockReset();
+    
+    mockEntityManager.create.mockReset();
+    mockEntityManager.create.mockImplementation((entity, data) => data);
+    
+    mockEntityManager.save.mockReset();
+    mockEntityManager.save.mockImplementation(async (entity, data) => data);
+
     (AppDataSource.getRepository as any).mockImplementation((entity: any) => {
       if (entity.name === 'Task') return mockTaskRepo;
+      if (entity.name === 'Activity') return mockActivityRepo;
+      return {};
     });
     (AppDataSource.createQueryRunner as any).mockReturnValue(mockQueryRunner);
   });
@@ -66,6 +100,43 @@ describe('taskService', () => {
       expect(mockQueryRunner.manager.create).toHaveBeenCalled();
       expect(mockQueryRunner.manager.save).toHaveBeenCalled();
       expect(mockQueryRunner.commitTransaction).toHaveBeenCalled();
+      expect(result).toEqual(savedTask);
+    });
+
+    it('should log activities for task creation and assignment', async () => {
+      const data = {
+        title: 'New Task with Assignee',
+        projectId: 'proj-1',
+        createdById: 'user-1',
+        assigneeId: 'user-assignee',
+        priority: TaskPriority.HIGH,
+        status: TaskStatus.TODO,
+      };
+
+      const savedTask = { id: 'task-1', ...data };
+
+      mockQueryRunner.manager.findOne
+        .mockResolvedValueOnce(null) // Duplicate check
+        .mockResolvedValueOnce({ id: 'user-assignee', name: 'John Doe' }); // User assignment lookup
+
+      mockQueryRunner.manager.save.mockResolvedValue(savedTask);
+
+      mockTaskRepo.findOne.mockResolvedValue(savedTask);
+
+      const result = await taskService.create(data);
+
+      expect(mockQueryRunner.manager.create).toHaveBeenCalledWith(expect.any(Function), {
+        user: 'Task “New Task with Assignee”',
+        action: 'created',
+        target: '',
+        status: '',
+      });
+      expect(mockQueryRunner.manager.create).toHaveBeenCalledWith(expect.any(Function), {
+        user: 'Task “New Task with Assignee”',
+        action: 'assigned to',
+        target: 'John Doe',
+        status: '',
+      });
       expect(result).toEqual(savedTask);
     });
 
@@ -122,6 +193,44 @@ describe('taskService', () => {
       expect(result.title).toBe('New Title');
     });
 
+    it('should log activity when marking a task as Completed', async () => {
+      const existingTask = { id: 'task-1', title: 'Task Title', projectId: 'proj-1', status: TaskStatus.TODO, assigneeId: 'user-1' };
+      mockQueryRunner.manager.findOne
+        .mockResolvedValueOnce(existingTask); // For the initial find only (no title update)
+
+      mockTaskRepo.findOne.mockResolvedValue({ ...existingTask, status: TaskStatus.DONE });
+
+      const result = await taskService.update('task-1', { status: TaskStatus.DONE });
+
+      expect(mockQueryRunner.manager.create).toHaveBeenCalledWith(expect.any(Function), {
+        user: 'Task “Task Title”',
+        action: 'marked as',
+        target: 'Completed',
+        status: 'done',
+      });
+      expect(result.status).toBe(TaskStatus.DONE);
+    });
+
+    it('should log activity when reassigned', async () => {
+      const existingTask = { id: 'task-1', title: 'Task Title', projectId: 'proj-1', status: TaskStatus.TODO, assigneeId: 'user-1' };
+      
+      mockQueryRunner.manager.findOne
+        .mockResolvedValueOnce(existingTask) // Initial find
+        .mockResolvedValueOnce({ id: 'user-2', name: 'John Doe' }); // User lookup
+
+      mockTaskRepo.findOne.mockResolvedValue({ ...existingTask, assigneeId: 'user-2' });
+
+      const result = await taskService.update('task-1', { assigneeId: 'user-2' });
+
+      expect(mockQueryRunner.manager.create).toHaveBeenCalledWith(expect.any(Function), {
+        user: 'Task “Task Title”',
+        action: 'assigned to',
+        target: 'John Doe',
+        status: '',
+      });
+      expect(result.assigneeId).toBe('user-2');
+    });
+
     it('should throw 400 when attempting to reassign a completed task', async () => {
       const existingTask = { 
         id: 'task-1', 
@@ -147,6 +256,23 @@ describe('taskService', () => {
 
       const result = await taskService.updateStatus('task-1', TaskStatus.IN_PROGRESS, 'user-1');
       expect(result.status).toBe(TaskStatus.IN_PROGRESS);
+    });
+
+    it('should log activity when marking a task as Completed via updateStatus', async () => {
+      const task = { id: 'task-1', title: 'Task Title', assigneeId: 'user-1', status: TaskStatus.TODO };
+      mockTaskRepo.findOne.mockResolvedValue(task);
+      mockTaskRepo.save.mockImplementation(async (t) => t);
+
+      const result = await taskService.updateStatus('task-1', TaskStatus.DONE, 'user-1');
+
+      expect(mockEntityManager.create).toHaveBeenCalledWith(expect.any(Function), {
+        user: 'Task “Task Title”',
+        action: 'marked as',
+        target: 'Completed',
+        status: 'done',
+      });
+      expect(mockEntityManager.save).toHaveBeenCalled();
+      expect(result.status).toBe(TaskStatus.DONE);
     });
 
     it('should throw 403 if requested by non-assignee', async () => {
