@@ -43,6 +43,7 @@ type ProjectView = {
   description: string;
   status: "active" | "completed" | "on_hold";
   dueDate: string;
+  rawDeadline: string | null;
   progress: number;
   memberCount?: number;
   isWarning?: boolean;
@@ -105,6 +106,7 @@ export default function ProjectsPage() {
           description: project.description || "No description provided.",
           status: project.status,
           dueDate: formatDueDate(project.deadline),
+          rawDeadline: project.deadline,
           progress: project.progress,
           memberCount: project.memberCount,
           isWarning:
@@ -344,10 +346,7 @@ export default function ProjectsPage() {
                 id: editingProject.id,
                 name: editingProject.title,
                 description: editingProject.description,
-                deadline:
-                  editingProject.dueDate === "No deadline"
-                    ? null
-                    : new Date(editingProject.dueDate).toISOString(),
+                deadline: editingProject.rawDeadline,
                 status: editingProject.status,
               }
             : null

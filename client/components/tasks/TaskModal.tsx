@@ -105,6 +105,7 @@ export function TaskModal({ isOpen, onClose, onSave, initial }: TaskModalProps) 
 
     const submitData = {
       ...form,
+      dueDate: form.dueDate ? new Date(form.dueDate).toISOString() : undefined,
       teamId: form.teamId || undefined,
       assigneeId: form.assignee?.id || undefined, // Keep as undefined if no actual user is mapped yet
     };

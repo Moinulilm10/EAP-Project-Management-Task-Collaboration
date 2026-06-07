@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/Button";
 import { useTranslation } from "react-i18next";
 import { useTaskStore } from "@/stores/taskStore";
 import { useEffect } from "react";
+import { notification } from "@/utils/notification";
 import {
   MdAdd,
   MdViewKanban,
@@ -97,12 +98,21 @@ export default function TasksPage() {
 
   // ── Handlers ───────────────────────────────────────────────────────────────
   const handleSave = async (formData: any) => {
-    if (editingTask) {
-      await updateTask(editingTask.id, formData);
-    } else {
-      await createTask(formData);
+    try {
+      if (editingTask) {
+        await updateTask(editingTask.id, formData);
+        notification.successToast(t("Task updated successfully") as string);
+      } else {
+        await createTask(formData);
+        notification.successToast(t("Task created successfully") as string);
+      }
+      setModalOpen(false);
+      setEditingTask(null);
+    } catch (err: any) {
+      notification.errorToast(
+        err?.message || (t("Failed to save task") as string)
+      );
     }
-    setEditingTask(null);
   };
 
   const handleEdit = (task: Task) => {
