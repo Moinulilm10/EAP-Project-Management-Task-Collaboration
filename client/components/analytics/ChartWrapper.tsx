@@ -44,7 +44,7 @@ export function ChartWrapper({
           </div>
         )}
       </div>
-      <div className="flex-1 relative w-full flex items-center justify-center">
+      <div className="flex-1 relative w-full min-h-0">
         {children}
       </div>
     </Card>

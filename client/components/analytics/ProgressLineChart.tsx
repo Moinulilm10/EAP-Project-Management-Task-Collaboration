@@ -143,5 +143,9 @@ export function ProgressLineChart({ projects }: ProgressLineChartProps) {
     },
   };
 
-  return <Line ref={chartRef} data={chartData} options={options} className="w-full h-full" />;
+  return (
+    <div className="absolute inset-0 w-full h-full">
+      <Line ref={chartRef} data={chartData} options={options} />
+    </div>
+  );
 }

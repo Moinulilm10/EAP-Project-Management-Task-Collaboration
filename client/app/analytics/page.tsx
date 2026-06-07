@@ -87,7 +87,7 @@ export default function AnalyticsPage() {
             title={t("Project Progress Trend")}
             description={t("Completion rate of active projects")}
             className="xl:col-span-2"
-            heightClass="h-[590px]"
+            heightClass="h-[490px]"
             actionMenu
           >
             <ProgressLineChart projects={insights?.projectSummaries} />
@@ -106,7 +106,7 @@ export default function AnalyticsPage() {
             title={t("Team Productivity Overview")}
             description={t("Active workload tasks by member")}
             className="xl:col-span-3"
-            heightClass="h-[590px]"
+            heightClass="h-[490px]"
             filterOptions={[
               { label: t("This Month"), value: "this-month" },
               { label: t("Last Month"), value: "last-month" },

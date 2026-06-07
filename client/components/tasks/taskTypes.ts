@@ -11,6 +11,7 @@ export interface Task {
   priority: TaskPriority;
   dueDate: string;
   assignee: {
+    id?: string;
     name: string;
     initials: string;
     avatarUrl?: string;
@@ -18,6 +19,8 @@ export interface Task {
   };
   tags: string[];
   subtasks: { id: string; title: string; done: boolean }[];
+  teamId?: string | null;
+  assigneeId?: string | null;
 }
 
 export const MOCK_TASKS: Task[] = [

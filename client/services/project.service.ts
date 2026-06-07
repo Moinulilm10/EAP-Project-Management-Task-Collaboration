@@ -51,6 +51,8 @@ export interface ProjectQueryParams {
   page?: number;
   limit?: number;
   adminOnly?: boolean;
+  sortBy?: string;
+  deadlineStatus?: string;
 }
 
 const buildQueryString = (params: ProjectQueryParams) => {
@@ -61,6 +63,8 @@ const buildQueryString = (params: ProjectQueryParams) => {
   if (params.page != null) query.set("page", String(params.page));
   if (params.limit != null) query.set("limit", String(params.limit));
   if (params.adminOnly) query.set("adminOnly", "true");
+  if (params.sortBy) query.set("sortBy", params.sortBy);
+  if (params.deadlineStatus) query.set("deadlineStatus", params.deadlineStatus);
 
   return query.toString() ? `?${query.toString()}` : "";
 };

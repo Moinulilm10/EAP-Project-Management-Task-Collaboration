@@ -371,8 +371,9 @@ export default function TasksPage() {
         {/* Pagination Controls */}
         {total > limit && (
           <Pagination
-            currentPage={page}
-            totalPages={Math.ceil(total / limit)}
+            total={total}
+            page={page}
+            limit={limit}
             onPageChange={setPage}
           />
         )}

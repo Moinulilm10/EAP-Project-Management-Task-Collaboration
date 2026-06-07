@@ -29,7 +29,7 @@ export const AppDataSource = new DataSource({
   },
   synchronize: true,
   schema: process.env.NODE_ENV === 'test' ? 'test' : 'public',
-  logging: true,
+  logging: false,
   entities: [
     User,
     RefreshToken,

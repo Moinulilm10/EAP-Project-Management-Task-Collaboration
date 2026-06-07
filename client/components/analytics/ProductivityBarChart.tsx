@@ -89,5 +89,9 @@ export function ProductivityBarChart({ workload }: ProductivityBarChartProps) {
     },
   };
 
-  return <Bar data={data} options={options} className="w-full h-full" />;
+  return (
+    <div className="absolute inset-0 w-full h-full">
+      <Bar data={data} options={options} />
+    </div>
+  );
 }
