@@ -60,7 +60,7 @@ export function SecuritySettings() {
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
-          <div className="flex flex-col gap-xs">
+          <div className="flex flex-col gap-sm">
             <label className="font-label-md text-label-md text-on-surface-variant">
               {t("Current Password")}
             </label>
@@ -73,7 +73,7 @@ export function SecuritySettings() {
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-md mt-xs">
-          <div className="flex flex-col gap-xs">
+          <div className="flex flex-col gap-sm">
             <label className="font-label-md text-label-md text-on-surface-variant">
               {t("New Password")}
             </label>
@@ -84,7 +84,7 @@ export function SecuritySettings() {
               onChange={(e) => setNewPassword(e.target.value)}
             />
           </div>
-          <div className="flex flex-col gap-xs">
+          <div className="flex flex-col gap-sm">
             <label className="font-label-md text-label-md text-on-surface-variant">
               {t("Confirm New Password")}
             </label>

@@ -138,7 +138,7 @@ export function ProfileSettingsForm({
         </div>
       </div>
 
-      <div className="flex flex-col gap-xs">
+      <div className="flex flex-col gap-sm">
         <label className="font-label-md text-label-md text-on-surface-variant">
           {t("Full Name")}
         </label>
@@ -149,7 +149,7 @@ export function ProfileSettingsForm({
         />
       </div>
 
-      <div className="flex flex-col gap-xs">
+      <div className="flex flex-col gap-sm">
         <div className="flex justify-between items-center">
           <label className="font-label-md text-label-md text-on-surface-variant">
             {t("Email Address")}
@@ -167,7 +167,7 @@ export function ProfileSettingsForm({
         />
       </div>
 
-      <div className="flex flex-col gap-xs">
+      <div className="flex flex-col gap-sm">
         <label className="font-label-md text-label-md text-on-surface-variant">
           {t("Bio")}
         </label>

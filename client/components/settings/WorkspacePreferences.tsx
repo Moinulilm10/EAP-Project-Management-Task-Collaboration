@@ -10,13 +10,13 @@ export function WorkspacePreferences() {
     <div className="flex flex-col gap-xl">
       <div className="flex flex-col gap-sm">
         <h3 className="font-title-md text-title-md text-on-surface">{t("General Info")}</h3>
-        <div className="flex flex-col gap-xs mt-xs">
+        <div className="flex flex-col gap-sm mt-xs">
           <label className="font-label-md text-label-md text-on-surface-variant">
             {t("Workspace Name")}
           </label>
           <Input defaultValue="Acme Corp Design Team" />
         </div>
-        <div className="flex flex-col gap-xs mt-sm">
+        <div className="flex flex-col gap-sm mt-sm">
           <label className="font-label-md text-label-md text-on-surface-variant">
             {t("Default Timezone")}
           </label>
@@ -35,7 +35,7 @@ export function WorkspacePreferences() {
         <p className="font-body-sm text-body-sm text-secondary mb-xs">
           {t("Settings applied to all newly created projects in this workspace.")}
         </p>
-        <div className="flex flex-col gap-xs">
+        <div className="flex flex-col gap-sm">
           <label className="font-label-md text-label-md text-on-surface-variant">
             {t("Default Privacy")}
           </label>
@@ -46,7 +46,7 @@ export function WorkspacePreferences() {
             ]}
           />
         </div>
-        <div className="flex flex-col gap-xs mt-sm">
+        <div className="flex flex-col gap-sm mt-sm">
           <label className="font-label-md text-label-md text-on-surface-variant">
             {t("Task Status Workflow")}
           </label>
@@ -76,11 +76,11 @@ export function WorkspacePreferences() {
           ))}
         </div>
         <div className="flex items-center gap-md mt-sm">
-           <div className="flex flex-col gap-xs flex-1">
+           <div className="flex flex-col gap-sm flex-1">
              <label className="font-label-sm text-label-sm text-on-surface-variant">{t("Start Time")}</label>
              <Input type="time" defaultValue="09:00" />
            </div>
-           <div className="flex flex-col gap-xs flex-1">
+           <div className="flex flex-col gap-sm flex-1">
              <label className="font-label-sm text-label-sm text-on-surface-variant">{t("End Time")}</label>
              <Input type="time" defaultValue="17:00" />
            </div>
