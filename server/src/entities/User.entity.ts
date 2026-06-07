@@ -9,6 +9,7 @@ import {
 } from "typeorm";
 import { ProjectMember } from "./ProjectMember.entity";
 import { RefreshToken } from "./RefreshToken.entity";
+import { TeamMember } from "./TeamMember.entity";
 
 export enum AuthProvider {
   CREDENTIALS = "credentials",
@@ -60,4 +61,7 @@ export class User {
 
   @OneToMany(() => ProjectMember, (membership) => membership.user)
   projectMemberships!: ProjectMember[];
+
+  @OneToMany(() => TeamMember, (membership) => membership.user)
+  teamMemberships!: TeamMember[];
 }

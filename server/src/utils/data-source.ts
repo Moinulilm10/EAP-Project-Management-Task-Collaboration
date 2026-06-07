@@ -8,6 +8,10 @@ import { RefreshToken } from "../entities/RefreshToken.entity";
 import { Task } from "../entities/Task.entity";
 import { User } from "../entities/User.entity";
 import { Role } from "../entities/Role.entity";
+import { Team } from "../entities/Team.entity";
+import { TeamMember } from "../entities/TeamMember.entity";
+import { ProjectTeam } from "../entities/ProjectTeam.entity";
+import { TaskTeam } from "../entities/TaskTeam.entity";
 
 dotenv.config();
 
@@ -34,6 +38,10 @@ export const AppDataSource = new DataSource({
     ProjectMember,
     Task,
     Role,
+    Team,
+    TeamMember,
+    ProjectTeam,
+    TaskTeam,
   ],
   migrations: [],
   subscribers: [],

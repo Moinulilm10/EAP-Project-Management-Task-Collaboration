@@ -1,51 +1,62 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { TopNavBar } from "@/components/layout/TopNavBar";
 import { SideNavBar } from "@/components/layout/SideNavBar";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { TeamOverview } from "@/components/team/TeamOverview";
-import { MemberCard, Member } from "@/components/team/MemberCard";
+import { TeamCard } from "@/components/team/TeamCard";
+import { TeamDetailsModal } from "@/components/team/TeamDetailsModal";
+import { CreateTeamModal } from "@/components/team/CreateTeamModal";
 import { Button } from "@/components/ui/Button";
 import { useTranslation } from "react-i18next";
-import { MdFilterList, MdPersonAdd } from "react-icons/md";
-
-const TEAM_MEMBERS: Member[] = [
-  {
-    id: "1",
-    name: "Sarah Jenkins",
-    role: "Project Manager",
-    avatarUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBKsuP-Y7iCFVuBchgjX33xf60EnmK_8II5r_h8AaoXS6eJ-T1sQUbjc_QHYKMYqiOwS-hSUiNOWaOqQyVjAnBKZC7FZ3Htzie5PEhkvRs0DY08Z0H9EUCOikxHS9kwxM9-MtKajOCWkb3VXu3xxdhhgqoIDI9he7-qs9om1etzMJAelKdQmXLRu57_ma1snc46oWDQRgRn1jxCUrnuV__GPhg61JbNZTl_FZmvlqUXL0KaumnAnqx7uQKtC-mUGfKamgQ2iTFtSnQ",
-    status: "online",
-    tasks: { total: 24, done: 18, todo: 6 },
-    capacity: 90,
-  },
-  {
-    id: "2",
-    name: "Michael Chen",
-    role: "Lead Developer",
-    avatarUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDmZBl_xn__wIQueLDKrVghmqDihoRb1MByMDVJFtwzr-CJLLhfBl3fJtq0Qgm0xWz0UjD2U4o5WjG4t51_B9zyGhJm3HXpRiTHuRgkQZ_EGe3Y-DvV9Rv55GhcWmMI6_ZCKI2jNNfAktdIbptlORelym6wMU4xOMqc8nEgRcNp-6hcSUYYHXUVh-0HZFmGAWrEJwY1DJ-yWn1SoxE9INhj6pv1AYcltTDtDIIaRkU_nsZ_GVeA98l5caTvDuB-6hpPhvaz8MkKPyw",
-    status: "online",
-    tasks: { total: 42, done: 30, todo: 12 },
-    capacity: 65,
-  },
-  {
-    id: "3",
-    name: "Elena Rodriguez",
-    role: "UX Designer",
-    initials: "EJ",
-    status: "offline",
-    tasks: { total: 15, done: 12, todo: 3 },
-    capacity: 40,
-  },
-];
+import { MdAdd } from "react-icons/md";
+import { useTeamStore } from "@/stores/teamStore";
+import { Team } from "@/services/team.service";
+import { Select } from "@/components/ui/Select";
+import { useAuthStore } from "@/stores/authStore";
 
 export default function TeamPage() {
   const { t } = useTranslation();
-  const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  
+  const { teams, fetchTeams, createTeam, loading } = useTeamStore();
+  const { user } = useAuthStore();
+  
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+
+  useEffect(() => {
+    fetchTeams();
+  }, [fetchTeams]);
+
+  const filteredTeams = React.useMemo(() => {
+    let result = teams;
+
+    // Apply Dropdown Filter
+    if (filterStatus === "my_teams" && user) {
+      result = result.filter((team) =>
+        team.members?.some((m) => m.user?.id === user.id)
+      );
+    } else if (filterStatus === "has_projects") {
+      result = result.filter((team) => (team.projectTeams?.length || 0) > 0);
+    }
+
+    // Apply Search Query Filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(
+        (team) =>
+          team.name.toLowerCase().includes(query) ||
+          team.description?.toLowerCase().includes(query)
+      );
+    }
+
+    return result;
+  }, [teams, searchQuery, filterStatus, user]);
 
   return (
     <div className="bg-background text-on-background font-body-lg min-h-screen flex antialiased">
@@ -55,29 +66,83 @@ export default function TeamPage() {
       <PageWrapper>
         <PageHeader
           title={t("Team Directory")}
-          description={t("Manage team members, roles, and current workload capacity.")}
+          description={t("Manage teams, roles, projects, and tasks.")}
           actions={
-            <>
-              <Button variant="secondary" className="flex items-center gap-1">
-                <MdFilterList className="w-[18px] h-[18px]" />
-                {t("Filter")}
-              </Button>
-              <Button variant="primary" className="flex items-center gap-1">
-                <MdPersonAdd className="w-[18px] h-[18px]" />
-                {t("Add Member")}
-              </Button>
-            </>
+            <Button variant="primary" className="flex items-center gap-1" onClick={() => setIsCreateModalOpen(true)}>
+              <MdAdd className="w-[18px] h-[18px]" />
+              {t("Create Team")}
+            </Button>
           }
         />
         
         <TeamOverview />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
-          {TEAM_MEMBERS.map((member) => (
-            <MemberCard key={member.id} member={member} />
-          ))}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 px-5 py-4 rounded-3xl bg-surface-container-highest border border-outline-variant/30">
+          <div>
+            <p className="font-label-lg text-label-lg text-on-surface">{t("Teams")}</p>
+            <p className="font-body-sm text-secondary mt-1">
+              {t("Showing")} {filteredTeams.length} {t("teams")}
+            </p>
+          </div>
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <div className="w-full sm:w-48">
+              <Select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                options={[
+                  { label: t("All Teams"), value: "all" },
+                  { label: t("My Teams"), value: "my_teams" },
+                  { label: t("Has Projects"), value: "has_projects" },
+                ]}
+              />
+            </div>
+            <input
+              type="search"
+              placeholder={t("Search teams...") || ""}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full sm:w-64 px-4 py-[10px] rounded-xl border border-outline-variant/60 bg-surface-bright dark:bg-surface-container-lowest text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary shadow-sm transition-all duration-200"
+            />
+          </div>
         </div>
+
+        {loading ? (
+          <div className="flex justify-center items-center h-48">
+            <span className="h-8 w-8 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+            {filteredTeams.map((team) => (
+              <TeamCard key={team.id} team={team} onClick={setSelectedTeam} />
+            ))}
+            {filteredTeams.length === 0 && (
+              <div className="col-span-full flex flex-col items-center justify-center p-12 bg-surface-container-lowest rounded-3xl border border-dashed border-outline-variant/30">
+                <p className="text-secondary">
+                  {searchQuery ? t("No teams match your search.") : t("No teams found. Create one to get started.")}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
       </PageWrapper>
+
+      <CreateTeamModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSave={async (payload) => {
+          await createTeam(payload);
+          setIsCreateModalOpen(false);
+        }}
+      />
+
+      {selectedTeam && (
+        <TeamDetailsModal
+          isOpen={true}
+          onClose={() => setSelectedTeam(null)}
+          team={selectedTeam}
+        />
+      )}
     </div>
   );
 }

@@ -13,6 +13,7 @@ import {
 import { ProjectMember } from "./ProjectMember.entity";
 import { Task } from "./Task.entity";
 import { User } from "./User.entity";
+import { ProjectTeam } from "./ProjectTeam.entity";
 
 export enum ProjectStatus {
   ACTIVE = "active",
@@ -66,4 +67,7 @@ export class Project {
 
   @OneToMany(() => ProjectMember, (member) => member.project)
   projectMembers!: ProjectMember[];
+
+  @OneToMany(() => ProjectTeam, (projectTeam) => projectTeam.project)
+  projectTeams!: ProjectTeam[];
 }

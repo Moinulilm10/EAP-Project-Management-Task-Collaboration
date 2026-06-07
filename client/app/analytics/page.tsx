@@ -100,7 +100,7 @@ export default function AnalyticsPage() {
             title={t("Team Productivity Overview")}
             description={t("Tasks completed by department")}
             className="xl:col-span-3"
-            heightClass="h-[590px]"
+            heightClass="h-[490px]"
             filterOptions={[
               { label: t("This Month"), value: "this-month" },
               { label: t("Last Month"), value: "last-month" },

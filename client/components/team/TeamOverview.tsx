@@ -4,18 +4,27 @@ import { Card } from "../ui/Card";
 import { ProgressBar } from "../ui/ProgressBar";
 import { useTranslation } from "react-i18next";
 import { MdGroup, MdSpeed, MdAssignmentLate } from "react-icons/md";
+import { useTeamStore } from "../../stores/teamStore";
 
 export function TeamOverview() {
   const { t } = useTranslation();
+  const { teams } = useTeamStore();
+
+  const totalTeams = teams.length;
+  // Calculate total pending tasks across all teams
+  const pendingTasks = teams.reduce((acc, team) => {
+    return acc + (team.taskTeams?.filter((t) => t.task?.status !== "done").length || 0);
+  }, 0);
+  const activeProjects = teams.reduce((acc, team) => acc + (team.projectTeams?.length || 0), 0);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter mb-lg">
-      {/* Total Team */}
+      {/* Total Teams */}
       <KpiCard
-        title={t("Total Team")}
-        value="24"
+        title={t("Total Teams")}
+        value={totalTeams.toString()}
         icon={<MdGroup className="w-[18px] h-[18px]" />}
-        subtitle={t("Active Members")}
+        subtitle={t("Active Teams")}
         customDecorative={
           <div className="absolute bottom-0 right-0 opacity-10 pointer-events-none transform translate-x-1/4 translate-y-1/4">
             <MdGroup className="text-[120px]" />
@@ -47,8 +56,8 @@ export function TeamOverview() {
           </span>
         </div>
         <div className="z-10">
-          <span className="font-display-lg text-display-lg text-on-primary">156</span>
-          <p className="font-body-md text-body-md text-on-primary/80 mt-xs">{t("Across 8 active projects")}</p>
+          <span className="font-display-lg text-display-lg text-on-primary">{pendingTasks}</span>
+          <p className="font-body-md text-body-md text-on-primary/80 mt-xs">{t(`Across ${activeProjects} active projects`)}</p>
         </div>
         <div
           className="absolute inset-0 opacity-20 pointer-events-none"

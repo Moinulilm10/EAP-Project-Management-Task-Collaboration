@@ -6,9 +6,11 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { User } from './User.entity';
 import { Project } from './Project.entity';
+import { TaskTeam } from './TaskTeam.entity';
 
 export enum TaskStatus {
   TODO = 'todo',
@@ -78,4 +80,7 @@ export class Task {
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'createdById' })
   createdBy!: User;
+
+  @OneToMany(() => TaskTeam, (taskTeam) => taskTeam.task)
+  taskTeams!: TaskTeam[];
 }
