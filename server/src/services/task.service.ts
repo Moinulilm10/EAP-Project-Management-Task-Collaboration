@@ -93,6 +93,22 @@ export const taskService = {
     await queryRunner.startTransaction();
 
     try {
+      const existingTask = await queryRunner.manager.findOne(Task, {
+        where: { projectId: data.projectId, title: data.title },
+      });
+      if (existingTask) {
+        throw { status: 400, message: "This task already exists in the project." };
+      }
+
+      if (data.dueDate) {
+        const taskDate = new Date(data.dueDate);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        taskDate.setHours(0, 0, 0, 0);
+        if (taskDate < today) {
+          throw { status: 400, message: "Please select a valid deadline." };
+        }
+      }
       const task = queryRunner.manager.create(Task, {
         title: data.title,
         description: data.description || null,
@@ -146,6 +162,31 @@ export const taskService = {
       const task = await queryRunner.manager.findOne(Task, { where: { id } });
       if (!task) {
         throw { status: 404, message: 'Task not found.' };
+      }
+
+      if (data.title !== undefined && data.title !== task.title) {
+        const existingTask = await queryRunner.manager.findOne(Task, {
+          where: { projectId: task.projectId, title: data.title },
+        });
+        if (existingTask) {
+          throw { status: 400, message: "This task already exists in the project." };
+        }
+      }
+
+      if (data.dueDate !== undefined && data.dueDate !== null) {
+        const taskDate = new Date(data.dueDate);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        taskDate.setHours(0, 0, 0, 0);
+        if (taskDate < today) {
+          throw { status: 400, message: "Please select a valid deadline." };
+        }
+      }
+
+      if (data.assigneeId !== undefined && data.assigneeId !== task.assigneeId) {
+        if (task.status === TaskStatus.DONE && (data.status === undefined || data.status === TaskStatus.DONE)) {
+          throw { status: 400, message: "Completed tasks cannot be reassigned." };
+        }
       }
 
       if (data.title !== undefined) task.title = data.title;

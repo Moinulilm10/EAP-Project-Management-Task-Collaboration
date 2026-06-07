@@ -96,11 +96,48 @@ export function TaskModal({ isOpen, onClose, onSave, initial }: TaskModalProps) 
     handleChange("tags", form.tags.filter((t: string) => t !== tag));
   };
 
+  const [formError, setFormError] = React.useState<string | null>(null);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.title.trim() || !form.projectId) {
-      alert("Title and Project are required.");
+    setFormError(null);
+
+    if (!form.title?.trim() || !form.projectId) {
+      setFormError("Title and Project are required.");
       return;
+    }
+
+    if (form.dueDate && form.projectId) {
+      const selectedProject = projects.find((p) => p.id === form.projectId);
+      if (selectedProject) {
+        const taskDate = new Date(form.dueDate);
+        taskDate.setHours(0, 0, 0, 0);
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (taskDate < today) {
+          setFormError("Please select a valid deadline.");
+          return;
+        }
+
+        if (selectedProject.createdAt) {
+          const projectCreatedAt = new Date(selectedProject.createdAt);
+          projectCreatedAt.setHours(0, 0, 0, 0);
+          if (taskDate < projectCreatedAt) {
+            setFormError(`Task due date cannot be before the project's creation date (${projectCreatedAt.toLocaleDateString()}).`);
+            return;
+          }
+        }
+
+        if (selectedProject.deadline) {
+          const projectDeadline = new Date(selectedProject.deadline);
+          projectDeadline.setHours(0, 0, 0, 0);
+          if (taskDate > projectDeadline) {
+            setFormError(`Task due date cannot be after the project's deadline (${projectDeadline.toLocaleDateString()}).`);
+            return;
+          }
+        }
+      }
     }
 
     const submitData = {
@@ -109,6 +146,16 @@ export function TaskModal({ isOpen, onClose, onSave, initial }: TaskModalProps) 
       teamId: form.teamId || undefined,
       assigneeId: form.assignee?.id || undefined, // Keep as undefined if no actual user is mapped yet
     };
+
+    if (initial && form.status === "done") {
+      const currentAssigneeId = initial.assigneeId || initial.assignee?.id;
+      const newAssigneeId = submitData.assigneeId;
+      if (currentAssigneeId !== newAssigneeId) {
+        setFormError("Completed tasks cannot be reassigned.");
+        return;
+      }
+    }
+
     onSave(submitData);
   };
 
@@ -157,6 +204,11 @@ export function TaskModal({ isOpen, onClose, onSave, initial }: TaskModalProps) 
               </div>
 
               <form onSubmit={handleSubmit} className="overflow-y-auto flex-1 px-6 py-6 space-y-5">
+                {formError && (
+                  <div className="bg-error/10 text-error p-3 rounded-lg text-sm border border-error/20">
+                    {formError}
+                  </div>
+                )}
                 <div>
                   <label className={labelCls}>Task Title *</label>
                   <input

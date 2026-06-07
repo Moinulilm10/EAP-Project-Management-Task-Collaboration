@@ -122,7 +122,7 @@ export function ProjectDetailsModal({
                       {project.description}
                     </p>
 
-                    <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="grid gap-3 sm:grid-cols-1">
                       <div className="rounded-2xl bg-surface-container-low p-4">
                         <p className="font-label-sm text-label-sm text-secondary">
                           {t("Owner")}
@@ -182,8 +182,8 @@ export function ProjectDetailsModal({
                         <p className="text-body-sm text-secondary mt-1">
                           {project.canManage
                             ? t(
-                                "Only admins can invite members to this project.",
-                              )
+                              "Only admins can invite members to this project.",
+                            )
                             : t("Only project admins can invite members.")}
                         </p>
                       </div>
@@ -244,11 +244,11 @@ export function ProjectDetailsModal({
                           <p className="text-body-sm text-secondary mt-1">
                             {role === "Project Member"
                               ? t(
-                                  "Can manage tasks and participate in the project.",
-                                )
+                                "Can manage tasks and participate in the project.",
+                              )
                               : t(
-                                  "Can contribute to project work as a team member.",
-                                )}
+                                "Can contribute to project work as a team member.",
+                              )}
                           </p>
                         </div>
                       ))}
