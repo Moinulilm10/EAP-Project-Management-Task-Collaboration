@@ -101,7 +101,7 @@ export function ProjectModal({
           >
             <form
               onSubmit={submit}
-              className="w-full max-w-2xl rounded-3xl bg-surface-container-lowest border border-outline-variant/20 shadow-2xl overflow-hidden"
+              className="w-full max-w-2xl rounded-3xl bg-surface-container-lowest border border-outline-variant/20 shadow-2xl overflow-hidden min-h-[600px]"
             >
               <div className="flex items-center justify-between px-6 py-5 border-b border-outline-variant/20">
                 <div>
