@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import "./globals.css";
 
 export const metadata: Metadata = {
   title: "ProSync Task Management System",
@@ -14,6 +13,7 @@ import { AuthProvider } from "../components/providers/AuthProvider";
 import { RouteGuard } from "../components/providers/RouteGuard";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import "./globals.css";
 
 export default function RootLayout({
   children,

@@ -3,11 +3,12 @@ import Swal from "sweetalert2";
 
 // Define a unified styled theme matching the modern, premium dark/light HSL scheme
 const swalCustomClass = {
-  popup: "swal-premium-popup",
-  title: "swal-premium-title",
-  htmlContainer: "swal-premium-text",
-  confirmButton: "swal-premium-btn swal-premium-confirm-btn",
-  cancelButton: "swal-premium-btn swal-premium-cancel-btn",
+  popup: "bg-surface-container-lowest text-on-surface border border-outline-variant/20 rounded-3xl p-6 shadow-elevation-3",
+  title: "text-on-surface font-title-lg mb-2",
+  htmlContainer: "text-secondary font-body-md mb-4",
+  actions: "gap-4",
+  confirmButton: "bg-primary text-on-primary hover:bg-primary/90 rounded-xl px-5 py-2.5 font-label-md transition-colors cursor-pointer",
+  cancelButton: "bg-surface-container-high text-on-surface hover:bg-surface-container-highest rounded-xl px-5 py-2.5 font-label-md transition-colors cursor-pointer",
 };
 
 const toastConfig: ToastOptions = {
@@ -27,8 +28,8 @@ export const notification = {
     toast.success(message, {
       ...toastConfig,
       style: {
-        background: "var(--color-surface-container-highest, #33353a)",
-        color: "var(--color-on-surface, #e2e2e9)",
+        background: "var(--color-toast-success-bg, var(--color-surface-container-highest, #33353a))",
+        color: "var(--color-toast-success-text, var(--color-on-surface, #e2e2e9))",
       },
     });
   },

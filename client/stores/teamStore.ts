@@ -1,11 +1,12 @@
 import { create } from "zustand";
-import { Team, TeamCreateDTO, teamService } from "../services/team.service";
+import { Team, TeamCreateDTO, teamService, PaginationMeta } from "../services/team.service";
 
 interface TeamState {
   teams: Team[];
+  meta: PaginationMeta | null;
   loading: boolean;
   error: string | null;
-  fetchTeams: () => Promise<void>;
+  fetchTeams: (page?: number, limit?: number) => Promise<void>;
   createTeam: (data: TeamCreateDTO) => Promise<void>;
   addMember: (teamId: string, userId: string, role: string) => Promise<void>;
   assignProject: (teamId: string, projectId: string) => Promise<void>;
@@ -18,14 +19,15 @@ interface TeamState {
 
 export const useTeamStore = create<TeamState>((set, get) => ({
   teams: [],
+  meta: null,
   loading: false,
   error: null,
 
-  fetchTeams: async () => {
+  fetchTeams: async (page: number = 1, limit: number = 9) => {
     set({ loading: true, error: null });
     try {
-      const data = await teamService.getAll();
-      set({ teams: data, loading: false });
+      const response = await teamService.getAll(page, limit);
+      set({ teams: response.data, meta: response.meta, loading: false });
     } catch (err: any) {
       set({ error: err.message || "Failed to fetch teams", loading: false });
     }

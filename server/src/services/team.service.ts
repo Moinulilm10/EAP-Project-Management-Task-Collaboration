@@ -43,8 +43,10 @@ export class TeamService {
     }
   }
 
-  async getTeams(userId: string) {
-    return this.teamRepository
+  async getTeams(userId: string, page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
+
+    const [teams, total] = await this.teamRepository
       .createQueryBuilder("team")
       .innerJoin("team.members", "member", "member.userId = :userId", { userId })
       .leftJoinAndSelect("team.members", "allMembers")
@@ -53,7 +55,19 @@ export class TeamService {
       .leftJoinAndSelect("projectTeams.project", "project")
       .leftJoinAndSelect("team.taskTeams", "taskTeams")
       .leftJoinAndSelect("taskTeams.task", "task")
-      .getMany();
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
+
+    return {
+      data: teams,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   async getTeamById(teamId: string, userId: string) {

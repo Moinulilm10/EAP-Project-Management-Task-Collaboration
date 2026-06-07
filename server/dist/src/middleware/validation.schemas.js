@@ -1,15 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateTaskStatusSchema = exports.updateTaskSchema = exports.createTaskSchema = exports.updateProjectSchema = exports.createProjectSchema = exports.loginSchema = exports.registerSchema = void 0;
+exports.updateTaskStatusSchema = exports.updateTaskSchema = exports.createTaskSchema = exports.updateProjectSchema = exports.createProjectSchema = exports.updatePasswordSchema = exports.updateProfileSchema = exports.loginSchema = exports.registerSchema = void 0;
 const zod_1 = require("zod");
 const sanitizedString = (minLen, maxLen) => zod_1.z
     .string()
-    .min(minLen)
-    .max(maxLen)
     .transform((val) => val
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
     .replace(/<[^>]*>/g, '')
-    .trim());
+    .trim())
+    .pipe(zod_1.z.string().min(minLen).max(maxLen));
 // ─── Auth Schemas ───────────────────────────────────────────────────────────
 exports.registerSchema = zod_1.z.object({
     email: zod_1.z
@@ -31,6 +30,19 @@ exports.loginSchema = zod_1.z.object({
         .max(255)
         .transform((v) => v.toLowerCase().trim()),
     password: zod_1.z.string().min(1, 'Password is required').max(128),
+});
+exports.updateProfileSchema = zod_1.z.object({
+    name: sanitizedString(2, 100).optional(),
+    picture: zod_1.z.string().max(1000).optional().nullable(),
+    bio: sanitizedString(0, 1000).optional().nullable(),
+});
+exports.updatePasswordSchema = zod_1.z.object({
+    currentPassword: zod_1.z.string().min(1, 'Current password is required'),
+    newPassword: zod_1.z
+        .string()
+        .min(8, 'New password must be at least 8 characters')
+        .max(128, 'New password must be at most 128 characters')
+        .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+={}[\]|:;"'<>,.?/~`])/, 'New password must contain uppercase, lowercase, number, and special character'),
 });
 // ─── Project Schemas ────────────────────────────────────────────────────────
 exports.createProjectSchema = zod_1.z.object({

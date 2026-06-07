@@ -28,8 +28,11 @@ export const teamController = {
         return;
       }
 
-      const teams = await teamService.getTeams(userId);
-      res.json(teams);
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+
+      const result = await teamService.getTeams(userId, page, limit);
+      res.json(result);
     } catch (error: any) {
       res.status(error.status || 500).json({ error: error.message || "Failed to fetch teams" });
     }

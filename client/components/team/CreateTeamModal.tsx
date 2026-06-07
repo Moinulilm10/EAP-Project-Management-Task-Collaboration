@@ -43,7 +43,7 @@ export function CreateTeamModal({ isOpen, onClose, onSave }: CreateTeamModalProp
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={onClose}
-            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm"
+            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm cursor-pointer"
           />
 
           <motion.div

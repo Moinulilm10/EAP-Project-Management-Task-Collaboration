@@ -14,6 +14,7 @@ const typeorm_1 = require("typeorm");
 const ProjectMember_entity_1 = require("./ProjectMember.entity");
 const Task_entity_1 = require("./Task.entity");
 const User_entity_1 = require("./User.entity");
+const ProjectTeam_entity_1 = require("./ProjectTeam.entity");
 var ProjectStatus;
 (function (ProjectStatus) {
     ProjectStatus["ACTIVE"] = "active";
@@ -34,6 +35,7 @@ let Project = class Project {
     owner;
     tasks;
     projectMembers;
+    projectTeams;
 };
 exports.Project = Project;
 __decorate([
@@ -93,6 +95,10 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => ProjectMember_entity_1.ProjectMember, (member) => member.project),
     __metadata("design:type", Array)
 ], Project.prototype, "projectMembers", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => ProjectTeam_entity_1.ProjectTeam, (projectTeam) => projectTeam.project),
+    __metadata("design:type", Array)
+], Project.prototype, "projectTeams", void 0);
 exports.Project = Project = __decorate([
     (0, typeorm_1.Index)(["status", "deadline", "deletedAt"]),
     (0, typeorm_1.Entity)("projects")

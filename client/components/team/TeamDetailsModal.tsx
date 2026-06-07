@@ -41,12 +41,15 @@ export function TeamDetailsModal({ isOpen, onClose, team }: TeamDetailsModalProp
       confirmButtonColor: "#ef4444",
       confirmButtonText: t("Yes, delete it!"),
       buttonsStyling: false,
+      background: "var(--color-surface-container-lowest, #ffffff)",
+      color: "var(--color-on-surface, #191c1e)",
       customClass: {
         popup: "bg-surface-container-lowest text-on-surface border border-outline-variant/20 rounded-3xl",
         title: "text-on-surface font-title-lg",
         htmlContainer: "text-secondary font-body-md",
-        confirmButton: "bg-error text-on-error hover:bg-error/90 rounded-xl px-5 py-2.5 font-label-md ml-3 transition-colors",
-        cancelButton: "bg-surface-container-high text-on-surface hover:bg-surface-container-highest rounded-xl px-5 py-2.5 font-label-md transition-colors"
+        actions: "gap-4",
+        confirmButton: "bg-error text-on-error hover:bg-error/90 rounded-xl px-5 py-2.5 font-label-md transition-colors cursor-pointer",
+        cancelButton: "bg-surface-container-high text-on-surface hover:bg-surface-container-highest rounded-xl px-5 py-2.5 font-label-md transition-colors cursor-pointer"
       }
     });
 
@@ -70,12 +73,15 @@ export function TeamDetailsModal({ isOpen, onClose, team }: TeamDetailsModalProp
       confirmButtonColor: "#ef4444",
       confirmButtonText: t("Remove"),
       buttonsStyling: false,
+      background: "var(--color-surface-container-lowest, #ffffff)",
+      color: "var(--color-on-surface, #191c1e)",
       customClass: {
         popup: "bg-surface-container-lowest text-on-surface border border-outline-variant/20 rounded-3xl",
         title: "text-on-surface font-title-lg",
         htmlContainer: "text-secondary font-body-md",
-        confirmButton: "bg-error text-on-error hover:bg-error/90 rounded-xl px-5 py-2.5 font-label-md ml-3 transition-colors",
-        cancelButton: "bg-surface-container-high text-on-surface hover:bg-surface-container-highest rounded-xl px-5 py-2.5 font-label-md transition-colors"
+        actions: "gap-4",
+        confirmButton: "bg-error text-on-error hover:bg-error/90 rounded-xl px-5 py-2.5 font-label-md transition-colors cursor-pointer",
+        cancelButton: "bg-surface-container-high text-on-surface hover:bg-surface-container-highest rounded-xl px-5 py-2.5 font-label-md transition-colors cursor-pointer"
       }
     });
 
@@ -116,11 +122,14 @@ export function TeamDetailsModal({ isOpen, onClose, team }: TeamDetailsModalProp
       `,
       showCancelButton: true,
       buttonsStyling: false,
+      background: "var(--color-surface-container-lowest, #ffffff)",
+      color: "var(--color-on-surface, #191c1e)",
       customClass: {
         popup: "bg-surface-container-lowest text-on-surface border border-outline-variant/20 rounded-3xl",
         title: "text-on-surface font-title-lg",
-        confirmButton: "bg-primary text-on-primary hover:bg-primary/90 rounded-xl px-5 py-2.5 font-label-md ml-3 transition-colors",
-        cancelButton: "bg-surface-container-high text-on-surface hover:bg-surface-container-highest rounded-xl px-5 py-2.5 font-label-md transition-colors"
+        actions: "gap-4",
+        confirmButton: "bg-primary text-on-primary hover:bg-primary/90 rounded-xl px-5 py-2.5 font-label-md transition-colors cursor-pointer",
+        cancelButton: "bg-surface-container-high text-on-surface hover:bg-surface-container-highest rounded-xl px-5 py-2.5 font-label-md transition-colors cursor-pointer"
       },
       didOpen: () => {
         const input = document.getElementById('swal-capacity-input') as HTMLInputElement;

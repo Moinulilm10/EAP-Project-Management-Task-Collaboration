@@ -13,6 +13,7 @@ exports.User = exports.AuthProvider = void 0;
 const typeorm_1 = require("typeorm");
 const ProjectMember_entity_1 = require("./ProjectMember.entity");
 const RefreshToken_entity_1 = require("./RefreshToken.entity");
+const TeamMember_entity_1 = require("./TeamMember.entity");
 var AuthProvider;
 (function (AuthProvider) {
     AuthProvider["CREDENTIALS"] = "credentials";
@@ -32,6 +33,7 @@ let User = class User {
     updatedAt;
     refreshTokens;
     projectMemberships;
+    teamMemberships;
 };
 exports.User = User;
 __decorate([
@@ -91,6 +93,10 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => ProjectMember_entity_1.ProjectMember, (membership) => membership.user),
     __metadata("design:type", Array)
 ], User.prototype, "projectMemberships", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => TeamMember_entity_1.TeamMember, (membership) => membership.user),
+    __metadata("design:type", Array)
+], User.prototype, "teamMemberships", void 0);
 exports.User = User = __decorate([
     (0, typeorm_1.Entity)("users")
 ], User);

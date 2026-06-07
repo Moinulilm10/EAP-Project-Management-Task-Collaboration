@@ -213,6 +213,11 @@ body {
   font-family: var(--font-inter);
 }
 
+button,
+[role="button"] {
+  cursor: pointer;
+}
+
 .glass-panel {
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(16px);
@@ -275,4 +280,91 @@ body {
   outline: none;
   box-shadow: 0 0 0 2px var(--color-primary);
   border-color: transparent;
+}
+
+/* ─── React Toastify Theme Overrides ────────────────────────────────────── */
+:root {
+  --color-toast-success-bg: var(--color-primary);
+  --color-toast-success-text: #ffffff;
+  
+  /* Override default toastify variables */
+  --toastify-color-light: var(--color-primary);
+  --toastify-text-color-light: #ffffff;
+}
+
+.dark {
+  --color-toast-success-bg: var(--color-surface-container-highest);
+  --color-toast-success-text: var(--color-on-surface);
+  
+  /* In dark mode, default toasts match surface container highest */
+  --toastify-color-light: var(--color-surface-container-highest);
+  --toastify-text-color-light: var(--color-on-surface);
+}
+
+/* Adjust close button, icons and progress bar to look premium with our solid backgrounds */
+.Toastify__toast-theme--light {
+  background-color: var(--toastify-color-light) !important;
+  color: var(--toastify-text-color-light) !important;
+  border-radius: var(--radius-xl) !important;
+  box-shadow: var(--ambient-shadow) !important;
+}
+
+.Toastify__toast-theme--light .Toastify__toast-icon svg {
+  fill: var(--toastify-text-color-light) !important;
+}
+
+.Toastify__toast-theme--light .Toastify__close-button {
+  color: var(--toastify-text-color-light) !important;
+  opacity: 0.8 !important;
+}
+
+.Toastify__toast-theme--light .Toastify__close-button:hover {
+  opacity: 1 !important;
+}
+
+.Toastify__toast-theme--light .Toastify__progress-bar-theme--light {
+  background: var(--toastify-text-color-light) !important;
+  opacity: 0.4 !important;
+}
+
+/* Specific styling for error toasts to keep them clearly red for accessibility */
+.Toastify__toast--error {
+  background-color: var(--color-error, #ba1a1a) !important;
+  color: #ffffff !important;
+}
+
+.dark .Toastify__toast--error {
+  background-color: #ba1a1a !important; /* solid dark red for readability on white text */
+}
+
+.Toastify__toast--error .Toastify__toast-icon svg {
+  fill: #ffffff !important;
+}
+
+.Toastify__toast--error .Toastify__close-button {
+  color: #ffffff !important;
+  opacity: 0.8 !important;
+}
+
+.Toastify__toast--error .Toastify__progress-bar {
+  background: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Specific styling for warning toasts to keep them distinct */
+.Toastify__toast--warning {
+  background-color: #d97706 !important; /* solid amber-600 */
+  color: #ffffff !important;
+}
+
+.Toastify__toast--warning .Toastify__toast-icon svg {
+  fill: #ffffff !important;
+}
+
+.Toastify__toast--warning .Toastify__close-button {
+  color: #ffffff !important;
+  opacity: 0.8 !important;
+}
+
+.Toastify__toast--warning .Toastify__progress-bar {
+  background: rgba(255, 255, 255, 0.4) !important;
 }

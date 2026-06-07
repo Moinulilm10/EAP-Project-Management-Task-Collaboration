@@ -21,17 +21,18 @@ export default function TeamPage() {
   const { t } = useTranslation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
-  const { teams, fetchTeams, createTeam, loading } = useTeamStore();
+  const { teams, fetchTeams, createTeam, loading, meta } = useTeamStore();
   const { user } = useAuthStore();
   
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
-    fetchTeams();
-  }, [fetchTeams]);
+    fetchTeams(page);
+  }, [fetchTeams, page]);
 
   const filteredTeams = React.useMemo(() => {
     let result = teams;
@@ -122,6 +123,28 @@ export default function TeamPage() {
                 </p>
               </div>
             )}
+          </div>
+        )}
+
+        {meta && meta.totalPages > 1 && (
+          <div className="flex justify-center items-center gap-4 mt-8 mb-4">
+            <Button
+              variant="secondary"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+            >
+              {t("Previous")}
+            </Button>
+            <span className="text-body-md text-on-surface">
+              {t("Page")} {page} {t("of")} {meta.totalPages}
+            </span>
+            <Button
+              variant="secondary"
+              onClick={() => setPage((p) => Math.min(meta.totalPages, p + 1))}
+              disabled={page === meta.totalPages}
+            >
+              {t("Next")}
+            </Button>
           </div>
         )}
 

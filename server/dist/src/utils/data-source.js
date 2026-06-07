@@ -14,6 +14,10 @@ const RefreshToken_entity_1 = require("../entities/RefreshToken.entity");
 const Task_entity_1 = require("../entities/Task.entity");
 const User_entity_1 = require("../entities/User.entity");
 const Role_entity_1 = require("../entities/Role.entity");
+const Team_entity_1 = require("../entities/Team.entity");
+const TeamMember_entity_1 = require("../entities/TeamMember.entity");
+const ProjectTeam_entity_1 = require("../entities/ProjectTeam.entity");
+const TaskTeam_entity_1 = require("../entities/TaskTeam.entity");
 dotenv_1.default.config();
 exports.AppDataSource = new typeorm_1.DataSource({
     type: "postgres",
@@ -37,6 +41,10 @@ exports.AppDataSource = new typeorm_1.DataSource({
         ProjectMember_entity_1.ProjectMember,
         Task_entity_1.Task,
         Role_entity_1.Role,
+        Team_entity_1.Team,
+        TeamMember_entity_1.TeamMember,
+        ProjectTeam_entity_1.ProjectTeam,
+        TaskTeam_entity_1.TaskTeam,
     ],
     migrations: [],
     subscribers: [],

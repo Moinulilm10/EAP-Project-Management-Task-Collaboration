@@ -8,9 +8,9 @@ import { useTeamStore } from "../../stores/teamStore";
 
 export function TeamOverview() {
   const { t } = useTranslation();
-  const { teams } = useTeamStore();
+  const { teams, meta } = useTeamStore();
 
-  const totalTeams = teams.length;
+  const totalTeams = meta ? meta.total : teams.length;
   // Calculate total pending tasks across all teams
   const pendingTasks = teams.reduce((acc, team) => {
     return acc + (team.taskTeams?.filter((t) => t.task?.status !== "done").length || 0);

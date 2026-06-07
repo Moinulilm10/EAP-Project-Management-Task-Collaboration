@@ -49,9 +49,21 @@ export interface TeamCreateDTO {
   maxMembers?: number;
 }
 
+export interface PaginationMeta {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface TeamResponse {
+  data: Team[];
+  meta: PaginationMeta;
+}
+
 export const teamService = {
-  async getAll(): Promise<Team[]> {
-    const data = await apiClient.get<Team[]>("/teams");
+  async getAll(page: number = 1, limit: number = 9): Promise<TeamResponse> {
+    const data = await apiClient.get<TeamResponse>(`/teams?page=${page}&limit=${limit}`);
     return data as any;
   },
 

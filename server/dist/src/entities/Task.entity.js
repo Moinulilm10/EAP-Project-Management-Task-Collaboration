@@ -13,6 +13,7 @@ exports.Task = exports.TaskPriority = exports.TaskStatus = void 0;
 const typeorm_1 = require("typeorm");
 const User_entity_1 = require("./User.entity");
 const Project_entity_1 = require("./Project.entity");
+const TaskTeam_entity_1 = require("./TaskTeam.entity");
 var TaskStatus;
 (function (TaskStatus) {
     TaskStatus["TODO"] = "todo";
@@ -42,6 +43,7 @@ let Task = class Task {
     project;
     assignee;
     createdBy;
+    taskTeams;
 };
 exports.Task = Task;
 __decorate([
@@ -111,6 +113,10 @@ __decorate([
     (0, typeorm_1.JoinColumn)({ name: 'createdById' }),
     __metadata("design:type", User_entity_1.User)
 ], Task.prototype, "createdBy", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => TaskTeam_entity_1.TaskTeam, (taskTeam) => taskTeam.task),
+    __metadata("design:type", Array)
+], Task.prototype, "taskTeams", void 0);
 exports.Task = Task = __decorate([
     (0, typeorm_1.Entity)('tasks')
 ], Task);
