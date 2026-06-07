@@ -73,7 +73,6 @@ export default function SettingsPage() {
                 image: freshImage,
                 bio: freshBio,
               });
-              await update({ user: { name: freshUser.name, image: freshImage } });
             }
           }
         }
@@ -108,9 +107,6 @@ export default function SettingsPage() {
           image: response.user?.picture || picture,
           bio: response.user?.bio || bio || null,
         });
-        
-        // Update NextAuth session to keep it in sync
-        await update({ user: { name: fullName, image: response.user.picture || picture } });
         
         Swal.fire({
           title: t("Success!"),
