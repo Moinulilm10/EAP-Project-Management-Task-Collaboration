@@ -6,9 +6,11 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { TaskKanban } from "@/components/tasks/TaskKanban";
 import { TaskList } from "@/components/tasks/TaskList";
 import { TaskModal } from "@/components/tasks/TaskModal";
-import { MOCK_TASKS, Task, TaskStatus, TaskPriority } from "@/components/tasks/taskTypes";
+import { Task, TaskStatus, TaskPriority } from "@/components/tasks/taskTypes";
 import { Button } from "@/components/ui/Button";
 import { useTranslation } from "react-i18next";
+import { useTaskStore } from "@/stores/taskStore";
+import { useEffect } from "react";
 import {
   MdAdd,
   MdViewKanban,
@@ -37,9 +39,16 @@ type ViewMode = "list" | "kanban";
 export default function TasksPage() {
   const { t } = useTranslation();
 
+  // ── Store ──────────────────────────────────────────────────────────────────
+  const { tasks, fetchTasks, createTask, updateTask, updateTaskStatus, deleteTask } = useTaskStore();
+
+  useEffect(() => {
+    fetchTasks();
+  }, [fetchTasks]);
+
   // ── State ──────────────────────────────────────────────────────────────────
-  const [tasks, setTasks] = useState<Task[]>(MOCK_TASKS);
   const [view, setView] = useState<ViewMode>("list");
+  const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [filterPriority, setFilterPriority] = useState<TaskPriority | "all">("all");
   const [filterStatus, setFilterStatus] = useState<TaskStatus | "all">("all");
@@ -47,25 +56,33 @@ export default function TasksPage() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
+  // ── Debounce Search ────────────────────────────────────────────────────────
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setSearch(searchInput);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchInput]);
+
   // ── Derived ────────────────────────────────────────────────────────────────
   const stats = useMemo(() => {
     const counts: Record<string, number> = {
       all: tasks.length,
-      todo: tasks.filter((t) => t.status === "todo").length,
-      "in-progress": tasks.filter((t) => t.status === "in-progress").length,
-      review: tasks.filter((t) => t.status === "review").length,
-      done: tasks.filter((t) => t.status === "done").length,
+      todo: tasks.filter((t: any) => t.status === "todo").length,
+      "in-progress": tasks.filter((t: any) => t.status === "in-progress").length,
+      review: tasks.filter((t: any) => t.status === "review").length,
+      done: tasks.filter((t: any) => t.status === "done").length,
     };
     return counts;
   }, [tasks]);
 
   const filteredTasks = useMemo(() => {
-    return tasks.filter((task) => {
+    return tasks.filter((task: any) => {
       const matchSearch =
         !search ||
         task.title.toLowerCase().includes(search.toLowerCase()) ||
         task.project.toLowerCase().includes(search.toLowerCase()) ||
-        task.assignee.name.toLowerCase().includes(search.toLowerCase());
+        task.assignee?.name.toLowerCase().includes(search.toLowerCase());
       const matchPriority = filterPriority === "all" || task.priority === filterPriority;
       const matchStatus = filterStatus === "all" || task.status === filterStatus;
       return matchSearch && matchPriority && matchStatus;
@@ -79,22 +96,11 @@ export default function TasksPage() {
   ].filter(Boolean).length;
 
   // ── Handlers ───────────────────────────────────────────────────────────────
-  const handleSave = (formData: Omit<Task, "id" | "subtasks">) => {
+  const handleSave = async (formData: any) => {
     if (editingTask) {
-      setTasks((prev) =>
-        prev.map((t) =>
-          t.id === editingTask.id
-            ? { ...editingTask, ...formData }
-            : t
-        )
-      );
+      await updateTask(editingTask.id, formData);
     } else {
-      const newTask: Task = {
-        ...formData,
-        id: `t${Date.now()}`,
-        subtasks: [],
-      };
-      setTasks((prev) => [newTask, ...prev]);
+      await createTask(formData);
     }
     setEditingTask(null);
   };
@@ -104,14 +110,12 @@ export default function TasksPage() {
     setModalOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    setTasks((prev) => prev.filter((t) => t.id !== id));
+  const handleDelete = async (id: string) => {
+    await deleteTask(id);
   };
 
-  const handleStatusChange = (id: string, status: TaskStatus) => {
-    setTasks((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, status } : t))
-    );
+  const handleStatusChange = async (id: string, status: TaskStatus) => {
+    await updateTaskStatus(id, status);
   };
 
   const handleOpenNew = () => {
@@ -120,6 +124,7 @@ export default function TasksPage() {
   };
 
   const clearFilters = () => {
+    setSearchInput("");
     setSearch("");
     setFilterPriority("all");
     setFilterStatus("all");
@@ -190,21 +195,21 @@ export default function TasksPage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3, delay: 0.1 }}
-        className="flex flex-col sm:flex-row items-stretch sm:items-center gap-sm mb-md"
+        className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-4 mb-md"
       >
         {/* Search */}
-        <div className="relative flex-1 max-w-sm">
+        <div className="relative flex-1 min-w-[240px] max-w-full sm:max-w-sm">
           <MdSearch className="absolute left-sm top-1/2 -translate-y-1/2 text-secondary w-[18px] h-[18px]" />
           <input
             type="text"
             placeholder={t("Search tasks, projects, assignees...")}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-[36px] pr-sm py-xs bg-surface-container-lowest border border-outline-variant/40 rounded-lg font-body-md text-body-md text-on-surface placeholder:text-secondary/60 focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className="w-full pl-[36px] pr-10 py-xs bg-surface-container-lowest border border-outline-variant/40 rounded-lg font-body-md text-body-md text-on-surface placeholder:text-secondary/60 focus:outline-none focus:ring-2 focus:ring-primary transition-all"
           />
-          {search && (
+          {searchInput && (
             <button
-              onClick={() => setSearch("")}
+              onClick={() => setSearchInput("")}
               className="absolute right-xs top-1/2 -translate-y-1/2 text-secondary hover:text-primary cursor-pointer transition-colors"
             >
               <MdClose className="w-4 h-4" />
@@ -215,7 +220,7 @@ export default function TasksPage() {
         {/* Filter toggle */}
         <button
           onClick={() => setIsFiltersOpen((p) => !p)}
-          className={`relative flex items-center gap-xs px-sm py-xs rounded-lg border font-label-md text-label-md transition-all cursor-pointer ${
+          className={`flex-shrink-0 relative flex items-center justify-center gap-xs px-sm py-xs rounded-lg border font-label-md text-label-md transition-all cursor-pointer ${
             isFiltersOpen || activeFiltersCount > 0
               ? "border-primary text-primary bg-primary-container/10"
               : "border-outline-variant/40 text-secondary hover:text-primary hover:border-primary/40 bg-surface-container-lowest"
@@ -231,12 +236,12 @@ export default function TasksPage() {
         </button>
 
         {/* View toggle */}
-        <div className="flex rounded-lg overflow-hidden border border-outline-variant/40 bg-surface-container-lowest self-start sm:self-auto">
+        <div className="flex-shrink-0 flex rounded-lg overflow-hidden border border-outline-variant/40 bg-surface-container-lowest self-start sm:self-auto">
           {(["list", "kanban"] as ViewMode[]).map((v) => (
             <button
               key={v}
               onClick={() => setView(v)}
-              className={`flex items-center gap-xs px-sm py-xs font-label-md text-label-md transition-all cursor-pointer ${
+              className={`flex-1 flex items-center justify-center gap-xs px-sm py-xs font-label-md text-label-md transition-all cursor-pointer ${
                 view === v
                   ? "bg-primary text-on-primary"
                   : "text-secondary hover:bg-surface-container-low"
@@ -263,15 +268,15 @@ export default function TasksPage() {
             transition={{ duration: 0.25, ease: "easeOut" }}
             className="overflow-hidden"
           >
-            <div className="flex flex-wrap items-center gap-sm mb-md p-sm bg-surface-container-lowest border border-outline-variant/20 rounded-xl">
+            <div className="flex flex-wrap items-center gap-6 mb-md p-sm bg-surface-container-lowest border border-outline-variant/20 rounded-xl">
               {/* Priority filter */}
-              <div className="flex items-center gap-xs flex-wrap">
+              <div className="flex items-center gap-3 flex-wrap">
                 <span className="font-label-sm text-label-sm text-secondary">Priority:</span>
                 {(["all", "high", "medium", "low"] as const).map((p) => (
                   <button
                     key={p}
                     onClick={() => setFilterPriority(p)}
-                    className={`px-xs py-0.5 rounded-full text-[11px] font-semibold border transition-all cursor-pointer capitalize ${
+                    className={`px-3 py-1 rounded-full text-xs font-semibold border transition-all cursor-pointer capitalize ${
                       filterPriority === p
                         ? "bg-primary text-on-primary border-primary"
                         : "border-outline-variant/40 text-secondary hover:border-primary hover:text-primary"
@@ -285,13 +290,13 @@ export default function TasksPage() {
               <div className="h-4 w-px bg-outline-variant/30 hidden sm:block" />
 
               {/* Status filter */}
-              <div className="flex items-center gap-xs flex-wrap">
+              <div className="flex items-center gap-3 flex-wrap">
                 <span className="font-label-sm text-label-sm text-secondary">Status:</span>
                 {(["all", "todo", "in-progress", "review", "done"] as const).map((s) => (
                   <button
                     key={s}
                     onClick={() => setFilterStatus(s)}
-                    className={`px-xs py-0.5 rounded-full text-[11px] font-semibold border transition-all cursor-pointer ${
+                    className={`px-3 py-1 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
                       filterStatus === s
                         ? "bg-primary text-on-primary border-primary"
                         : "border-outline-variant/40 text-secondary hover:border-primary hover:text-primary"
@@ -305,9 +310,9 @@ export default function TasksPage() {
               {activeFiltersCount > 0 && (
                 <button
                   onClick={clearFilters}
-                  className="ml-auto flex items-center gap-xs font-label-sm text-label-sm text-error hover:text-error/80 cursor-pointer transition-colors"
+                  className="ml-auto flex items-center gap-2 font-label-sm text-label-sm text-error hover:text-error/80 cursor-pointer transition-colors"
                 >
-                  <MdClose className="w-3.5 h-3.5" />
+                  <MdClose className="w-4 h-4" />
                   Clear all
                 </button>
               )}

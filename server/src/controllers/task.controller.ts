@@ -13,8 +13,18 @@ export const taskController = {
         res.status(401).json({ error: 'Authentication required.' });
         return;
       }
-      const tasks = await taskService.findAll(req.user.id);
-      res.status(200).json({ tasks });
+      
+      const { search, status, priority, page, limit } = req.query;
+      const options = {
+        search: search as string,
+        status: status as any,
+        priority: priority as any,
+        page: page ? parseInt(page as string, 10) : 1,
+        limit: limit ? parseInt(limit as string, 10) : 10,
+      };
+
+      const { tasks, total } = await taskService.findAll(req.user.id, options);
+      res.status(200).json({ tasks, total, page: options.page, limit: options.limit });
     } catch (error: any) {
       res.status(error.status || 500).json({ error: error.message || 'Failed to fetch tasks.' });
     }

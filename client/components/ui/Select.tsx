@@ -8,6 +8,7 @@ interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>
   onChange?: (event: React.ChangeEvent<HTMLSelectElement>) => void;
   placeholder?: string;
   direction?: "up" | "down";
+  emptyMessage?: string;
 }
 
 export function Select({
@@ -19,6 +20,7 @@ export function Select({
   disabled,
   placeholder,
   direction = "down",
+  emptyMessage = "No options available",
   ...props
 }: SelectProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -87,31 +89,37 @@ export function Select({
             exit={{ opacity: 0, scale: 0.96, y: direction === "up" ? 4 : -4 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
             style={{ originY: direction === "up" ? 1 : 0 }}
-            className={`absolute z-50 w-full bg-surface-bright/95 dark:bg-surface-container-lowest/95 backdrop-blur-md border border-outline-variant/60 rounded-2xl shadow-xl overflow-hidden max-h-60 overflow-y-auto ${
+            className={`absolute z-50 w-full bg-surface-bright/95 dark:bg-surface-container-lowest/95 backdrop-blur-md border border-outline-variant/60 rounded-2xl shadow-xl max-h-60 overflow-auto ${
               direction === "up" ? "bottom-full mb-2" : "top-full mt-2"
             }`}
           >
-            <div className="py-1.5">
-              {options.map((opt) => {
-                const isSelected = opt.value === value;
-                return (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => handleSelect(opt.value)}
-                    className={`w-full flex items-center justify-between px-4 py-2.5 text-body-md text-left transition-colors cursor-pointer hover:bg-surface-container-high dark:hover:bg-surface-container-high/60 ${
-                      isSelected
-                        ? "bg-primary/10 text-primary font-medium dark:bg-primary/20"
-                        : "text-on-surface"
-                    }`}
-                  >
-                    <span className="truncate">{opt.label}</span>
-                    {isSelected && (
-                      <MdCheck className="w-5 h-5 text-primary flex-shrink-0 ml-2" />
-                    )}
-                  </button>
-                );
-              })}
+            <div className="py-1.5 w-max min-w-full">
+              {options.length === 0 ? (
+                <div className="px-4 py-3 text-body-md text-secondary text-center italic whitespace-nowrap">
+                  {emptyMessage}
+                </div>
+              ) : (
+                options.map((opt) => {
+                  const isSelected = opt.value === value;
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => handleSelect(opt.value)}
+                      className={`w-full flex items-center justify-between px-4 py-2.5 text-body-md text-left transition-colors cursor-pointer hover:bg-surface-container-high dark:hover:bg-surface-container-high/60 ${
+                        isSelected
+                          ? "bg-primary/10 text-primary font-medium dark:bg-primary/20"
+                          : "text-on-surface"
+                      }`}
+                    >
+                      <span className="whitespace-nowrap pr-4">{opt.label}</span>
+                      {isSelected && (
+                        <MdCheck className="w-5 h-5 text-primary flex-shrink-0 ml-2" />
+                      )}
+                    </button>
+                  );
+                })
+              )}
             </div>
           </motion.div>
         )}
