@@ -7,6 +7,7 @@ import { TaskChart } from "../components/dashboard/TaskChart";
 import { ProjectProgressList } from "../components/dashboard/ProjectProgressList";
 import { PriorityTasks } from "../components/dashboard/PriorityTasks";
 import { ActivityTimeline } from "../components/dashboard/ActivityTimeline";
+import { MemberWorkload } from "../components/dashboard/MemberWorkload";
 import { TaskModal } from "../components/tasks/TaskModal";
 import { Task } from "../components/tasks/taskTypes";
 import { useTranslation } from "react-i18next";
@@ -148,14 +149,18 @@ export default function DashboardHome() {
       >
         {/* Left Side: Charts and Project Progress (8 columns) */}
         <div className="xl:col-span-8 flex flex-col gap-gutter">
-          <TaskChart />
+          <TaskChart distribution={insights?.tasksByStatus} />
           <ProjectProgressList projects={insights ? insights.projectSummaries : []} />
+          <MemberWorkload workload={insights?.memberWorkload || []} />
         </div>
 
         {/* Right Side: Priority Tasks and Activity Log (4 columns) */}
         <div className="xl:col-span-4 flex flex-col gap-gutter">
-          <PriorityTasks />
-          <ActivityTimeline />
+          <PriorityTasks 
+            tasks={insights?.highPriorityTasks || []} 
+            upcoming={insights?.upcomingDeadlines || []} 
+          />
+          <ActivityTimeline activities={insights?.recentActivities || []} />
         </div>
       </div>
 

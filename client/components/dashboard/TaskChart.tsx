@@ -4,15 +4,31 @@ import React from "react";
 import { Card } from "../ui/Card";
 import { useTranslation } from "react-i18next";
 
-export function TaskChart() {
+interface TaskChartProps {
+  distribution?: {
+    todo: number;
+    inProgress: number;
+    review: number;
+    done: number;
+  };
+}
+
+export function TaskChart({ distribution }: TaskChartProps) {
   const { t } = useTranslation();
 
+  const max = Math.max(
+    40,
+    distribution?.todo || 0,
+    distribution?.inProgress || 0,
+    distribution?.review || 0,
+    distribution?.done || 0
+  );
+
   const data = [
-    { label: "To Do", value: 12, max: 40, color: "bg-secondary/40" },
-    { label: "In Progress", value: 18, max: 40, color: "bg-primary" },
-    { label: "In Review", value: 6, max: 40, color: "bg-primary-fixed-dim" },
-    { label: "Completed", value: 32, max: 40, color: "bg-tertiary-container" },
-    { label: "On Hold", value: 4, max: 40, color: "bg-error/60" },
+    { label: "To Do", value: distribution?.todo || 0, max, color: "bg-secondary/40" },
+    { label: "In Progress", value: distribution?.inProgress || 0, max, color: "bg-primary" },
+    { label: "In Review", value: distribution?.review || 0, max, color: "bg-primary-fixed-dim" },
+    { label: "Completed", value: distribution?.done || 0, max, color: "bg-tertiary-container" },
   ];
 
   return (

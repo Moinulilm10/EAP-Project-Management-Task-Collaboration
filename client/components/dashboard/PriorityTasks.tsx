@@ -1,77 +1,60 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { Card } from "../ui/Card";
 import { Badge } from "../ui/Badge";
 import { useTranslation } from "react-i18next";
+import { TaskPriorityItem } from "../../services/dashboard.service";
 
-interface TaskItem {
-  id: string;
-  title: string;
-  project: string;
-  dueDate: string;
-  priority: "high" | "medium" | "low";
-  isOverdue?: boolean;
-  assigneeInitials: string;
-  assigneeBg: string;
+interface PriorityTasksProps {
+  tasks: TaskPriorityItem[];
+  upcoming: TaskPriorityItem[];
 }
 
-export function PriorityTasks() {
+export function PriorityTasks({ tasks = [], upcoming = [] }: PriorityTasksProps) {
   const { t } = useTranslation();
+  const [tab, setTab] = useState<"priority" | "upcoming">("priority");
 
-  const tasks: TaskItem[] = [
-    {
-      id: "t1",
-      title: "Review portal prototype feedback",
-      project: "Client Portal Redesign",
-      dueDate: "Today",
-      priority: "high",
-      isOverdue: true,
-      assigneeInitials: "JD",
-      assigneeBg: "bg-primary-fixed text-on-primary-fixed",
-    },
-    {
-      id: "t2",
-      title: "Launch landing page assets",
-      project: "Q3 Marketing Campaign",
-      dueDate: "Oct 10",
-      priority: "high",
-      assigneeInitials: "AM",
-      assigneeBg: "bg-secondary-container text-on-secondary-container",
-    },
-    {
-      id: "t3",
-      title: "Final security audit check",
-      project: "Server Migration V2",
-      dueDate: "Completed",
-      priority: "medium",
-      assigneeInitials: "SK",
-      assigneeBg: "bg-tertiary-fixed text-on-tertiary-fixed",
-    },
-  ];
+  const displayList = tab === "priority" ? tasks : upcoming;
 
   return (
     <Card className="p-md h-full min-h-[350px] flex flex-col">
       <div className="flex justify-between items-center mb-md">
-        <h3 className="font-title-md text-title-md text-on-surface">
-          {t("High Priority Tasks")}
-        </h3>
+        <div className="flex gap-4">
+          <h3 
+            className={`font-title-md text-title-md cursor-pointer transition-colors ${tab === "priority" ? "text-on-surface" : "text-secondary"}`}
+            onClick={() => setTab("priority")}
+          >
+            {t("High Priority")}
+          </h3>
+          <h3 
+            className={`font-title-md text-title-md cursor-pointer transition-colors ${tab === "upcoming" ? "text-on-surface" : "text-secondary"}`}
+            onClick={() => setTab("upcoming")}
+          >
+            {t("Upcoming Deadlines")}
+          </h3>
+        </div>
         <Link href="/tasks" className="font-label-sm text-label-sm text-primary hover:text-primary/70 cursor-pointer transition-colors">
           {t("See All Tasks")}
         </Link>
       </div>
 
-      <div className="space-y-4 flex-1 flex flex-col justify-center">
-        {tasks.map((task) => (
-          <div
-            key={task.id}
-            className="flex items-center justify-between p-sm rounded-lg hover:bg-surface-container-low transition-colors duration-200 border border-outline-variant/10 cursor-pointer"
-          >
+      {displayList.length === 0 ? (
+        <div className="flex-1 flex items-center justify-center text-secondary font-body-md">
+          {t(tab === "priority" ? "No high priority tasks." : "No upcoming deadlines.")}
+        </div>
+      ) : (
+        <div className="space-y-4 flex-1 flex flex-col justify-center">
+          {displayList.map((task) => (
+            <div
+              key={task.id}
+              className="flex items-center justify-between p-sm rounded-lg hover:bg-surface-container-low transition-colors duration-200 border border-outline-variant/10 cursor-pointer"
+            >
             <div className="flex items-center gap-sm min-w-0">
               {/* Assignee Avatar */}
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-[12px] flex-shrink-0 ${task.assigneeBg}`}
+                className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-[12px] flex-shrink-0 bg-primary-fixed text-on-primary-fixed`}
               >
                 {task.assigneeInitials}
               </div>
@@ -94,15 +77,16 @@ export function PriorityTasks() {
                   task.isOverdue ? "text-error font-bold" : "text-secondary"
                 }`}
               >
-                {t(task.dueDate)}
+                {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No date'}
               </span>
-              <Badge variant={task.priority === "high" ? "on-hold" : "completed"}>
+              <Badge variant={task.priority === "high" || task.priority === "critical" ? "on-hold" : "completed"}>
                 {t(task.priority.toUpperCase())}
               </Badge>
             </div>
           </div>
         ))}
       </div>
+      )}
     </Card>
   );
 }
