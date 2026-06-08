@@ -8,6 +8,7 @@ import { Team } from "../entities/Team.entity";
 import { TeamMember, TeamRoleName } from "../entities/TeamMember.entity";
 import { Task, TaskStatus, TaskPriority } from "../entities/Task.entity";
 import { Role } from "../entities/Role.entity";
+import { Activity } from "../entities/Activity.entity";
 
 async function main() {
   try {
@@ -139,6 +140,30 @@ async function main() {
       });
       
       await taskRepo.save(task);
+    }
+    
+    // Create Activities
+    console.log("Creating 15 activities...");
+    const activityRepo = AppDataSource.getRepository(Activity);
+    const actions = [
+      { action: "created task", target: "Setup Database Schema", status: "done" },
+      { action: "updated status of", target: "Auth Migration", status: "in_progress" },
+      { action: "assigned", target: "API Documentation", status: "done" },
+      { action: "completed task", target: "Design Landing Page", status: "done" },
+      { action: "commented on", target: "OAuth Integration", status: "done" }
+    ];
+
+    for (let i = 0; i < 15; i++) {
+      const user = faker.helpers.arrayElement(allUsers);
+      const act = faker.helpers.arrayElement(actions);
+      const activity = activityRepo.create({
+        user: user.name,
+        action: act.action,
+        target: act.target,
+        status: act.status,
+        createdAt: faker.date.recent({ days: 3 })
+      });
+      await activityRepo.save(activity);
     }
 
     console.log("Seeding complete.");

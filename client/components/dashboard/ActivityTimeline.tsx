@@ -3,7 +3,7 @@
 import React from "react";
 import { Card } from "../ui/Card";
 import { useTranslation } from "react-i18next";
-import { MdCheckCircle, MdUpdate, MdChat } from "react-icons/md";
+import { MdCheckCircle, MdUpdate, MdChat, MdHistory } from "react-icons/md";
 import { RecentActivityItem } from "../../services/dashboard.service";
 
 interface ActivityTimelineProps {
@@ -30,11 +30,19 @@ export function ActivityTimeline({ activities = [], isLoading = false }: Activit
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
         </div>
       ) : activities.length === 0 ? (
-        <div className="flex-1 flex items-center justify-center text-secondary font-body-md">
-          {t("No recent activities.")}
+        <div className="flex-1 flex flex-col items-center justify-center text-center p-lg">
+          <div className="w-12 h-12 rounded-full bg-secondary-container/20 flex items-center justify-center text-secondary mb-3">
+            <MdHistory className="w-6 h-6 text-secondary/70" />
+          </div>
+          <p className="font-body-md text-secondary font-medium">
+            {t("No recent activities")}
+          </p>
+          <p className="font-label-sm text-secondary/60 mt-1 max-w-[200px]">
+            {t("Actions performed in the system will appear here.")}
+          </p>
         </div>
       ) : (
-        <div className="relative pl-sm flex-grow flex flex-col justify-center gap-6">
+        <div className="relative pl-sm flex-grow flex flex-col gap-6 overflow-y-auto pr-1 mt-md">
           {/* Vertical Line */}
           <div className="absolute left-[20px] top-6 bottom-6 w-0.5 bg-outline-variant/20 pointer-events-none" />
 
