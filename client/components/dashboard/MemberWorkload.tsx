@@ -13,7 +13,7 @@ export function MemberWorkload({ workload = [] }: MemberWorkloadProps) {
   const { t } = useTranslation();
 
   return (
-    <Card className="p-md flex flex-col mt-gutter">
+    <Card className="p-md flex flex-col mt-gutter shrink-0">
       <div className="flex justify-between items-center mb-md">
         <h3 className="font-title-md text-title-md text-on-surface">
           {t("Member Workload Summary")}

@@ -30,7 +30,7 @@ export function ProjectProgressList({ projects }: ProjectProgressListProps) {
           {t("No active projects.")}
         </div>
       ) : (
-        <div className="space-y-6 flex-1 flex flex-col justify-center">
+        <div className="space-y-6 overflow-y-auto flex-1 pr-1">
           {projects.map((project) => {
             let subtitle = "";
             let isWarning = false;
@@ -51,9 +51,9 @@ export function ProjectProgressList({ projects }: ProjectProgressListProps) {
 
             return (
               <div key={project.id} className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h4 className="font-body-lg text-body-lg font-semibold text-on-surface">
+                <div className="flex justify-between items-start gap-4">
+                  <div className="min-w-0 flex-1">
+                    <h4 className="font-body-lg text-body-lg font-semibold text-on-surface truncate" title={project.title}>
                       {t(project.title)}
                     </h4>
                     <div className="flex items-center gap-xs mt-1">
