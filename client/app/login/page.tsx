@@ -111,11 +111,11 @@ export default function LoginPage() {
         <section className="hidden md:flex flex-col justify-between w-1/2 p-12 relative overflow-hidden">
           <div className="absolute inset-0 z-0 opacity-20 ">
             <Image
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCyAkzt0Lh8dZWf_34twn_9WnXUG5xUR7UbcFqioQUX06NJkBPbWIoLxoRAs07LdtbiKn2fS3XfEaKDg12SRWa4aG6bgFwzP_E7h2cjnAvbT6N5niGucpr5dQNuT3VbzLCwf0sxVxRuWCSCFeFkJZF-n-GTzbdoQ6TL5Xct_qwPMonH0nbQIH1VVcd5v6WlppiNpI6WfoIqaDBbgbx6UzPmMZX0ZR7paXYQZhgy-K_G_VuCyhpEiNSNx0UuOD9ZrfSV-BMp7nFwwec"
+              src="/img/loginPageImage.png"
               alt="Abstract geometric shapes"
               fill
               className="object-cover mix-blend-overlay"
-              unoptimized
+              priority
             />
           </div>
 
@@ -148,28 +148,25 @@ export default function LoginPage() {
           <div className="relative z-10 flex items-center gap-4 mt-auto">
             <div className="flex -space-x-3">
               <Image
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCdZqIe-3d1BH4Eaeak6eq7SHap8Diep4uQjV2FZGapxGYaN4XkWhxTN5oADB6iw0UWUxZ3DiDOEgssK-LpoCepzm0rUq2obHlPo8Xji46n8ZwG4Bt-SXmQ_jTsCxzk2kW2ze4ogCrVAGn378ctHGCPt8-SOZCPD1U8llOQM2ng57T_wn3kfYRUG5fPCz_L4QJdmLZ389KhaSi07m6jNQdqc43h6LoQESpQZX-WrfLy7i7_-mwZvgZJLtQnvQC_INkDyOfStiny838"
+                src="/img/person-1.png"
                 alt="Team member"
                 width={40}
                 height={40}
                 className="rounded-full border-2 border-primary object-cover"
-                unoptimized
               />
               <Image
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQGDo5bfDZUm9KqMmlBgDEIk1NTWhtgy1zkWQcz6WcX6sMWJHBfgAU3T1WLQ8iFtJPtoBEcAPEOKM76UO6h3RYG5EHZprYhDJXsSn82y7foy_XUr12sj7yTxpSxbgiQNDyXQfRxk9FXnD_oglog7wHSL7rcE1O--jEnmUM2_1CfzqJUK4HTHcC_KXV84XFho4ABDbGrLOfI9fX1CTo0S5QOaszQpA373O1gRNlUm31ssgBcj56Ty-L1Jk4r8LAam3JA-iQM3hCnt0"
+                src="/img/person-2.png"
                 alt="Team member"
                 width={40}
                 height={40}
                 className="rounded-full border-2 border-primary object-cover"
-                unoptimized
               />
               <Image
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0R7CTVPEq2cfgtUaJsfjpo3ui8M4vfJHdeoN3Z8krErrc7uNwYuphE6UNOjEGiGh-_6vV0J31QcgtHRvhV-kGyI_2E9RBfizZPMMppcYFVkknOTzbJ4ZfVKtm_nobXjSILw1YFRUlQa-ONZoHUxkndT581WoGh0uk1IZWldvk8jIQAr3OqVQf1bVB1giQebPH0xAAyraVvvBOFQE39gs3Zw1mf5Kf7KgUU0ttARk8DVWJ8TN_L8veZBamqeNjkVgJz3T_f01op8M"
+                src="/img/person-3.png"
                 alt="Team member"
                 width={40}
                 height={40}
                 className="rounded-full border-2 border-primary object-cover"
-                unoptimized
               />
             </div>
             <div className="text-sm font-body-md text-primary-fixed">
