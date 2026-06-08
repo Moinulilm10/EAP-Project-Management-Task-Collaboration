@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
+import path from "path";
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -12,8 +13,10 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  turbopack: {
+    root: path.join(process.cwd(), '../'),
+  },
 };
-
 
 export default withSentryConfig(nextConfig, {
   org: "eap-project-management-task-c",
