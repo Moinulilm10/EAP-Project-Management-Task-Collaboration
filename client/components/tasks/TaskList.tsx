@@ -14,6 +14,7 @@ import {
 import { Task, TaskStatus } from "./taskTypes";
 
 const PRIORITY_CONFIG = {
+  critical: { label: "Critical", cls: "bg-error/20 text-error border-error/50 font-bold" },
   high: { label: "High", cls: "bg-error-container/30 text-error border-error/30" },
   medium: { label: "Medium", cls: "bg-tertiary-container/20 text-tertiary border-tertiary/30" },
   low: { label: "Low", cls: "bg-secondary-container/30 text-secondary border-secondary-container" },
@@ -91,7 +92,7 @@ export function TaskList({ tasks, onEdit, onDelete, onStatusChange, sortBy, onSo
       <AnimatePresence mode="popLayout">
         {tasks.map((task, i) => {
           const isDone = task.status === "done";
-          const isOverdue = task.dueDate === "Today" && task.priority === "high" && !isDone;
+          const isOverdue = task.dueDate === "Today" && (task.priority === "high" || task.priority === "critical") && !isDone;
           const statusCfg = STATUS_CONFIG[task.status];
           const priorityCfg = PRIORITY_CONFIG[task.priority];
 

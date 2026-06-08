@@ -13,6 +13,7 @@ import {
 import { Task, TaskStatus } from "./taskTypes";
 
 const PRIORITY_CONFIG = {
+  critical: { label: "Critical", cls: "bg-error/20 text-error border-error/50 font-bold" },
   high: { label: "High", cls: "bg-error-container/30 text-error border-error/30" },
   medium: { label: "Medium", cls: "bg-tertiary-container/20 text-tertiary border-tertiary/30" },
   low: { label: "Low", cls: "bg-secondary-container/30 text-secondary border-secondary-container" },
@@ -35,7 +36,7 @@ interface TaskCardProps {
 
 export function TaskCard({ task, onEdit, onDelete, onStatusChange, compact = false }: TaskCardProps) {
   const isDone = task.status === "done";
-  const isOverdue = task.dueDate === "Today" && task.priority === "high" && !isDone;
+  const isOverdue = task.dueDate === "Today" && (task.priority === "high" || task.priority === "critical") && !isDone;
   const donePct = task.subtasks.length
     ? Math.round((task.subtasks.filter((s) => s.done).length / task.subtasks.length) * 100)
     : 0;

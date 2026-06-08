@@ -82,7 +82,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
         description: t.description || '',
         project: t.project?.name || 'Unknown Project',
         projectId: t.projectId,
-        status: t.status,
+        status: t.status === 'in_progress' ? 'in-progress' : t.status,
         priority: t.priority,
         dueDate: t.dueDate ? new Date(t.dueDate).toISOString().split('T')[0] : '',
         assignee: t.assignee ? {

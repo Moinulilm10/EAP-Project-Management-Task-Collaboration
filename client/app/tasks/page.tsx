@@ -275,7 +275,7 @@ export default function TasksPage() {
               {/* Priority filter */}
               <div className="flex items-center gap-3 flex-wrap">
                 <span className="font-label-sm text-label-sm text-secondary">Priority:</span>
-                {(["all", "high", "medium", "low"] as const).map((p) => (
+                {(["all", "critical", "high", "medium", "low"] as const).map((p) => (
                   <button
                     key={p}
                     onClick={() => setPriorityFilter(p)}

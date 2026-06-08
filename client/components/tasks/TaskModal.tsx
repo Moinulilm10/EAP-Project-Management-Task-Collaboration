@@ -294,6 +294,7 @@ export function TaskModal({ isOpen, onClose, onSave, initial }: TaskModalProps) 
                       value={form.priority}
                       onChange={(e) => handleChange("priority", e.target.value as TaskPriority)}
                       options={[
+                        { label: "Critical", value: "critical" },
                         { label: "High", value: "high" },
                         { label: "Medium", value: "medium" },
                         { label: "Low", value: "low" },
