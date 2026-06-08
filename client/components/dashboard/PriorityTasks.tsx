@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { Card } from "../ui/Card";
 import { useTranslation } from "react-i18next";
@@ -14,6 +14,7 @@ interface PriorityTasksProps {
 
 export function PriorityTasks({ tasks = [], upcoming = [], isLoading = false }: PriorityTasksProps) {
   const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState<"priority" | "upcoming">("priority");
 
   const renderTaskRow = (task: TaskPriorityItem) => (
     <div
@@ -60,11 +61,28 @@ export function PriorityTasks({ tasks = [], upcoming = [], isLoading = false }: 
 
   return (
     <Card className="p-md h-[650px] flex flex-col">
-      <div className="flex justify-between items-center mb-md">
-        <h3 className="font-title-md text-title-md text-on-surface">
-          {t("High Priority")}
-        </h3>
-        <Link href="/tasks" className="font-label-sm text-label-sm text-primary hover:text-primary/70 cursor-pointer transition-colors">
+      <div className="flex justify-between items-end mb-md border-b border-outline-variant/20">
+        <div className="flex gap-6">
+          <button
+            onClick={() => setActiveTab("priority")}
+            className={`pb-2 font-title-sm text-title-sm transition-colors relative -mb-[1px] ${activeTab === "priority"
+                ? "text-primary border-b-2 border-primary font-bold"
+                : "text-secondary hover:text-on-surface"
+              }`}
+          >
+            {t("High Priority")}
+          </button>
+          <button
+            onClick={() => setActiveTab("upcoming")}
+            className={`pb-2 font-title-sm text-title-sm transition-colors relative -mb-[1px] ${activeTab === "upcoming"
+                ? "text-primary border-b-2 border-primary font-bold"
+                : "text-secondary hover:text-on-surface"
+              }`}
+          >
+            {t("Upcoming Deadlines")}
+          </button>
+        </div>
+        <Link href="/tasks" className="font-label-sm text-label-sm text-primary hover:text-primary/70 cursor-pointer transition-colors pb-2">
           {t("See All Tasks")}
         </Link>
       </div>
@@ -74,35 +92,32 @@ export function PriorityTasks({ tasks = [], upcoming = [], isLoading = false }: 
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
         </div>
       ) : (
-        <div className="flex-1 overflow-y-auto pr-1 space-y-lg">
-          {/* High Priority List */}
-          <div className="space-y-sm">
-            {tasks.length === 0 ? (
-              <div className="text-secondary font-body-md py-sm text-center">
-                {t("No high priority tasks.")}
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {tasks.map(renderTaskRow)}
-              </div>
-            )}
-          </div>
-
-          {/* Upcoming Deadlines Section */}
-          <div className="space-y-sm">
-            <h4 className="font-title-sm text-title-sm text-on-surface pt-xs border-t border-outline-variant/10">
-              {t("Upcoming Deadlines")}
-            </h4>
-            {upcoming.length === 0 ? (
-              <div className="text-secondary font-body-md py-sm text-center">
-                {t("No upcoming deadlines.")}
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {upcoming.map(renderTaskRow)}
-              </div>
-            )}
-          </div>
+        <div className="flex-1 overflow-y-auto pr-1">
+          {activeTab === "priority" ? (
+            <div className="space-y-sm">
+              {tasks.length === 0 ? (
+                <div className="text-secondary font-body-md py-sm text-center">
+                  {t("No high priority tasks.")}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {tasks.map(renderTaskRow)}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-sm">
+              {upcoming.length === 0 ? (
+                <div className="text-secondary font-body-md py-sm text-center">
+                  {t("No upcoming deadlines.")}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {upcoming.map(renderTaskRow)}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
     </Card>
