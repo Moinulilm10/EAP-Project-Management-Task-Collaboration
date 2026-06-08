@@ -22,6 +22,5 @@ export default withSentryConfig(nextConfig, {
   org: "eap-project-management-task-c",
   project: "javascript-nextjs",
   widenClientFileUpload: true,
-  tunnelRoute: "/monitoring",
   silent: !process.env.CI,
 });
