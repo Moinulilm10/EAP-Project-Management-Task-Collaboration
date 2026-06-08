@@ -114,6 +114,7 @@ export default function LoginPage() {
               src="/img/loginPageImage.png"
               alt="Abstract geometric shapes"
               fill
+              sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover mix-blend-overlay"
               priority
             />
@@ -127,6 +128,7 @@ export default function LoginPage() {
                 width={50}
                 height={50}
                 className="rounded-lg"
+                priority
               />
               <h1 className="font-display-lg text-display-lg text-white tracking-tight">
                 {t("ProjectFlow")}
@@ -201,6 +203,7 @@ export default function LoginPage() {
               width={28}
               height={28}
               className="rounded-lg"
+              priority
             />
             <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-primary font-bold">
               {t("ProjectFlow")}
