@@ -133,15 +133,16 @@ export class DashboardService {
       .groupBy('task.assigneeId')
       .getRawMany();
 
-    const memberWorkload = await Promise.all(workloadCounts.map(async (w) => {
+    const memberWorkload = [];
+    for (const w of workloadCounts) {
       const user = await this.userRepo.findOne({ where: { id: w.assigneeId } });
-      return {
+      memberWorkload.push({
         userId: w.assigneeId,
         userName: user ? user.name : 'Unknown User',
         userInitials: user ? user.name.substring(0, 2).toUpperCase() : 'U',
         taskCount: parseInt(w.count, 10),
-      };
-    }));
+      });
+    }
 
     // 6. Project Summaries
     const projects = await this.projectRepo.find({
@@ -150,37 +151,36 @@ export class DashboardService {
       take: 5,
     });
 
-    const projectSummaries: ProjectSummary[] = await Promise.all(
-      projects.map(async (p) => {
-        const pTasks = await this.taskRepo.find({ where: { projectId: p.id } });
-        const pTotal = pTasks.length;
-        const pCompleted = pTasks.filter((t) => t.status === TaskStatus.DONE).length;
-        const pPending = pTotal - pCompleted;
-        const progress = pTotal > 0 ? Math.round((pCompleted / pTotal) * 100) : 0;
+    const projectSummaries: ProjectSummary[] = [];
+    for (const p of projects) {
+      const pTasks = await this.taskRepo.find({ where: { projectId: p.id } });
+      const pTotal = pTasks.length;
+      const pCompleted = pTasks.filter((t) => t.status === TaskStatus.DONE).length;
+      const pPending = pTotal - pCompleted;
+      const progress = pTotal > 0 ? Math.round((pCompleted / pTotal) * 100) : 0;
 
-        let isWarning = false;
-        if (p.deadline) {
-          const deadlineDate = new Date(p.deadline);
-          deadlineDate.setHours(0,0,0,0);
-          const daysUntilDeadline = Math.floor((deadlineDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
-          if (daysUntilDeadline <= 3 && progress < 100) {
-            isWarning = true;
-          }
+      let isWarning = false;
+      if (p.deadline) {
+        const deadlineDate = new Date(p.deadline);
+        deadlineDate.setHours(0,0,0,0);
+        const daysUntilDeadline = Math.floor((deadlineDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
+        if (daysUntilDeadline <= 3 && progress < 100) {
+          isWarning = true;
         }
+      }
 
-        return {
-          id: p.id,
-          title: p.name,
-          progress,
-          dueDate: p.deadline ? p.deadline.toISOString() : null,
-          status: p.status === ProjectStatus.ACTIVE ? 'active' : p.status === ProjectStatus.COMPLETED ? 'completed' : 'on-hold',
-          isWarning,
-          tasksPending: pPending,
-          tasksCompleted: pCompleted,
-          totalTasks: pTotal,
-        };
-      })
-    );
+      projectSummaries.push({
+        id: p.id,
+        title: p.name,
+        progress,
+        dueDate: p.deadline ? p.deadline.toISOString() : null,
+        status: p.status === ProjectStatus.ACTIVE ? 'active' : p.status === ProjectStatus.COMPLETED ? 'completed' : 'on-hold',
+        isWarning,
+        tasksPending: pPending,
+        tasksCompleted: pCompleted,
+        totalTasks: pTotal,
+      });
+    }
 
     return {
       totalProjects,

@@ -152,6 +152,7 @@ export function TopNavBar({ onMenuClick }: TopNavBarProps) {
               alt={user?.name || "User Profile"}
               size="sm"
               className="cursor-pointer  group-hover:ring-primary/50 transition-all"
+              priority
             />
           </button>
 

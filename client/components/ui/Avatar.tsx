@@ -9,6 +9,7 @@ interface AvatarProps {
   size?: "sm" | "md" | "lg" | "xl";
   statusColor?: string;
   className?: string;
+  priority?: boolean;
 }
 
 const sizeClasses = {
@@ -57,6 +58,7 @@ export function Avatar({
   size = "md",
   statusColor,
   className = "",
+  priority = false,
 }: AvatarProps) {
   const finalInitials = initials || (name ? getInitials(name) : "?");
   const bgClass = name ? getBgColor(name) : "bg-primary-container text-primary ";
@@ -71,7 +73,7 @@ export function Avatar({
             width={80}
             height={80}
             className="w-full h-full object-cover"
-            loading="lazy"
+            priority={priority}
             unoptimized
             onLoad={(e) => {
               const target = e.target as HTMLElement;

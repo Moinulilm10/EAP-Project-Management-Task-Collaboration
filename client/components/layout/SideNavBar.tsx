@@ -101,6 +101,7 @@ export function SideNavBar({ isOpen = false, onClose }: SideNavBarProps) {
           width={65}
           height={65}
           className="rounded-lg"
+          priority
         />
         <div>
           <h1 className="font-headline-md text-headline-md font-bold text-primary">
