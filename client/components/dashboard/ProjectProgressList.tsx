@@ -9,9 +9,10 @@ import { ProjectSummary } from "../../services/dashboard.service";
 
 interface ProjectProgressListProps {
   projects: ProjectSummary[];
+  isLoading?: boolean;
 }
 
-export function ProjectProgressList({ projects }: ProjectProgressListProps) {
+export function ProjectProgressList({ projects, isLoading = false }: ProjectProgressListProps) {
   const { t } = useTranslation();
 
   return (
@@ -25,7 +26,11 @@ export function ProjectProgressList({ projects }: ProjectProgressListProps) {
         </span>
       </div>
 
-      {projects.length === 0 ? (
+      {isLoading ? (
+        <div className="flex-grow flex items-center justify-center py-xl">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
+        </div>
+      ) : projects.length === 0 ? (
         <div className="flex-1 flex items-center justify-center text-secondary font-body-md">
           {t("No active projects.")}
         </div>

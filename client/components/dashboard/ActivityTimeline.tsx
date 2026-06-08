@@ -8,9 +8,10 @@ import { RecentActivityItem } from "../../services/dashboard.service";
 
 interface ActivityTimelineProps {
   activities: RecentActivityItem[];
+  isLoading?: boolean;
 }
 
-export function ActivityTimeline({ activities = [] }: ActivityTimelineProps) {
+export function ActivityTimeline({ activities = [], isLoading = false }: ActivityTimelineProps) {
   const { t } = useTranslation();
 
   return (
@@ -24,7 +25,11 @@ export function ActivityTimeline({ activities = [] }: ActivityTimelineProps) {
         </span>
       </div>
 
-      {activities.length === 0 ? (
+      {isLoading ? (
+        <div className="flex-grow flex items-center justify-center py-xl">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
+        </div>
+      ) : activities.length === 0 ? (
         <div className="flex-1 flex items-center justify-center text-secondary font-body-md">
           {t("No recent activities.")}
         </div>

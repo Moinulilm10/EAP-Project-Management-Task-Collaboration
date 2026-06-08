@@ -26,10 +26,15 @@ export default function DashboardHome() {
   const [exportDone, setExportDone] = useState(false);
   const [taskModalOpen, setTaskModalOpen] = useState(false);
   const [insights, setInsights] = useState<DashboardInsights | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     Sentry.logger.info('User triggered test log', { log_source: 'sentry_test' });
-    dashboardService.getInsights().then(setInsights).catch(console.error);
+    setIsLoading(true);
+    dashboardService.getInsights()
+      .then(setInsights)
+      .catch(console.error)
+      .finally(() => setIsLoading(false));
   }, []);
 
   const handleExport = () => {
@@ -135,11 +140,11 @@ export default function DashboardHome() {
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-md mb-lg animate-fade-in"
         style={{ animationDelay: "0.2s" }}
       >
-        <KPICard title="Total Projects" value={insights ? insights.totalProjects.toString() : "-"} />
-        <KPICard title="Total Tasks" value={insights ? insights.totalTasks.toString() : "-"} />
-        <KPICard title="Completed" value={insights ? insights.completedTasks.toString() : "-"} subValue={insights ? `/${insights.totalTasks}` : ""} variant="primary-highlight" />
-        <KPICard title="Pending" value={insights ? insights.pendingTasks.toString() : "-"} />
-        <KPICard title="Overdue" value={insights ? insights.overdueTasks.toString() : "-"} variant="error-highlight" />
+        <KPICard title="Total Projects" value={insights ? insights.totalProjects.toString() : "-"} isLoading={isLoading} />
+        <KPICard title="Total Tasks" value={insights ? insights.totalTasks.toString() : "-"} isLoading={isLoading} />
+        <KPICard title="Completed" value={insights ? insights.completedTasks.toString() : "-"} subValue={insights ? `/${insights.totalTasks}` : ""} variant="primary-highlight" isLoading={isLoading} />
+        <KPICard title="Pending" value={insights ? insights.pendingTasks.toString() : "-"} isLoading={isLoading} />
+        <KPICard title="Overdue" value={insights ? insights.overdueTasks.toString() : "-"} variant="error-highlight" isLoading={isLoading} />
       </div>
 
       {/* Main Content Layout Grid */}
@@ -150,8 +155,8 @@ export default function DashboardHome() {
         {/* Left Side: Charts and Project Progress (8 columns) */}
         <div className="xl:col-span-8 flex flex-col gap-gutter">
           <TaskChart distribution={insights?.tasksByStatus} />
-          <ProjectProgressList projects={insights ? insights.projectSummaries : []} />
-          <MemberWorkload workload={insights?.memberWorkload || []} />
+          <ProjectProgressList projects={insights ? insights.projectSummaries : []} isLoading={isLoading} />
+          <MemberWorkload workload={insights?.memberWorkload || []} isLoading={isLoading} />
         </div>
 
         {/* Right Side: Priority Tasks and Activity Log (4 columns) */}
@@ -159,8 +164,9 @@ export default function DashboardHome() {
           <PriorityTasks 
             tasks={insights?.highPriorityTasks || []} 
             upcoming={insights?.upcomingDeadlines || []} 
+            isLoading={isLoading}
           />
-          <ActivityTimeline activities={insights?.recentActivities || []} />
+          <ActivityTimeline activities={insights?.recentActivities || []} isLoading={isLoading} />
         </div>
       </div>
 

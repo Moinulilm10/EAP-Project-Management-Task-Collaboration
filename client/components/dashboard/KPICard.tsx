@@ -9,9 +9,10 @@ interface KPICardProps {
   value: string | number;
   subValue?: string;
   variant?: "default" | "primary-highlight" | "error-highlight";
+  isLoading?: boolean;
 }
 
-export function KPICard({ title, value, subValue, variant = "default" }: KPICardProps) {
+export function KPICard({ title, value, subValue, variant = "default", isLoading = false }: KPICardProps) {
   const { t } = useTranslation();
 
   const containerStyles = {
@@ -44,10 +45,14 @@ export function KPICard({ title, value, subValue, variant = "default" }: KPICard
       </div>
       
       <div className="flex items-end gap-3 mt-auto relative z-10">
-        <span className={`font-display-lg text-display-lg font-bold leading-none ${valueStyles[variant]}`}>
-          {value}
-        </span>
-        {subValue && (
+        {isLoading ? (
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary/20 border-t-primary mb-1" />
+        ) : (
+          <span className={`font-display-lg text-display-lg font-bold leading-none ${valueStyles[variant]}`}>
+            {value}
+          </span>
+        )}
+        {!isLoading && subValue && (
           <span className="font-body-md text-body-md text-secondary mb-2">
             {subValue}
           </span>
