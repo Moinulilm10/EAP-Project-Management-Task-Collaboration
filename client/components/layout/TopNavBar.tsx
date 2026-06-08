@@ -172,6 +172,7 @@ export function TopNavBar({ onMenuClick }: TopNavBarProps) {
                     name={user?.name || "User"}
                     size="md"
                     className="mb-sm"
+                    priority
                   />
                   <h4 className="font-title-md text-title-md text-on-surface font-semibold truncate w-full max-w-60">
                     {user?.name || "Anonymous User"}

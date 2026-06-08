@@ -74,6 +74,7 @@ export function Avatar({
             height={80}
             className="w-full h-full object-cover"
             priority={priority}
+            loading={priority ? "eager" : undefined}
             unoptimized
             onLoad={(e) => {
               const target = e.target as HTMLElement;
