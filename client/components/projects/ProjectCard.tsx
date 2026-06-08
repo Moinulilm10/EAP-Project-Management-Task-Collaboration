@@ -47,7 +47,43 @@ export function ProjectCard({
     <Card
       className={`group ${isCompleted ? "opacity-75 hover:opacity-100" : ""}`}
     >
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-sm">
+      {/* Actions overlay on hover */}
+      <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200 bg-surface-container-lowest/90 dark:bg-surface-container-low/90 backdrop-blur-sm p-1 rounded-xl border border-outline-variant/30 shadow-sm z-10">
+        {onOpenDetails && (
+          <button
+            type="button"
+            onClick={onOpenDetails}
+            className="p-1.5 text-secondary hover:text-primary rounded-lg hover:bg-surface-container-high transition-colors"
+            aria-label={t("View Details") as string}
+          >
+            <MdOpenInNew className="w-[18px] h-[18px]" />
+          </button>
+        )}
+        {onEdit && (
+          <button
+            type="button"
+            onClick={() => onEdit(project.id)}
+            className="p-1.5 text-secondary hover:text-primary rounded-lg hover:bg-surface-container-high transition-colors"
+            aria-label={t("Edit Project") as string}
+          >
+            <MdEdit className="w-[18px] h-[18px]" />
+          </button>
+        )}
+        {onDelete && (
+          <button
+            type="button"
+            onClick={() => onDelete(project.id)}
+            className="p-1.5 text-secondary hover:text-error rounded-lg hover:bg-error-container/20 transition-colors"
+            aria-label={t("Delete Project") as string}
+          >
+            <MdDelete className="w-[18px] h-[18px]" />
+          </button>
+        )}
+      </div>
+
+      {/* Badges Row */}
+      <div className="flex flex-col gap-2 mb-sm pr-16">
+        {/* Row 1: Status and Member Count */}
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant={normalizedStatus}>
             {t(
@@ -63,52 +99,23 @@ export function ProjectCard({
               {`${project.memberCount} ${t("members")}`}
             </span>
           )}
-          {isAdmin && (
+        </div>
+
+        {/* Row 2: Admin Badge */}
+        {isAdmin && (
+          <div className="flex">
             <span className="rounded-full bg-primary/10 px-3 py-1 text-[10px] font-semibold uppercase text-primary border border-primary/20">
               {t("Admin")}
             </span>
-          )}
-        </div>
-
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          {onOpenDetails && (
-            <button
-              type="button"
-              onClick={onOpenDetails}
-              className="p-2 text-secondary hover:text-primary rounded-xl hover:bg-surface-container-high transition-colors"
-              aria-label={t("View Details") as string}
-            >
-              <MdOpenInNew className="w-5 h-5" />
-            </button>
-          )}
-          {onEdit && (
-            <button
-              type="button"
-              onClick={() => onEdit(project.id)}
-              className="p-2 text-secondary hover:text-primary rounded-xl hover:bg-surface-container-high transition-colors"
-              aria-label={t("Edit Project") as string}
-            >
-              <MdEdit className="w-5 h-5" />
-            </button>
-          )}
-          {onDelete && (
-            <button
-              type="button"
-              onClick={() => onDelete(project.id)}
-              className="p-2 text-secondary hover:text-error rounded-xl hover:bg-error-container/20 transition-colors"
-              aria-label={t("Delete Project") as string}
-            >
-              <MdDelete className="w-5 h-5" />
-            </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       <h3 className="font-title-md text-title-md text-on-surface mb-xs">
         {t(project.title)}
       </h3>
 
-      <p className="font-body-md text-body-md text-secondary line-clamp-2 mb-md flex-1">
+      <p className="font-body-md text-body-md text-secondary line-clamp-2 mb-md">
         {t(project.description)}
       </p>
 
