@@ -31,7 +31,7 @@ interface ProjectDetailsModalProps {
   };
 }
 
-const ROLE_OPTIONS = ["Project Member", "Team Member"];
+const ROLE_OPTIONS = ["Project Manager", "Team Member"];
 
 export function ProjectDetailsModal({
   isOpen,
@@ -78,11 +78,11 @@ export function ProjectDetailsModal({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.98 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-full max-w-3xl rounded-3xl bg-surface-container-lowest border border-outline-variant/20 shadow-2xl overflow-hidden">
-              <div className="flex flex-col gap-4 px-6 py-5 border-b border-outline-variant/20 sm:flex-row sm:items-center sm:justify-between">
+            <div className="w-full max-w-5xl max-h-[90vh] flex flex-col rounded-3xl bg-surface-container-lowest border border-outline-variant/20 shadow-2xl overflow-hidden">
+              <div className="flex-shrink-0 flex flex-col gap-4 px-6 py-5 border-b border-outline-variant/20 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="font-title-md text-title-md text-on-surface">
                     {project.title}
@@ -100,8 +100,9 @@ export function ProjectDetailsModal({
                 </button>
               </div>
 
-              <div className="grid gap-6 p-6 md:grid-cols-[1.4fr_1fr]">
-                <div className="space-y-5">
+              <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-outline-variant/50">
+                <div className="grid gap-6 md:grid-cols-[1.4fr_1fr] items-start">
+                  <div className="space-y-5">
                   <div className="rounded-3xl bg-surface-container-highest p-5 border border-outline-variant/20">
                     <div className="flex flex-wrap items-center gap-2 mb-4">
                       <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
@@ -253,7 +254,7 @@ export function ProjectDetailsModal({
                             {t(role)}
                           </p>
                           <p className="text-body-sm text-secondary mt-1">
-                            {role === "Project Member"
+                            {role === "Project Manager"
                               ? t(
                                 "Can manage tasks and participate in the project.",
                               )
@@ -268,6 +269,7 @@ export function ProjectDetailsModal({
                 </div>
               </div>
             </div>
+          </div>
           </motion.div>
         </>
       )}
