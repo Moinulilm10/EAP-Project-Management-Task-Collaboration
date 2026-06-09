@@ -15,7 +15,7 @@ export function ActivityTimeline({ activities = [], isLoading = false }: Activit
   const { t } = useTranslation();
 
   return (
-    <Card className="p-md h-full min-h-[350px] flex flex-col">
+    <Card className="p-md h-fit min-h-[550px] flex flex-col">
       <div className="flex justify-between items-center mb-md">
         <h3 className="font-title-md text-title-md text-on-surface">
           {t("Recent Activity Timeline")}
@@ -57,7 +57,7 @@ export function ActivityTimeline({ activities = [], isLoading = false }: Activit
             const hours = Math.floor(diff / (1000 * 60 * 60));
             const days = Math.floor(hours / 24);
             const mins = Math.floor(diff / (1000 * 60));
-            
+
             let timeStr = "just now";
             if (days > 0) timeStr = `${days}d ago`;
             else if (hours > 0) timeStr = `${hours}h ago`;

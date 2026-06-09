@@ -322,7 +322,7 @@ export default function ProjectsPage() {
           )}
         </div>
 
-        <div className="rounded-3xl border border-outline-variant/30 bg-surface-container-lowest p-6">
+        <div className="rounded-3xl border border-outline-variant/30 bg-surface-container-lowest p-6 h-fit sticky top-24">
           <h3 className="font-title-sm text-title-sm text-on-surface mb-4">
             {t("Project Overview")}
           </h3>
