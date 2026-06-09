@@ -65,18 +65,18 @@ export function PriorityTasks({ tasks = [], upcoming = [], isLoading = false }: 
         <div className="flex gap-6">
           <button
             onClick={() => setActiveTab("priority")}
-            className={`pb-2 font-title-sm text-title-sm transition-colors relative -mb-[1px] ${activeTab === "priority"
-                ? "text-primary border-b-2 border-primary font-bold"
-                : "text-secondary hover:text-on-surface"
+            className={`pb-2 font-title-sm text-xs transition-colors relative -mb-[1px] ${activeTab === "priority"
+              ? "text-primary border-b-2 border-primary font-bold"
+              : "text-secondary hover:text-on-surface"
               }`}
           >
             {t("High Priority")}
           </button>
           <button
             onClick={() => setActiveTab("upcoming")}
-            className={`pb-2 font-title-sm text-title-sm transition-colors relative -mb-[1px] ${activeTab === "upcoming"
-                ? "text-primary border-b-2 border-primary font-bold"
-                : "text-secondary hover:text-on-surface"
+            className={`pb-2 font-title-sm text-xs transition-colors relative -mb-[1px] ${activeTab === "upcoming"
+              ? "text-primary border-b-2 border-primary font-bold"
+              : "text-secondary hover:text-on-surface"
               }`}
           >
             {t("Upcoming Deadlines")}
