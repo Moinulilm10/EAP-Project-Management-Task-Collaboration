@@ -13,14 +13,24 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  turbopack: {
-    root: path.join(process.cwd(), '../'),
-  },
+  ...(process.env.VERCEL
+    ? {}
+    : {
+        turbopack: {
+          root: path.join(process.cwd(), '../'),
+        },
+      }),
 };
 
 export default withSentryConfig(nextConfig, {
   org: "eap-project-management-task-c",
   project: "javascript-nextjs",
   widenClientFileUpload: true,
-  silent: !process.env.CI,
+  silent: true,
+  sourcemaps: {
+    disable: !process.env.SENTRY_AUTH_TOKEN,
+  },
+  errorHandler: (err) => {
+    console.warn("Sentry build warning:", err.message);
+  },
 });
