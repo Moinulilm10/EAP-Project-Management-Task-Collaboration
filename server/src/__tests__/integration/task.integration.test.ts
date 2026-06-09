@@ -149,6 +149,19 @@ describe('Task Module Integration', () => {
       expect(res.status).toBe(400);
       expect(res.body.error).toBe('Completed tasks cannot be reassigned.');
     });
+
+    it('should fail when a non-owner tries to update the task', async () => {
+      const res = await request(app)
+        .put(`/api/v1/tasks/${createdTaskId}`)
+        .set('Authorization', `Bearer ${outsiderToken}`)
+        .set('X-Idempotency-Key', uuidv4())
+        .send({
+          title: 'Hacked Task Title'
+        });
+
+      expect(res.status).toBe(403);
+      expect(res.body.message).toBe('Only the task owner can edit or change the status of this task.');
+    });
   });
 
   describe('GET /api/v1/tasks', () => {
@@ -217,6 +230,16 @@ describe('Task Module Integration', () => {
   });
 
   describe('DELETE /api/v1/tasks/:id', () => {
+    it('should fail when a non-owner tries to delete the task', async () => {
+      const res = await request(app)
+        .delete(`/api/v1/tasks/${createdTaskId}`)
+        .set('Authorization', `Bearer ${outsiderToken}`)
+        .set('X-Idempotency-Key', uuidv4());
+
+      expect(res.status).toBe(403);
+      expect(res.body.message).toBe('Only the task owner can delete this task.');
+    });
+
     it('should successfully delete a task', async () => {
       const res = await request(app)
         .delete(`/api/v1/tasks/${createdTaskId}`)

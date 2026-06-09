@@ -82,6 +82,7 @@ export const authOptions: NextAuthOptions = {
         // Assume access token expires in 15 minutes
         token.accessTokenExpires = Date.now() + 15 * 60 * 1000;
         token.picture = (user as any).picture || user.image;
+        token.id = user.id;
       }
       
       // Handle session updates (e.g. name or picture change)
@@ -108,6 +109,7 @@ export const authOptions: NextAuthOptions = {
       (session as any).accessToken = token.accessToken as string;
       if (session.user) {
         session.user.image = (token as any).picture || (token as any).image || null;
+        (session.user as any).id = (token as any).id || (token as any).sub;
       }
       return session;
     },

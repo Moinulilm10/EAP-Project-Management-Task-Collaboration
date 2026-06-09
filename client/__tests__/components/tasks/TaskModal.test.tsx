@@ -8,7 +8,15 @@ import { TaskModal } from '../../../components/tasks/TaskModal';
 vi.mock('../../../stores/projectStore', () => {
   const store = {
     projects: [
-      { id: 'p1', name: 'Project 1', createdAt: new Date('2025-01-01').toISOString(), deadline: new Date('2025-12-31').toISOString() }
+      { 
+        id: 'p1', 
+        name: 'Project 1', 
+        status: 'active',
+        memberCount: 5,
+        description: 'Mock project description',
+        createdAt: new Date('2025-01-01').toISOString(), 
+        deadline: new Date('2025-12-31').toISOString() 
+      }
     ],
     fetchProjects: vi.fn(),
   };
@@ -36,6 +44,17 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (k: string) => k }),
 }));
 
+vi.mock('../../../stores/authStore', () => {
+  return {
+    useAuthStore: () => ({ user: { id: 'u1', name: 'John Doe', email: 'j@d.com' } })
+  };
+});
+
+vi.mock('next-auth/react', () => ({
+  useSession: vi.fn(() => ({ data: { user: { name: 'Test User' } }, status: 'authenticated' })),
+  getSession: vi.fn().mockResolvedValue({ accessToken: 'mock-token' }),
+}));
+
 describe('TaskModal', () => {
   const onSaveMock = vi.fn();
   const onCloseMock = vi.fn();
@@ -50,7 +69,7 @@ describe('TaskModal', () => {
   });
 
   it('renders Edit Task when initial data is provided', () => {
-    const initialData = { id: '1', title: 'Edit Me', projectId: 'p1', status: 'todo' };
+    const initialData = { id: '1', title: 'Edit Me', projectId: 'p1', status: 'todo', createdById: 'u1' };
     render(<TaskModal isOpen={true} onClose={onCloseMock} onSave={onSaveMock} initial={initialData as any} />);
     expect(screen.getByText('Edit Task')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Edit Me')).toBeInTheDocument();
@@ -98,7 +117,8 @@ describe('TaskModal', () => {
       projectId: 'p1', 
       status: 'done',
       assigneeId: 'u1',
-      assignee: { id: 'u1', name: 'John Doe' }
+      assignee: { id: 'u1', name: 'John Doe' },
+      createdById: 'u1'
     };
     
     render(<TaskModal isOpen={true} onClose={onCloseMock} onSave={onSaveMock} initial={initialData as any} />);
@@ -117,5 +137,24 @@ describe('TaskModal', () => {
       expect(screen.getByText('Completed tasks cannot be reassigned.')).toBeInTheDocument();
     });
     expect(onSaveMock).not.toHaveBeenCalled();
+  });
+
+  it('disables fields and hides save button when user is not the owner', () => {
+    const initialData = { 
+      id: '1', 
+      title: 'Not Mine', 
+      projectId: 'p1', 
+      status: 'todo', 
+      createdById: 'u2' // different from mock user u1
+    };
+    render(<TaskModal isOpen={true} onClose={onCloseMock} onSave={onSaveMock} initial={initialData as any} />);
+    
+    // Title input should be disabled
+    const titleInput = screen.getByDisplayValue('Not Mine');
+    expect(titleInput).toBeDisabled();
+    
+    // Save button should not exist
+    const saveButton = screen.queryByRole('button', { name: /save/i });
+    expect(saveButton).not.toBeInTheDocument();
   });
 });

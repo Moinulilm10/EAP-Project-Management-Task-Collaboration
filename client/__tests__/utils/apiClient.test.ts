@@ -41,4 +41,24 @@ describe('apiClient', () => {
     expect(callArgs.headers['X-Idempotency-Key']).toBeUndefined();
     expect(callArgs.headers['Authorization']).toBe('Bearer mock-token');
   });
+
+  it('should prioritize data.message over data.error when throwing ApiError', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 403,
+      json: () => Promise.resolve({ error: 'Forbidden', message: 'Specific human readable message' }),
+    });
+
+    await expect(apiClient.get('/test')).rejects.toThrowError('Specific human readable message');
+  });
+
+  it('should fall back to data.error if data.message is missing', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 400,
+      json: () => Promise.resolve({ error: 'Bad Request' }),
+    });
+
+    await expect(apiClient.get('/test')).rejects.toThrowError('Bad Request');
+  });
 });

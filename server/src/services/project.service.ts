@@ -234,7 +234,7 @@ export const projectService = {
   async findById(id: string): Promise<Project> {
     const project = await projectRepo().findOne({
       where: { id, deletedAt: IsNull() },
-      relations: { owner: true, projectMembers: true, tasks: true },
+      relations: { owner: true, projectMembers: { user: true }, tasks: true },
     });
 
     if (!project) {

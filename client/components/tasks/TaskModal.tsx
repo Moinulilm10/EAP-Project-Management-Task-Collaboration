@@ -13,10 +13,11 @@ import {
 import { Task, TaskStatus, TaskPriority } from "./taskTypes";
 import { Select } from "../ui/Select";
 import { AttachmentsSection } from "../ui/AttachmentsSection";
+import { ProjectSearchSelect } from "./ProjectSearchSelect";
 import { useProjectStore } from "../../stores/projectStore";
 import { useTeamStore } from "../../stores/teamStore";
-import { useProjectMemberStore } from "../../stores/projectMemberStore";
 import { useAuthStore } from "../../stores/authStore";
+import { projectService } from "../../services/project.service";
 
 interface TaskModalProps {
   isOpen: boolean;
@@ -33,50 +34,93 @@ const ASSIGNEES = [
 export function TaskModal({ isOpen, onClose, onSave, initial }: TaskModalProps) {
   const { projects, fetchProjects } = useProjectStore();
   const { teams, fetchTeams } = useTeamStore();
-  const { members, fetchMembers } = useProjectMemberStore();
   const { user } = useAuthStore();
 
   const [form, setForm] = React.useState<any>({});
   const [tagInput, setTagInput] = React.useState("");
+  const [projectMembers, setProjectMembers] = React.useState<any[]>([]);
+
+  const assigneeOptions = React.useMemo(() => {
+    const opts = [{ label: "Unassigned", value: "" }];
+    if (form.assignee && form.assignee.id) {
+      opts.push({ label: form.assignee.name, value: form.assignee.id });
+    }
+    projectMembers.forEach((m) => {
+      if (!opts.some((o) => o.value === m.user.id)) {
+        opts.push({ label: m.user.name, value: m.user.id });
+      }
+    });
+    return opts;
+  }, [form.assignee, projectMembers]);
+
   const firstInputRef = useRef<HTMLInputElement>(null);
+  const hasInitialized = useRef(false);
 
   useEffect(() => {
     fetchProjects();
     fetchTeams();
-    fetchMembers();
-  }, [fetchProjects, fetchTeams, fetchMembers]);
+  }, [fetchProjects, fetchTeams]);
 
   useEffect(() => {
-    if (isOpen) {
-      if (initial) {
-        setForm({
-          title: initial.title,
-          description: initial.description,
-          projectId: initial.projectId || "",
-          status: initial.status || "todo",
-          priority: initial.priority || "medium",
-          dueDate: initial.dueDate || "",
-          assignee: initial.assignee || null,
-          teamId: initial.teamId || "",
-          tags: initial.tags || [],
+    if (form.projectId) {
+      projectService.getById(form.projectId)
+        .then((res: any) => {
+          setProjectMembers(res.project?.projectMembers || []);
+        })
+        .catch((err) => {
+          console.error("Failed to fetch project members:", err);
+          setProjectMembers([]);
         });
-      } else {
-        setForm({
-          title: "",
-          description: "",
-          projectId: "",
-          status: "todo",
-          priority: "medium",
-          dueDate: "",
-          assignee: null,
-          teamId: "",
-          tags: [],
-        });
-      }
+    } else {
+      setProjectMembers([]);
+    }
+  }, [form.projectId]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      hasInitialized.current = false;
+      return;
+    }
+
+    if (hasInitialized.current) return;
+
+    if (initial) {
+      setForm({
+        title: initial.title,
+        description: initial.description,
+        projectId: initial.projectId || "",
+        status: initial.status || "todo",
+        priority: initial.priority || "medium",
+        dueDate: initial.dueDate || "",
+        assignee: initial.assignee || null,
+        teamId: initial.teamId || "",
+        tags: initial.tags || [],
+      });
+      hasInitialized.current = true;
+      setTagInput("");
+      setTimeout(() => firstInputRef.current?.focus(), 100);
+    } else if (user) {
+      setForm({
+        title: "",
+        description: "",
+        projectId: "",
+        status: "todo",
+        priority: "medium",
+        dueDate: "",
+        assignee: {
+          id: user.id,
+          name: user.name,
+          initials: user.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase(),
+          bg: 'bg-primary text-on-primary'
+        },
+        teamId: "",
+        tags: [],
+      });
+      hasInitialized.current = true;
       setTagInput("");
       setTimeout(() => firstInputRef.current?.focus(), 100);
     }
-  }, [isOpen, initial, projects]);
+  }, [isOpen, initial, user]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -250,12 +294,10 @@ export function TaskModal({ isOpen, onClose, onSave, initial }: TaskModalProps) 
                       <MdFolder className="w-4 h-4" />
                       Project *
                     </label>
-                    <Select
+                    <ProjectSearchSelect
+                      projects={projects}
                       value={form.projectId}
-                      onChange={(e) => handleChange("projectId", e.target.value)}
-                      options={projectOptions}
-                      placeholder="Select a project"
-                      emptyMessage="No project available"
+                      onChange={(val) => handleChange("projectId", val)}
                       disabled={isReadOnly}
                     />
                   </div>
@@ -277,21 +319,32 @@ export function TaskModal({ isOpen, onClose, onSave, initial }: TaskModalProps) 
                       <MdPerson className="w-4 h-4" />
                       Assignee (Optional)
                     </label>
-                    <Select
-                      value={form.assignee?.id || ""}
-                      onChange={(e) => {
-                        const selectedMember = members.find(m => m.user.id === e.target.value);
-                        handleChange("assignee", selectedMember ? { 
-                          id: selectedMember.user.id, 
-                          name: selectedMember.user.name,
-                          initials: selectedMember.user.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase(),
-                          bg: 'bg-primary text-on-primary'
-                        } : null);
-                      }}
-                      options={[{ label: "Unassigned", value: "" }, ...members.map(m => ({ label: m.user.name, value: m.user.id }))]}
-                      placeholder="Select assignee"
-                      disabled={isReadOnly}
-                    />
+                      <Select
+                       value={form.assignee?.id || ""}
+                       onChange={(e) => {
+                         const val = e.target.value;
+                         if (!val) {
+                           handleChange("assignee", null);
+                           return;
+                         }
+                         const selectedMember = projectMembers.find(m => m.user.id === val);
+                         if (selectedMember) {
+                           handleChange("assignee", { 
+                             id: selectedMember.user.id, 
+                             name: selectedMember.user.name,
+                             initials: selectedMember.user.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase(),
+                             bg: 'bg-primary text-on-primary'
+                           });
+                         } else if (form.assignee && form.assignee.id === val) {
+                           // keep current assignee
+                         } else {
+                           handleChange("assignee", null);
+                         }
+                       }}
+                       options={assigneeOptions}
+                       placeholder="Select assignee"
+                       disabled={isReadOnly}
+                     />
                   </div>
                 </div>
 
