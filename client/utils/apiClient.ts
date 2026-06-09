@@ -75,21 +75,19 @@ class ApiClient {
               store.getState &&
                 store.getState().clearAuth &&
                 store.getState().clearAuth();
-            } catch (e) {
-              // swallow any errors while clearing state
-            }
 
-            try {
-
+              // Ask NextAuth to sign out (no redirect) to clear server session/cookies if any
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
               await signOut({ redirect: false });
             } catch (e) {
               // ignore
             }
 
-
+            // Reset redirect flag after a delay to allow future session expirations to be handled
             setTimeout(() => {
-              window.location.href = "/login";
-            }, 2000);
+              isRedirecting = false;
+            }, 3000);
           }
 
           // Prevent further execution for this request to avoid secondary errors
