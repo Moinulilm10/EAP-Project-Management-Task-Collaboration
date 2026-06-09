@@ -8,6 +8,7 @@ import {
   MdEdit,
   MdOpenInNew,
   MdWarning,
+  MdAttachFile,
 } from "react-icons/md";
 import { Badge } from "../ui/Badge";
 import { Card } from "../ui/Card";
@@ -20,6 +21,7 @@ export interface Project {
   dueDate: string;
   progress: number;
   memberCount?: number;
+  attachmentCount?: number;
   isWarning?: boolean;
 }
 
@@ -97,6 +99,12 @@ export function ProjectCard({
           {project.memberCount !== undefined && project.memberCount >= 0 && (
             <span className="rounded-full bg-surface-container-low px-3 py-1 text-[10px] font-semibold uppercase text-secondary">
               {`${project.memberCount} ${t("members")}`}
+            </span>
+          )}
+          {project.attachmentCount !== undefined && project.attachmentCount > 0 && (
+            <span className="rounded-full bg-surface-container-low px-3 py-1 text-[10px] font-semibold uppercase text-secondary flex items-center gap-1">
+              <MdAttachFile className="w-3 h-3" />
+              {project.attachmentCount}
             </span>
           )}
         </div>

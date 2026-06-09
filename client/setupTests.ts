@@ -1,1 +1,4 @@
 import '@testing-library/jest-dom';
+
+process.env.NEXT_PUBLIC_API_URL = 'http://localhost:3000/api/v1';
+process.env.NEXTAUTH_URL = 'http://localhost:3000';

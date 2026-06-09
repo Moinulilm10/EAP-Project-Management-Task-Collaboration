@@ -21,6 +21,9 @@ export interface Task {
   subtasks: { id: string; title: string; done: boolean }[];
   teamId?: string | null;
   assigneeId?: string | null;
+  createdById?: string;
+  attachmentCount?: number;
+  commentCount?: number;
 }
 
 export const MOCK_TASKS: Task[] = [

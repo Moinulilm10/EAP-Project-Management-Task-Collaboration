@@ -12,9 +12,11 @@ import {
 } from "react-icons/md";
 import { Task, TaskStatus, TaskPriority } from "./taskTypes";
 import { Select } from "../ui/Select";
+import { AttachmentsSection } from "../ui/AttachmentsSection";
 import { useProjectStore } from "../../stores/projectStore";
 import { useTeamStore } from "../../stores/teamStore";
 import { useProjectMemberStore } from "../../stores/projectMemberStore";
+import { useAuthStore } from "../../stores/authStore";
 
 interface TaskModalProps {
   isOpen: boolean;
@@ -32,6 +34,7 @@ export function TaskModal({ isOpen, onClose, onSave, initial }: TaskModalProps) 
   const { projects, fetchProjects } = useProjectStore();
   const { teams, fetchTeams } = useTeamStore();
   const { members, fetchMembers } = useProjectMemberStore();
+  const { user } = useAuthStore();
 
   const [form, setForm] = React.useState<any>({});
   const [tagInput, setTagInput] = React.useState("");
@@ -100,6 +103,9 @@ export function TaskModal({ isOpen, onClose, onSave, initial }: TaskModalProps) 
   };
 
   const [formError, setFormError] = React.useState<string | null>(null);
+
+  const isOwner = initial ? initial.createdById === user?.id : true;
+  const isReadOnly = !isOwner;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -196,7 +202,7 @@ export function TaskModal({ isOpen, onClose, onSave, initial }: TaskModalProps) 
             <div className="w-[90%] max-w-[550px] bg-surface-container-lowest rounded-3xl shadow-2xl border border-outline-variant/20 overflow-hidden flex flex-col max-h-[90vh] min-h-[650px]">
               <div className="flex items-center justify-between px-6 py-5 border-b border-outline-variant/20 flex-shrink-0">
                 <h2 className="font-title-md text-title-md text-on-surface">
-                  {initial ? "Edit Task" : "New Task"}
+                  {isReadOnly ? "Task Details" : initial ? "Edit Task" : "New Task"}
                 </h2>
                 <button
                   onClick={onClose}
@@ -222,6 +228,7 @@ export function TaskModal({ isOpen, onClose, onSave, initial }: TaskModalProps) 
                     value={form.title || ""}
                     onChange={(e) => handleChange("title", e.target.value)}
                     className={inputCls}
+                    disabled={isReadOnly}
                   />
                 </div>
 
@@ -233,6 +240,7 @@ export function TaskModal({ isOpen, onClose, onSave, initial }: TaskModalProps) 
                     value={form.description || ""}
                     onChange={(e) => handleChange("description", e.target.value)}
                     className={`${inputCls} resize-none`}
+                    disabled={isReadOnly}
                   />
                 </div>
 
@@ -248,6 +256,7 @@ export function TaskModal({ isOpen, onClose, onSave, initial }: TaskModalProps) 
                       options={projectOptions}
                       placeholder="Select a project"
                       emptyMessage="No project available"
+                      disabled={isReadOnly}
                     />
                   </div>
 
@@ -257,6 +266,7 @@ export function TaskModal({ isOpen, onClose, onSave, initial }: TaskModalProps) 
                       value={form.teamId || ""}
                       onChange={(e) => handleChange("teamId", e.target.value)}
                       options={teamOptions}
+                      disabled={isReadOnly}
                     />
                   </div>
                 </div>
@@ -280,6 +290,7 @@ export function TaskModal({ isOpen, onClose, onSave, initial }: TaskModalProps) 
                       }}
                       options={[{ label: "Unassigned", value: "" }, ...members.map(m => ({ label: m.user.name, value: m.user.id }))]}
                       placeholder="Select assignee"
+                      disabled={isReadOnly}
                     />
                   </div>
                 </div>
@@ -299,6 +310,7 @@ export function TaskModal({ isOpen, onClose, onSave, initial }: TaskModalProps) 
                         { label: "Medium", value: "medium" },
                         { label: "Low", value: "low" },
                       ]}
+                      disabled={isReadOnly}
                     />
                   </div>
                   <div>
@@ -312,6 +324,7 @@ export function TaskModal({ isOpen, onClose, onSave, initial }: TaskModalProps) 
                         { label: "In Review", value: "review" },
                         { label: "Done", value: "done" },
                       ]}
+                      disabled={isReadOnly}
                     />
                   </div>
                 </div>
@@ -328,9 +341,20 @@ export function TaskModal({ isOpen, onClose, onSave, initial }: TaskModalProps) 
                       value={form.dueDate || ""}
                       onChange={(e) => handleChange("dueDate", e.target.value)}
                       className={inputCls}
+                      disabled={isReadOnly}
                     />
                   </div>
                 </div>
+
+                {initial && (
+                  <div className="pt-4 border-t border-outline-variant/20">
+                    <label className={`${labelCls} mb-3`}>Attachments</label>
+                    <AttachmentsSection 
+                      taskId={initial.id} 
+                      canManage={initial.createdById === user?.id} 
+                    />
+                  </div>
+                )}
               </form>
 
               <div className="flex justify-end gap-3 px-6 py-5 border-t border-outline-variant/20 flex-shrink-0">
@@ -339,14 +363,16 @@ export function TaskModal({ isOpen, onClose, onSave, initial }: TaskModalProps) 
                   onClick={onClose}
                   className="px-4 py-2 rounded-xl font-label-md text-label-md text-secondary border border-outline-variant hover:bg-surface-container-low transition-colors cursor-pointer"
                 >
-                  Cancel
+                  {isReadOnly ? "Close" : "Cancel"}
                 </button>
-                <button
-                  onClick={handleSubmit as unknown as React.MouseEventHandler}
-                  className="px-4 py-2 rounded-xl font-label-md text-label-md bg-primary text-on-primary hover:bg-primary/90 transition-colors cursor-pointer shadow-sm"
-                >
-                  {initial ? "Save Changes" : "Create Task"}
-                </button>
+                {!isReadOnly && (
+                  <button
+                    onClick={handleSubmit as unknown as React.MouseEventHandler}
+                    className="px-4 py-2 rounded-xl font-label-md text-label-md bg-primary text-on-primary hover:bg-primary/90 transition-colors cursor-pointer shadow-sm"
+                  >
+                    {initial ? "Save Changes" : "Create Task"}
+                  </button>
+                )}
               </div>
             </div>
           </motion.div>

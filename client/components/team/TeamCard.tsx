@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { MdGroup, MdFolderOpen, MdAssignment } from "react-icons/md";
+import { MdGroup, MdFolderOpen, MdAssignment, MdAttachFile } from "react-icons/md";
 import { Team } from "../../services/team.service";
 import { Card } from "../ui/Card";
 import { Button } from "../ui/Button";
@@ -18,7 +18,7 @@ export function TeamCard({ team, onClick }: TeamCardProps) {
       <div className="flex justify-between items-start mb-4">
         <div>
           <h3 className="font-title-lg text-title-lg text-on-surface">{team.name}</h3>
-          <p className="font-body-sm text-body-sm text-secondary mt-1 line-clamp-2">
+          <p className="font-body-sm text-body-sm text-sm text-secondary mt-1 line-clamp-1">
             {team.description || t("No description")}
           </p>
         </div>
@@ -27,26 +27,33 @@ export function TeamCard({ team, onClick }: TeamCardProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 mt-auto pt-4 border-t border-outline-variant/30">
+      <div className="grid grid-cols-4 gap-2 mt-auto pt-4 border-t border-outline-variant/30">
         <div className="flex flex-col items-center">
           <span className="font-title-md text-on-surface">{team.members?.length || 0}</span>
-          <span className="font-body-xs text-secondary flex items-center gap-1 mt-1">
+          <span className="font-body-xs text-primary text-sm flex items-center gap-1 mt-1">
             <MdGroup className="w-3 h-3" />
             {t("Members")}
           </span>
         </div>
         <div className="flex flex-col items-center border-l border-outline-variant/30">
           <span className="font-title-md text-on-surface">{team.projectTeams?.length || 0}</span>
-          <span className="font-body-xs text-secondary flex items-center gap-1 mt-1">
+          <span className="font-body-xs text-primary text-sm flex items-center gap-1 mt-1">
             <MdFolderOpen className="w-3 h-3" />
             {t("Projects")}
           </span>
         </div>
         <div className="flex flex-col items-center border-l border-outline-variant/30">
           <span className="font-title-md text-on-surface">{team.taskTeams?.length || 0}</span>
-          <span className="font-body-xs text-secondary flex items-center gap-1 mt-1">
+          <span className="font-body-xs text-primary text-sm flex items-center gap-1 mt-1">
             <MdAssignment className="w-3 h-3" />
             {t("Tasks")}
+          </span>
+        </div>
+        <div className="flex flex-col items-center border-l border-outline-variant/30">
+          <span className="font-title-md text-on-surface">{team.attachmentCount || 0}</span>
+          <span className="font-body-xs text-primary text-sm flex items-center gap-1 mt-1">
+            <MdAttachFile className="w-3 h-3" />
+            {t("Files")}
           </span>
         </div>
       </div>

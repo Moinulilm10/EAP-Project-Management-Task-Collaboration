@@ -11,6 +11,7 @@ import {
 import { TeamMember } from "./TeamMember.entity";
 import { ProjectTeam } from "./ProjectTeam.entity";
 import { TaskTeam } from "./TaskTeam.entity";
+import { Attachment } from "./Attachment.entity";
 
 @Entity("teams")
 export class Team {
@@ -43,4 +44,7 @@ export class Team {
 
   @OneToMany(() => TaskTeam, (taskTeam) => taskTeam.team)
   taskTeams!: TaskTeam[];
+
+  @OneToMany(() => Attachment, (attachment) => attachment.team)
+  attachments!: Attachment[];
 }

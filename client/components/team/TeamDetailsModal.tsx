@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { MdClose, MdGroup, MdFolderOpen, MdAssignment, MdPersonAdd, MdDelete, MdEdit, MdPersonRemove } from "react-icons/md";
+import { MdClose, MdGroup, MdFolderOpen, MdAssignment, MdPersonAdd, MdDelete, MdEdit, MdPersonRemove, MdAttachFile } from "react-icons/md";
 import { Team } from "../../services/team.service";
 import { Button } from "../ui/Button";
 import Swal from "sweetalert2";
 import { useTeamStore } from "../../stores/teamStore";
 import { toast } from "react-toastify";
+import { AttachmentsSection } from "../ui/AttachmentsSection";
+import { useAuthStore } from "../../stores/authStore";
 
 interface TeamDetailsModalProps {
   isOpen: boolean;
@@ -16,7 +18,9 @@ interface TeamDetailsModalProps {
 export function TeamDetailsModal({ isOpen, onClose, team }: TeamDetailsModalProps) {
   const { t } = useTranslation();
   const { updateCapacity, removeMember, updateTeam, deleteTeam } = useTeamStore();
-  const [activeTab, setActiveTab] = useState<"members" | "projects" | "tasks">("members");
+  const { user } = useAuthStore();
+  const isMember = team.members?.some((m) => m.userId === user?.id);
+  const [activeTab, setActiveTab] = useState<"members" | "projects" | "tasks" | "files">("members");
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(team.name);
   const [editDesc, setEditDesc] = useState(team.description || "");
@@ -246,6 +250,15 @@ export function TeamDetailsModal({ isOpen, onClose, team }: TeamDetailsModalProp
             <MdAssignment className="inline w-4 h-4 mr-2" />
             {t("Tasks")} ({team.taskTeams?.length || 0})
           </button>
+          <button
+            onClick={() => setActiveTab("files")}
+            className={`px-4 py-3 font-label-md transition-colors whitespace-nowrap border-b-2 ${
+              activeTab === "files" ? "border-primary text-primary" : "border-transparent text-secondary hover:text-on-surface"
+            }`}
+          >
+            <MdAttachFile className="inline w-4 h-4 mr-2" />
+            {t("Files")}
+          </button>
         </div>
 
         <div className="p-6 overflow-y-auto flex-1 bg-surface">
@@ -336,6 +349,12 @@ export function TeamDetailsModal({ isOpen, onClose, team }: TeamDetailsModalProp
                   <p className="text-secondary text-center py-4">{t("No tasks assigned")}</p>
                 )}
               </div>
+            </div>
+          )}
+
+          {activeTab === "files" && (
+            <div className="space-y-4">
+              <AttachmentsSection teamId={team.id} canManage={true} />
             </div>
           )}
         </div>

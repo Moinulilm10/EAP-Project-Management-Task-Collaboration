@@ -113,7 +113,13 @@ export const projectService = {
         "owner.email",
         "currentUserRoleRelation.name",
       ])
-      .addSelect("COUNT(member.id)", "memberCount")
+      .addSelect("COUNT(DISTINCT member.id)", "memberCount")
+      .addSelect((qb) => {
+        return qb
+          .select("COUNT(attachment.id)", "count")
+          .from("attachments", "attachment")
+          .where('attachment."projectId" = project.id');
+      }, "attachmentCount")
       .groupBy("project.id")
       .addGroupBy("owner.id")
       .addGroupBy("currentUserRoleRelation.name");
@@ -218,6 +224,7 @@ export const projectService = {
           email: row.owner_email,
         },
         memberCount: Number(row.memberCount) || 0,
+        attachmentCount: Number(row.attachmentCount) || 0,
         currentUserRole: row.currentUserRoleRelation_name || undefined,
       })),
       total,

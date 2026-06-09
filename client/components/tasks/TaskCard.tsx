@@ -9,8 +9,12 @@ import {
   MdEdit,
   MdDelete,
   MdWarningAmber,
+  MdAttachFile,
+  MdChatBubbleOutline,
+  MdVisibility,
 } from "react-icons/md";
 import { Task, TaskStatus } from "./taskTypes";
+import { useAuthStore } from "../../stores/authStore";
 
 const PRIORITY_CONFIG = {
   critical: { label: "Critical", cls: "bg-error/20 text-error border-error/50 font-bold" },
@@ -35,6 +39,8 @@ interface TaskCardProps {
 }
 
 export function TaskCard({ task, onEdit, onDelete, onStatusChange, compact = false }: TaskCardProps) {
+  const { user } = useAuthStore();
+  const isOwner = task.createdById === user?.id;
   const isDone = task.status === "done";
   const isOverdue = task.dueDate === "Today" && (task.priority === "high" || task.priority === "critical") && !isDone;
   const donePct = task.subtasks.length
@@ -57,10 +63,11 @@ export function TaskCard({ task, onEdit, onDelete, onStatusChange, compact = fal
       <div className="flex items-start justify-between gap-xs mb-xs">
         <div className="flex items-start gap-xs flex-1 min-w-0">
           <button
-            onClick={() =>
-              onStatusChange?.(task.id, isDone ? "todo" : "done")
-            }
-            className="mt-[2px] flex-shrink-0 cursor-pointer hover:scale-110 transition-transform"
+            onClick={() => {
+              if (isOwner) onStatusChange?.(task.id, isDone ? "todo" : "done");
+            }}
+            disabled={!isOwner}
+            className={`mt-[2px] flex-shrink-0 transition-transform ${isOwner ? 'cursor-pointer hover:scale-110' : 'cursor-not-allowed opacity-50'}`}
             aria-label={isDone ? "Mark incomplete" : "Mark complete"}
           >
             {STATUS_ICON[task.status]}
@@ -80,12 +87,12 @@ export function TaskCard({ task, onEdit, onDelete, onStatusChange, compact = fal
             <button
               onClick={() => onEdit(task)}
               className="p-1 rounded hover:bg-surface-container-high text-secondary hover:text-primary transition-colors cursor-pointer"
-              aria-label="Edit task"
+              aria-label={isOwner ? "Edit task" : "View task details"}
             >
-              <MdEdit className="w-4 h-4" />
+              {isOwner ? <MdEdit className="w-4 h-4" /> : <MdVisibility className="w-4 h-4" />}
             </button>
           )}
-          {onDelete && (
+          {isOwner && onDelete && (
             <button
               onClick={() => onDelete(task.id)}
               className="p-1 rounded hover:bg-error-container/40 text-secondary hover:text-error transition-colors cursor-pointer"
@@ -130,16 +137,27 @@ export function TaskCard({ task, onEdit, onDelete, onStatusChange, compact = fal
             {task.dueDate}
           </span>
 
+          {/* Attachments & Comments */}
+          {(task.attachmentCount || 0) > 0 && (
+            <span className="inline-flex items-center gap-[3px] font-label-sm text-label-sm text-secondary">
+              <MdAttachFile className="w-3.5 h-3.5" />
+              {task.attachmentCount}
+            </span>
+          )}
+          <span className="inline-flex items-center gap-[3px] font-label-sm text-label-sm text-secondary" title="Comments">
+            <MdChatBubbleOutline className="w-3.5 h-3.5" />
+            3
+          </span>
+
           {/* Tags */}
-          {!compact &&
-            task.tags.slice(0, 2).map((tag) => (
-              <span
-                key={tag}
-                className="inline-flex items-center px-xs py-0.5 rounded-full text-[10px] font-medium bg-primary-container/10 text-primary border border-primary/10"
-              >
-                {tag}
-              </span>
-            ))}
+          {task.tags.slice(0, 2).map((tag) => (
+            <span
+              key={tag}
+              className="inline-flex items-center px-xs py-0.5 rounded-full text-[10px] font-medium bg-primary-container/10 text-primary border border-primary/10"
+            >
+              {tag}
+            </span>
+          ))}
         </div>
 
         {/* Assignee avatar */}

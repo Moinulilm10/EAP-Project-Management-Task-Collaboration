@@ -12,6 +12,7 @@ import {
 } from "react-icons/md";
 
 import { Select } from "../ui/Select";
+import { AttachmentsSection } from "../ui/AttachmentsSection";
 
 interface ProjectDetailsModalProps {
   isOpen: boolean;
@@ -169,6 +170,16 @@ export function ProjectDetailsModal({
                         style={{ width: `${project.progress}%` }}
                       />
                     </div>
+                  </div>
+
+                  <div className="rounded-3xl bg-surface-container-highest border border-outline-variant/20 p-5">
+                    <p className="font-label-sm text-label-sm text-secondary mb-4">
+                      {t("Attachments")}
+                    </p>
+                    <AttachmentsSection 
+                      projectId={project.id} 
+                      canManage={true} 
+                    />
                   </div>
                 </div>
 

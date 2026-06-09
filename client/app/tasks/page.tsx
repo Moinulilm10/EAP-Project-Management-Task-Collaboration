@@ -111,11 +111,19 @@ export default function TasksPage() {
   };
 
   const handleDelete = async (id: string) => {
-    await deleteTask(id);
+    try {
+      await deleteTask(id);
+    } catch (err: any) {
+      notification.errorToast(err.message || (t("Failed to delete task") as string));
+    }
   };
 
   const handleStatusChange = async (id: string, status: TaskStatus) => {
-    await updateTaskStatus(id, status);
+    try {
+      await updateTaskStatus(id, status);
+    } catch (err: any) {
+      notification.errorToast(err.message || (t("Failed to update task status") as string));
+    }
   };
 
   const handleOpenNew = () => {

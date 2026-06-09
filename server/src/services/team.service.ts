@@ -7,6 +7,7 @@ import { User } from "../entities/User.entity";
 import { Project } from "../entities/Project.entity";
 import { Task } from "../entities/Task.entity";
 import { Activity } from "../entities/Activity.entity";
+import { Attachment } from "../entities/Attachment.entity";
 
 export class TeamService {
   private teamRepository = AppDataSource.getRepository(Team);
@@ -59,6 +60,22 @@ export class TeamService {
       .skip(skip)
       .take(limit)
       .getManyAndCount();
+
+    if (teams.length > 0) {
+      const teamIds = teams.map((t) => t.id);
+      const counts = await AppDataSource.getRepository(Attachment)
+        .createQueryBuilder("attachment")
+        .select('attachment."teamId"', 'teamId')
+        .addSelect('COUNT(attachment.id)', 'count')
+        .where('attachment."teamId" IN (:...teamIds)', { teamIds })
+        .groupBy('attachment."teamId"')
+        .getRawMany();
+
+      const countMap = new Map(counts.map((c) => [c.teamId, parseInt(c.count, 10)]));
+      teams.forEach((team) => {
+        (team as any).attachmentCount = countMap.get(team.id) || 0;
+      });
+    }
 
     return {
       data: teams,

@@ -41,6 +41,7 @@ export interface Team {
   members: TeamMember[];
   projectTeams: TeamProject[];
   taskTeams: TeamTask[];
+  attachmentCount?: number;
 }
 
 export interface TeamCreateDTO {

@@ -1,6 +1,7 @@
 import { getSession, signOut } from "next-auth/react";
 import { v4 as uuidv4 } from "uuid";
 import { useAuthStore } from "../stores/authStore";
+import { notification } from "./notification";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -28,6 +29,10 @@ class ApiClient {
       "Content-Type": "application/json",
       ...((options.headers as Record<string, string>) || {}),
     };
+
+    if (typeof FormData !== "undefined" && options.body instanceof FormData) {
+      delete headers["Content-Type"];
+    }
 
     if (session?.accessToken) {
       headers["Authorization"] = `Bearer ${session.accessToken}`;
@@ -60,6 +65,8 @@ class ApiClient {
       // not an invalid/expired token.
       if (response.status === 401) {
         if (typeof window !== "undefined") {
+          notification.errorToast("Your session has expired. Redirecting to login...");
+
           try {
             // Clear client-side auth state (Zustand)
             const store = useAuthStore as any;
@@ -79,8 +86,13 @@ class ApiClient {
             // ignore
           }
 
-          // Redirect user to login page
-          window.location.href = "/login";
+          // Redirect user to login page after a brief delay so they can read the toast
+          setTimeout(() => {
+            window.location.href = "/login";
+          }, 2000);
+
+          // Prevent further execution for this request to avoid secondary errors
+          await new Promise(() => {}); 
         }
       }
 
@@ -89,7 +101,7 @@ class ApiClient {
       if (!response.ok) {
         throw new ApiError(
           response.status,
-          data?.error || data?.message || "API request failed",
+          data?.message || data?.error || "API request failed",
           data?.details,
         );
       }
@@ -107,18 +119,20 @@ class ApiClient {
   }
 
   post<T>(endpoint: string, body?: any, options?: RequestInit) {
+    const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
     return this.request<T>(endpoint, {
       ...options,
       method: "POST",
-      body: body ? JSON.stringify(body) : undefined,
+      body: isFormData ? body : (body ? JSON.stringify(body) : undefined),
     });
   }
 
   put<T>(endpoint: string, body?: any, options?: RequestInit) {
+    const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
     return this.request<T>(endpoint, {
       ...options,
       method: "PUT",
-      body: body ? JSON.stringify(body) : undefined,
+      body: isFormData ? body : (body ? JSON.stringify(body) : undefined),
     });
   }
 

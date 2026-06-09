@@ -10,6 +10,8 @@ import {
   MdDelete,
   MdWarningAmber,
   MdFlag,
+  MdAttachFile,
+  MdChatBubbleOutline,
 } from "react-icons/md";
 import { Task, TaskStatus } from "./taskTypes";
 
@@ -128,27 +130,59 @@ export function TaskList({ tasks, onEdit, onDelete, onStatusChange, sortBy, onSo
                     {task.title}
                   </p>
                   
-                  {/* Task progress indicator */}
-                  <div className="mt-1 flex items-center gap-2">
-                    <div className="w-20 bg-outline-variant/35 h-1 rounded-full overflow-hidden">
-                      <div 
-                        className={`h-full rounded-full transition-all duration-300 ${
-                          task.status === 'done' ? 'bg-tertiary' :
-                          task.status === 'review' ? 'bg-primary' :
-                          task.status === 'in-progress' ? 'bg-primary-container' : 'bg-outline'
-                        }`} 
-                        style={{ width: `${
-                          task.status === 'done' ? 100 :
-                          task.status === 'review' ? 80 :
-                          task.status === 'in-progress' ? 50 : 10
-                        }%` }}
-                      />
+                  {/* Task progress and metadata row */}
+                  <div className="mt-1 flex items-center gap-sm flex-wrap">
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-16 bg-outline-variant/35 h-1 rounded-full overflow-hidden">
+                        <div 
+                          className={`h-full rounded-full transition-all duration-300 ${
+                            task.status === 'done' ? 'bg-tertiary' :
+                            task.status === 'review' ? 'bg-primary' :
+                            task.status === 'in-progress' ? 'bg-primary-container' : 'bg-outline'
+                          }`} 
+                          style={{ width: `${
+                            task.status === 'done' ? 100 :
+                            task.status === 'review' ? 80 :
+                            task.status === 'in-progress' ? 50 : 10
+                          }%` }}
+                        />
+                      </div>
+                      <span className="text-[10px] text-secondary">
+                        {task.status === 'done' ? '100%' :
+                         task.status === 'review' ? '80%' :
+                         task.status === 'in-progress' ? '50%' : '10%'}
+                      </span>
                     </div>
-                    <span className="text-[10px] text-secondary">
-                      {task.status === 'done' ? '100%' :
-                       task.status === 'review' ? '80%' :
-                       task.status === 'in-progress' ? '50%' : '10%'}
+
+                    <span className="text-secondary/30 text-[10px]">•</span>
+
+                    {/* Attachments & Comments */}
+                    {(task.attachmentCount || 0) > 0 && (
+                      <span className="inline-flex items-center gap-[3px] font-label-sm text-label-sm text-secondary" title="Attachments">
+                        <MdAttachFile className="w-3.5 h-3.5" />
+                        {task.attachmentCount}
+                      </span>
+                    )}
+                    <span className="inline-flex items-center gap-[3px] font-label-sm text-label-sm text-secondary" title="Comments">
+                      <MdChatBubbleOutline className="w-3.5 h-3.5 animate-pulse" />
+                      3
                     </span>
+
+                    {task.tags && task.tags.length > 0 && (
+                      <>
+                        <span className="text-secondary/30 text-[10px]">•</span>
+                        <div className="flex items-center gap-xs">
+                          {task.tags.slice(0, 2).map((tag) => (
+                            <span
+                              key={tag}
+                              className="inline-flex items-center px-xs py-0.5 rounded-full text-[9px] font-medium bg-primary-container/10 text-primary border border-primary/10"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      </>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-xs mt-[2px] md:hidden flex-wrap">

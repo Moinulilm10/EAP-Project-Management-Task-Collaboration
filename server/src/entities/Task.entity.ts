@@ -11,6 +11,7 @@ import {
 import { User } from './User.entity';
 import { Project } from './Project.entity';
 import { TaskTeam } from './TaskTeam.entity';
+import { Attachment } from './Attachment.entity';
 
 export enum TaskStatus {
   TODO = 'todo',
@@ -83,4 +84,7 @@ export class Task {
 
   @OneToMany(() => TaskTeam, (taskTeam) => taskTeam.task)
   taskTeams!: TaskTeam[];
+
+  @OneToMany(() => Attachment, (attachment) => attachment.task)
+  attachments!: Attachment[];
 }

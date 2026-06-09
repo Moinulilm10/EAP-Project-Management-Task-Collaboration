@@ -103,29 +103,12 @@ export const taskController = {
       const taskId = req.params.id as string;
       const task = await taskService.findById(taskId);
 
-      const membership = await memberRepo().findOne({
-        where: { projectId: task.projectId, userId: req.user.id },
-        relations: { role: true },
-      });
-
-      if (!membership) {
-        res.status(403).json({ error: 'Forbidden', message: 'You are not a member of this project.' });
+      if (task.createdById !== req.user.id) {
+        res.status(403).json({ error: 'Forbidden', message: 'Only the task owner can edit or change the status of this task.' });
         return;
       }
 
-      let updatedTask;
-      if (membership.role && membership.role.name === ProjectRoleName.TEAM_MEMBER) {
-        // Team member: status-only update with ownership verification
-        updatedTask = await taskService.updateStatus(
-          taskId,
-          req.body.status,
-          req.user.id
-        );
-      } else {
-        // Admin/PM: full update
-        updatedTask = await taskService.update(taskId, req.body);
-      }
-
+      const updatedTask = await taskService.update(taskId, req.body);
       res.status(200).json({ task: updatedTask });
     } catch (error: any) {
       res.status(error.status || 500).json({ error: error.message || 'Failed to update task.' });
@@ -142,15 +125,10 @@ export const taskController = {
       const taskId = req.params.id as string;
       const task = await taskService.findById(taskId);
 
-      const membership = await memberRepo().findOne({
-        where: { projectId: task.projectId, userId: req.user.id },
-        relations: { role: true },
-      });
-
-      if (!membership || !membership.role || (membership.role.name !== ProjectRoleName.ADMIN && membership.role.name !== ProjectRoleName.PROJECT_MANAGER)) {
+      if (task.createdById !== req.user.id) {
         res.status(403).json({
           error: 'Forbidden',
-          message: 'Only project admins and project managers can delete tasks.',
+          message: 'Only the task owner can delete this task.',
         });
         return;
       }

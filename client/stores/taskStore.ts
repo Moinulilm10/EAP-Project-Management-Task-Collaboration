@@ -96,8 +96,14 @@ export const useTaskStore = create<TaskState>((set, get) => ({
         },
         assigneeId: t.assigneeId,
         teamId: t.taskTeams?.[0]?.teamId || null,
-        tags: [],
-        subtasks: []
+        createdById: t.createdById,
+        attachmentCount: t.attachmentCount || 0,
+        tags: t.priority === 'critical' || t.priority === 'high' ? ['Urgent', 'Review'] : ['Feature', 'Dev'],
+        subtasks: [
+          { id: `${t.id}-s1`, title: 'Verify requirements', done: true },
+          { id: `${t.id}-s2`, title: 'Code implementation', done: t.status === 'done' || t.status === 'review' },
+          { id: `${t.id}-s3`, title: 'Code review', done: t.status === 'done' }
+        ]
       }));
 
       set({

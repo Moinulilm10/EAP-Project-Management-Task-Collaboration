@@ -4,6 +4,7 @@ import { ProjectRoleName } from '../entities/ProjectMember.entity';
 import { TaskTeam } from '../entities/TaskTeam.entity';
 import { Activity } from '../entities/Activity.entity';
 import { User } from '../entities/User.entity';
+import { Attachment } from '../entities/Attachment.entity';
 
 const repo = () => AppDataSource.getRepository(Task);
 
@@ -110,6 +111,23 @@ export const taskService = {
     query.skip(skip).take(limit);
 
     const [tasks, total] = await query.getManyAndCount();
+
+    if (tasks.length > 0) {
+      const taskIds = tasks.map((t) => t.id);
+      const counts = await AppDataSource.getRepository(Attachment)
+        .createQueryBuilder("attachment")
+        .select('attachment."taskId"', 'taskId')
+        .addSelect('COUNT(attachment.id)', 'count')
+        .where('attachment."taskId" IN (:...taskIds)', { taskIds })
+        .groupBy('attachment."taskId"')
+        .getRawMany();
+
+      const countMap = new Map(counts.map((c) => [c.taskId, parseInt(c.count, 10)]));
+      tasks.forEach((task) => {
+        (task as any).attachmentCount = countMap.get(task.id) || 0;
+      });
+    }
+
     return { tasks, total };
   },
 
