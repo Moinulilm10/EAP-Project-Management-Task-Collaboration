@@ -119,11 +119,11 @@ export function ProjectCard({
         )}
       </div>
 
-      <h3 className="font-title-md text-title-md text-on-surface mb-xs">
+      <h3 className="font-title-md text-title-sm text-on-surface mb-xs">
         {t(project.title)}
       </h3>
 
-      <p className="font-body-md text-body-md text-secondary line-clamp-2 mb-md">
+      <p className="font-body-md text-body-md text-xs text-secondary line-clamp-2 mb-md">
         {t(project.description)}
       </p>
 
@@ -153,9 +153,8 @@ export function ProjectCard({
 
         <div className="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
           <div
-            className={`h-full rounded-full transition-all duration-500 ${
-              isCompleted ? "bg-secondary" : "bg-primary"
-            }`}
+            className={`h-full rounded-full transition-all duration-500 ${isCompleted ? "bg-secondary" : "bg-primary"
+              }`}
             style={{ width: `${project.progress}%` }}
           ></div>
         </div>
